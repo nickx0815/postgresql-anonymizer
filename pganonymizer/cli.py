@@ -68,7 +68,7 @@ def main():
 
     start_time = time.time()
     truncate_tables(connection, schema.get('truncate', []))
-    anonymize_tables(connection, schema.get('tables', []), verbose=args.verbose)
+    data = anonymize_tables(connection, schema.get('tables', []), verbose=args.verbose)
 
     if not args.dry_run:
         connection.commit()
