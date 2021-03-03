@@ -62,6 +62,7 @@ def build_data(connection, table, columns, excludes, total_count, verbose=False)
     cursor.execute(sql)
     data = []
     table_columns = None
+    original_data = {}
     while True:
         records = cursor.fetchmany(size=2000)
         if not records:
@@ -70,8 +71,11 @@ def build_data(connection, table, columns, excludes, total_count, verbose=False)
             row_column_dict = {}
             if not row_matches_excludes(row, excludes):
                 row_column_dict = get_column_values(row, columns)
+                row_values = {}
                 for key, value in row_column_dict.items():
+                    row_values[key] = row[key]
                     row[key] = value
+                original_data[row.get('id')] = row_values
             if verbose:
                 progress_bar.next()
             table_columns = row.keys()
@@ -81,7 +85,7 @@ def build_data(connection, table, columns, excludes, total_count, verbose=False)
     if verbose:
         progress_bar.finish()
     cursor.close()
-    return data, table_columns
+    return data, table_columns, original_data
 
 
 def row_matches_excludes(row, excludes=None):

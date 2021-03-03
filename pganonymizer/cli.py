@@ -12,6 +12,7 @@ import yaml
 from pganonymizer.constants import DATABASE_ARGS, DEFAULT_SCHEMA_FILE
 from pganonymizer.providers import PROVIDERS
 from pganonymizer.utils import anonymize_tables, create_database_dump, get_connection, truncate_tables
+from pganonymizer.revert import create_revert_script
 
 
 def get_pg_args(args):
@@ -69,7 +70,7 @@ def main():
     start_time = time.time()
     truncate_tables(connection, schema.get('truncate', []))
     data = anonymize_tables(connection, schema.get('tables', []), verbose=args.verbose)
-
+    create_revert_script(data)
     if not args.dry_run:
         connection.commit()
     connection.close()
