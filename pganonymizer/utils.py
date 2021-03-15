@@ -71,11 +71,12 @@ def build_data(connection, table, columns, excludes, total_count, verbose=False)
             row_column_dict = {}
             if not row_matches_excludes(row, excludes):
                 row_column_dict = get_column_values(row, columns)
-                row_values = {}
                 for key, value in row_column_dict.items():
-                    row_values[key] = row[key]
+                    
+                    if not original_data.get(key):
+                        original_data[key] = {}
+                    original_data[key].update({row.get('id'): row[key]})                    
                     row[key] = value
-                original_data[row.get('id')] = row_values
             if verbose:
                 progress_bar.next()
             table_columns = row.keys()
@@ -85,6 +86,7 @@ def build_data(connection, table, columns, excludes, total_count, verbose=False)
     if verbose:
         progress_bar.finish()
     cursor.close()
+    
     return data, table_columns, original_data
 
 

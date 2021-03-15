@@ -9,3 +9,10 @@ COPY_DB_DELIMITER = '\x1f'
 
 # Filename of the default schema
 DEFAULT_SCHEMA_FILE = 'schema.yml'
+
+section = ['Required','Optional']
+testarg = ['schema', 'dbname', 'user', 'password', 'host', 'port']
+testarg_optional = ['dump']
+#TODO use other technique
+# available arg ['-v', '-l', '--dry-run']
+test_arg_other = ['--dry-run', '-v', '-l']
