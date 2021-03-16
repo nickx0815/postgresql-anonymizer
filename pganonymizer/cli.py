@@ -12,7 +12,7 @@ import yaml
 from pganonymizer.constants import DATABASE_ARGS, DEFAULT_SCHEMA_FILE
 from pganonymizer.providers import PROVIDERS
 from pganonymizer.utils import anonymize_tables, create_database_dump, get_connection, truncate_tables
-from pganonymizer.revert import create_revert_script
+from pganonymizer.revert import create_anon_db
 
 
 def get_pg_args(args):
@@ -66,16 +66,20 @@ def main():
 
     pg_args = get_pg_args(args)
     connection = get_connection(pg_args)
-
-    start_time = time.time()
-    truncate_tables(connection, schema.get('truncate', []))
-    data = anonymize_tables(connection, schema.get('tables', []), verbose=args.verbose)
-    if not args.dry_run:
-        connection.commit()
-    connection.close()
-    
-    connection = get_connection(pg_args)
-    create_revert_script(connection, data)
+    try:
+        start_time = time.time()
+        truncate_tables(connection, schema.get('truncate', []))
+        data = anonymize_tables(connection, schema.get('tables', []), verbose=args.verbose)
+        
+        if not args.dry_run:
+            connection.commit()
+        
+        
+        create_anon_db(connection, data, schema.get('ids', []))
+    except:
+        pass
+    finally:
+        connection.close()
 
     end_time = time.time()
     logging.info('Anonymization took {:.2f}s'.format(end_time - start_time))

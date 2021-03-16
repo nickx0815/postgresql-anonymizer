@@ -1,37 +1,42 @@
 import psycopg2
 from pypika import Query, Table, Field
+from pganonymizer.update_field_history import update_fields_history
 
 
-
-def create_revert_script(connection, data):
+def create_anon_db(connection, data, ids):
     cr = connection.cursor()
-    cr.execute("CREATE TABLE anon_db(\
+    try:
+        cr.execute("CREATE TABLE anon_db(\
                          model_id VARCHAR,\
                          field_id VARCHAR,\
                          record_id INTEGER,\
-                         value VARCHAR);")
-    cr.execute("CREATE INDEX model_id_idx ON anon_db (model_id);")
-    cr.execute("CREATE INDEX field_id_idx ON anon_db (field_id);")
-    cr.execute("COMMIT;")
+                         value VARCHAR,\
+                         PRIMARY KEY (model_id, field_id, record_id));")
+        cr.execute("COMMIT;")
+    except:
+        cr.execute("ROLLBACK;")
+    _run_query(cr, data, ids)
     
-    _run_query(cr, data)
-    
-def _run_query(cr, data):
+def _run_query(cr, data, ids):
     table_ir_model = Table('ir_model')
-    table_ir_model_fields = Table('ir_model_fields')
+    table_ir_model_fields = Table('ir_model_fields_anonymization')
     table_anon_db = Table('anon_db')
     for table in data:
         table_sql = str(Query.from_(table_ir_model).select("id").where(table_ir_model.model == _(table)))
         cr.execute(table_sql)
         table_id = cr.fetchone()[0]
         for field in data.get(table):
-            field_sql = str(Query.from_(table_ir_model_fields).select('id').where(table_ir_model_fields.name == field).where(table_ir_model_fields.model_id == table_id))
+            field_sql = str(Query.from_(table_ir_model_fields).select('id').where(table_ir_model_fields.field_name == field).where(table_ir_model_fields.model_id == table_id).where(table_ir_model_fields.id.isin(ids)))
             cr.execute(field_sql)
             field_id = cr.fetchone()[0]
-            for id in data.get(table).get(field):
-                sql_anon_db_insert = str(Query.into(table_anon_db).insert(table_id, field_id, id, data.get(table).get(field).get(id)))
-                cr.execute(sql_anon_db_insert)
-    cr.execute("COMMIT;")
+            try:
+                for id in data.get(table).get(field):
+                    sql_anon_db_insert = str(Query.into(table_anon_db).insert(table_id, field_id, id, data.get(table).get(field).get(id)))
+                    cr.execute(sql_anon_db_insert)
+                update_fields_history(cr, table_id, field_id)
+                cr.execute("COMMIT;")
+            except:
+                cr.execute("ROLLBACK;")
     
 def _(t):
     return t.replace("_", ".")
