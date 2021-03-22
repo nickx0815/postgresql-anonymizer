@@ -40,16 +40,5 @@ def _run_query(cr, data, ids):
     
 def _(t):
     return t.replace("_", ".")
-
-def _get_queries(d):
-    q = []
-    for table_name in d:
-        data_table = d.get(table_name)
-        for id in data_table:
-            field_datas = data_table.get(id)
-            for field_data in field_datas:
-                table = Table(table_name)
-                q.append(str(Query.update(table).set(field_data, field_datas.get(field_data)).where(table.id ==id)))
-    return q
     
     
