@@ -52,13 +52,10 @@ def get_args():
     args = parser.parse_args()
     return args
 
-def get_schema(args):
-    schema = yaml.load(open(args.schema), Loader=yaml.FullLoader)
-    return schema
-
-def main():
+def main(args=None):
     """Main method"""
-    args = get_args()
+    if not args:
+        args = get_args()
 
     loglevel = logging.WARNING
     if args.verbose:
@@ -68,9 +65,8 @@ def main():
     if args.list_providers:
         list_provider_classes()
         sys.exit(0)
-    
 
-    schema = get_schema(args)
+    schema = yaml.load(open(args.schema), Loader=yaml.FullLoader)
 
     pg_args = get_pg_args(args)
     connection = get_connection(pg_args)

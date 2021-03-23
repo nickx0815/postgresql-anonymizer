@@ -12,7 +12,6 @@ DEFAULT_SCHEMA_FILE = 'schema.yml'
 
 section = ['Required','Optional']
 testarg = ['schema', 'dbname', 'user', 'password', 'host', 'port']
-testarg_optional = ['dump']
+testarg_optional = ['dump', 'dry-run', 'l', 'v']
 #TODO use other technique
 # available arg ['-v', '-l', '--dry-run']
-test_arg_other = ['--dry-run', '-v', '-l']
