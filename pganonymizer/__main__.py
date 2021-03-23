@@ -4,10 +4,10 @@ from __future__ import absolute_import
 import sys
 #test
 
-def main():
+def main(args=None):
     from pganonymizer.cli import main
     try:
-        main()
+        main(args=None)
         exit_status = 0
     except KeyboardInterrupt:
         exit_status = 1
