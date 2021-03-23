@@ -33,9 +33,7 @@ def list_provider_classes():
     for provider_cls in PROVIDERS:
         print('{:<10} {}'.format(provider_cls.id, provider_cls.__doc__))
 
-
-def main():
-    """Main method"""
+def get_args():
     parser = argparse.ArgumentParser(description='Anonymize data of a PostgreSQL database')
     parser.add_argument('-v', '--verbose', action='count', help='Increase verbosity')
     parser.add_argument('-l', '--list-providers', action='store_true', help='Show a list of all available providers',
@@ -52,6 +50,15 @@ def main():
     parser.add_argument('--dump-file', help='Create a database dump file with the given name')
 
     args = parser.parse_args()
+    return args
+
+def get_schema(args):
+    schema = yaml.load(open(args.schema), Loader=yaml.FullLoader)
+    return schema
+
+def main():
+    """Main method"""
+    args = get_args()
 
     loglevel = logging.WARNING
     if args.verbose:
@@ -61,8 +68,9 @@ def main():
     if args.list_providers:
         list_provider_classes()
         sys.exit(0)
+    
 
-    schema = yaml.load(open(args.schema), Loader=yaml.FullLoader)
+    schema = get_schema(args)
 
     pg_args = get_pg_args(args)
     connection = get_connection(pg_args)
