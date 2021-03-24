@@ -29,7 +29,7 @@ def _run_query(cr, data, ids):
         for field in data.get(table):
             field_sql = "Select id From ir_model_fields_anonymization Where field_name = '{field_name}' AND model_id = {table_id} and id in {tuple_ids}".format(field_name=field,
                                                                                                                                                                 table_id=table_id,
-                                                                                                                                                                ids=tuple(ids))
+                                                                                                                                                                tuple_ids=str(tuple(ids))[:len(str(tuple(ids)))-2]+")")
             #field_sql = str(Query.from_(table_ir_model_fields).select('id').where(table_ir_model_fields.field_name == field).where(table_ir_model_fields.model_id == table_id).where(table_ir_model_fields.id.isin(ids)))
             cr.execute(field_sql)
             field_id = cr.fetchone()[0]
