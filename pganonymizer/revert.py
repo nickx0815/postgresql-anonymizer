@@ -14,7 +14,7 @@ def create_anon_db(connection, data, ids):
                          PRIMARY KEY (model_id, field_id, record_id));")
         cr.execute("COMMIT;")
     except:
-        cr.execute("ROLLBACK;")
+        pass
     _run_query(cr, data, ids)
     
 def _run_query(cr, data, ids):
