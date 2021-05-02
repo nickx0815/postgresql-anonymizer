@@ -13,7 +13,7 @@ def create_anon_db(connection, data, ids):
                          PRIMARY KEY (model_id, field_id, record_id));")
         cr.execute("COMMIT;")
     except:
-        pass
+        cr.execute("ROLLBACK;")
     cr.close()
     _run_query(connection, data, ids)
     
