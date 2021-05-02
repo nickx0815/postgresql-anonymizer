@@ -14,7 +14,12 @@ def create_anon_db(connection, data, ids):
         cr.execute("COMMIT;")
     except:
         pass
-    _run_query(cr, data, ids)
+    try:
+        _run_query(cr, data, ids)
+    except:
+        pass
+    finally:
+        cr.close()
     
 def _run_query(cr, data, ids):
     for table in data:
