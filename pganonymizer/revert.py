@@ -19,7 +19,7 @@ def create_anon_db(connection, data, ids):
     
     
 def _run_query(con, data, ids):
-    cr = connection.cursor()
+    cr = con.cursor()
     for table in data:
         table_sql = "Select id FROM ir_model WHERE model = '{model_data}'".format(model_data=_(table))
         cr.execute(table_sql)
