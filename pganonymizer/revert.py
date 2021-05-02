@@ -31,7 +31,7 @@ def _run_query(cr, data, ids):
                 for id in data.get(table).get(field):
                     sql_anon_db_insert = "Insert into anon_db (model_id, field_id, record_id, value) \
                     VALUES ({model_id}, {field_id}, {record_id}, '{value}')".format(
-                        model_id = table_id, field_id = field_id, record_id = id, value = data.get(table).get(field).get(id))
+                        model_id = table, field_id = field, record_id = id, value = data.get(table).get(field).get(id))
                     cr.execute(sql_anon_db_insert)
                 update_fields_history(cr, table_id, field_id)
                 cr.execute("COMMIT;")
