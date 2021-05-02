@@ -1,5 +1,4 @@
 import psycopg2
-#from pypika import Query, Table, Field
 from pganonymizer.update_field_history import update_fields_history
 
 
