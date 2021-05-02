@@ -14,14 +14,12 @@ def create_anon_db(connection, data, ids):
         cr.execute("COMMIT;")
     except:
         pass
-    try:
-        _run_query(cr, data, ids)
-    except:
-        pass
-    finally:
-        cr.close()
+    cr.close()
+    _run_query(connection, data, ids)
     
-def _run_query(cr, data, ids):
+    
+def _run_query(con, data, ids):
+    cr = connection.cursor()
     for table in data:
         table_sql = "Select id FROM ir_model WHERE model = '{model_data}'".format(model_data=_(table))
         cr.execute(table_sql)
@@ -42,6 +40,7 @@ def _run_query(cr, data, ids):
                 cr.execute("COMMIT;")
             except:
                 cr.execute("ROLLBACK;")
+    cr.close()
     
 def _(t):
     return t.replace("_", ".")

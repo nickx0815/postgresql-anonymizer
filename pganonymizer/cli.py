@@ -70,20 +70,13 @@ def main(args=None):
 
     pg_args = get_pg_args(args)
     connection = get_connection(pg_args)
-    try:
-        start_time = time.time()
-        truncate_tables(connection, schema.get('truncate', []))
-        data = anonymize_tables(connection, schema.get('tables', []), verbose=args.verbose)
-        
-        if not args.dry_run:
-            connection.commit()
-        
-        
-        create_anon_db(connection, data, schema.get('ids', []))
-    except:
-        pass
-    finally:
-        connection.close()
+    start_time = time.time()
+    truncate_tables(connection, schema.get('truncate', []))
+    data = anonymize_tables(connection, schema.get('tables', []), verbose=args.verbose)
+    if not args.dry_run:
+        connection.commit()
+    create_anon_db(connection, data, schema.get('ids', []))
+    connection.close()
 
     end_time = time.time()
     logging.info('Anonymization took {:.2f}s'.format(end_time - start_time))
