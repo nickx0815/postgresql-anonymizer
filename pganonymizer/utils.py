@@ -221,7 +221,7 @@ def get_column_dict(columns):
     return column_dict
 
 
-def get_column_values(row, columns, row):
+def get_column_values(row, columns, row_info):
     """
     Return a dictionary for a single data row, with altered data.
 
@@ -244,7 +244,7 @@ def get_column_values(row, columns, row):
             # Skip the current column if there is no value to be altered
             continue
         provider = get_provider(provider_config)
-        value = provider.alter_value(orig_value, row)
+        value = provider.alter_value(orig_value, row_info)
         append = column_definition.get('append')
         if append:
             value = value + append
