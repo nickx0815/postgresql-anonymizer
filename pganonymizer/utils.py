@@ -244,6 +244,7 @@ def get_column_values(row, columns, row_info):
             # Skip the current column if there is no value to be altered
             continue
         provider = get_provider(provider_config)
+        row_info.update({'field':column_name})
         value = provider.alter_value(orig_value, row_info)
         append = column_definition.get('append')
         if append:
