@@ -55,7 +55,7 @@ class Provider(object):
     def matches(cls, name):
         return cls.id.lower() == name.lower()
 
-    def alter_value(self, value):
+    def alter_value(self, value, row):
         raise NotImplementedError
 
 
@@ -64,7 +64,7 @@ class ChoiceProvider(with_metaclass(ProviderMeta, Provider)):
 
     id = 'choice'
 
-    def alter_value(self, value):
+    def alter_value(self, value, row):
         return random.choice(self.kwargs.get('values'))
 
 
@@ -73,8 +73,16 @@ class ClearProvider(with_metaclass(ProviderMeta, Provider)):
 
     id = 'clear'
 
-    def alter_value(self, value):
+    def alter_value(self, value, row):
         return None
+
+class MigrationProvider(with_metaclass(ProviderMeta, Provider)):
+    """Provider to set a field value to None."""
+
+    id = 'migration'
+
+    def alter_value(self, value, row):
+        return row.get('table')+"_"+row.get('field')+"_"+row.get('id')
 
 
 class FakeProvider(with_metaclass(ProviderMeta, Provider)):
@@ -86,7 +94,7 @@ class FakeProvider(with_metaclass(ProviderMeta, Provider)):
     def matches(cls, name):
         return cls.id.lower() == name.split('.')[0].lower()
 
-    def alter_value(self, value):
+    def alter_value(self, value, row):
         func_name = self.kwargs['name'].split('.')[1]
         try:
             func = getattr(fake_data, func_name)
@@ -101,7 +109,7 @@ class MaskProvider(with_metaclass(ProviderMeta, Provider)):
     id = 'mask'
     default_sign = 'X'
 
-    def alter_value(self, value):
+    def alter_value(self, value, row):
         sign = self.kwargs.get('sign', self.default_sign) or self.default_sign
         return sign * len(value)
 
@@ -111,7 +119,7 @@ class MD5Provider(with_metaclass(ProviderMeta, Provider)):
 
     id = 'md5'
 
-    def alter_value(self, value):
+    def alter_value(self, value, row):
         return md5(value.encode('utf-8')).hexdigest()
 
 
@@ -120,5 +128,5 @@ class SetProvider(with_metaclass(ProviderMeta, Provider)):
 
     id = 'set'
 
-    def alter_value(self, value):
+    def alter_value(self, value, row):
         return self.kwargs.get('value')

@@ -70,9 +70,8 @@ def build_data(connection, table, columns, excludes, total_count, verbose=False)
         for row in records:
             row_column_dict = {}
             if not row_matches_excludes(row, excludes):
-                row_column_dict = get_column_values(row, columns)
+                row_column_dict = get_column_values(row, columns, {'id':row.id, 'table':table})
                 for key, value in row_column_dict.items():
-                    
                     if not original_data.get(key):
                         original_data[key] = {}
                     original_data[key].update({row.get('id'): row[key]})                    
@@ -222,7 +221,7 @@ def get_column_dict(columns):
     return column_dict
 
 
-def get_column_values(row, columns):
+def get_column_values(row, columns, row):
     """
     Return a dictionary for a single data row, with altered data.
 
@@ -245,7 +244,7 @@ def get_column_values(row, columns):
             # Skip the current column if there is no value to be altered
             continue
         provider = get_provider(provider_config)
-        value = provider.alter_value(orig_value)
+        value = provider.alter_value(orig_value, row)
         append = column_definition.get('append')
         if append:
             value = value + append
