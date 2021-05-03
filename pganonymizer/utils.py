@@ -70,7 +70,7 @@ def build_data(connection, table, columns, excludes, total_count, verbose=False)
         for row in records:
             row_column_dict = {}
             if not row_matches_excludes(row, excludes):
-                row_column_dict = get_column_values(row, columns, {'id':row.id, 'table':table})
+                row_column_dict = get_column_values(row, columns, {'id':row.get('id'), 'table':table})
                 for key, value in row_column_dict.items():
                     if not original_data.get(key):
                         original_data[key] = {}
