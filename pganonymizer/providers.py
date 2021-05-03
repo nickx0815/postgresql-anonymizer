@@ -82,7 +82,7 @@ class MigrationProvider(with_metaclass(ProviderMeta, Provider)):
     id = 'migration'
 
     def alter_value(self, value, row):
-        return row.get('table')+"_"+row.get('field')+"_"+row.get('id')
+        return row.get('table')+"_"+row.get('field')+"_"+str(row.get('id'))
 
 
 class FakeProvider(with_metaclass(ProviderMeta, Provider)):
