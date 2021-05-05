@@ -1,15 +1,16 @@
 import psycopg2, datetime
 
-def update_fields_history(con, model_id, field_id):
+def update_fields_history(con, model_id, field_id, record):
     now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     con.execute("""\
         Insert into ir_model_fields_anonymization_history (
-            state, model_id, field_id, create_date, write_date, create_uid
+            state, model_id, field_id, create_date, write_date, create_uid, record_id
         ) values (
-            {state}, {model_id},{field_id}, '{create_date}', '{write_date}', {create_uid});
+            {state}, {model_id},{field_id}, '{create_date}', '{write_date}', {create_uid}, {record_id});
         """.format(state = 2,
                    model_id = model_id,
                    field_id = field_id,
                    create_date = str(now),
                    write_date = str(now),
-                   create_uid=1))
+                   create_uid=1,
+                   record_id=record))
