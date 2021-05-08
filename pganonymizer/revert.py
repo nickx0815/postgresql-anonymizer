@@ -25,9 +25,10 @@ def _run_query(con, data, ids):
         cr.execute(table_sql)
         table_id = cr.fetchone()[0]
         for field in data.get(table):
+            ids_sql_format = str(set([x for x in ids])).replace("{","(").replace("}",")")
             field_sql = "Select id From ir_model_fields_anonymization Where field_name = '{field_name}' AND model_id = {table_id} and id in {tuple_ids}".format(field_name=field,
                                                                                                                                                                 table_id=table_id,
-                                                                                                                                                                tuple_ids=str(set([x for x in ids])).replace("{","(").replace("}",")"))
+                                                                                                                                                                tuple_ids=ids_sql_format)
             cr.execute(field_sql)
             field_id = cr.fetchone()[0]
             for id in data.get(table).get(field):
