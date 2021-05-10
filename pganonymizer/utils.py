@@ -36,12 +36,19 @@ def anonymize_tables(connection, definitions, verbose=False):
         column_dict = get_column_dict(columns)
         primary_key = table_definition.get('primary_key', DEFAULT_PRIMARY_KEY)
         total_count = get_table_count(connection, table_name)
+        #history = get_history(connection, table_name, columns)
         data, table_columns, original_data = build_data(connection, table_name, columns, excludes, total_count, verbose)
         dic_for_revert[table_name]=original_data
         import_data(connection, column_dict, table_name, table_columns, primary_key, data)
     return dic_for_revert
 
-
+# def get_history(connection, tabel, fields):
+#     cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor, name='fetch_large_result')
+#     sql = "SELECT id FROM ir_model where model ='{table}';".format(table=table.replace("_","."))
+#     cursor.execute(sql)
+#     model_id = cursor.fetchone()
+#     cursor.close()
+#     
 def build_data(connection, table, columns, excludes, total_count, verbose=False):
     """
     Select all data from a table and return it together with a list of table columns.
