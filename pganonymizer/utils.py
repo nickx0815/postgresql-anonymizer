@@ -77,7 +77,7 @@ def build_data(connection, table, columns, excludes, total_count, verbose=False)
         for row in records:
             row_column_dict = {}
             if not row_matches_excludes(row, excludes):
-                row_column_dict = get_column_values(row, columns, {'id':row.get('id'), 'table':table})
+                row_column_dict = get_column_values(con ,row, columns, {'id':row.get('id'), 'table':table})
                 for key, value in row_column_dict.items():
                     if not original_data.get(key):
                         original_data[key] = {}
@@ -236,7 +236,7 @@ def get_column_dict(columns):
     return column_dict
 
 
-def get_column_values(row, columns, row_info):
+def get_column_values(con, row, columns, row_info):
     """
     Return a dictionary for a single data row, with altered data.
 
@@ -249,13 +249,17 @@ def get_column_values(row, columns, row_info):
         {'guest_email': '12faf5a9bb6f6f067608dca3027c8fcb@localhost'}
     :rtype: dict
     """
+    cursor_ = con.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    sql = "select state from ir_model_fields_anonymization_history where field_id = {field_id} and record_id = {record_id}; "
     column_dict = {}
     for definition in columns:
         column_name = list(definition.keys())[0]
         column_definition = definition[column_name]
         provider_config = column_definition.get('provider')
         orig_value = row.get(column_name)
-        if not orig_value:
+        cursor_.execute(sql.format(field_id=provider_config['field_anon_id'], record_id = row.get('id')))
+        state = curser_.fetchone()
+        if not orig_value or state == 2:
             # Skip the current column if there is no value to be altered
             continue
         provider = get_provider(provider_config)
