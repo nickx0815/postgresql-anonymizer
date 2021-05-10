@@ -111,8 +111,9 @@ def row_matches_excludes(row, excludes=None):
     return False
 
 def exclude_eval(exclude, column, row):
-    if column == "id" and row.get('id') == exclude:
-        return True
+    if column == "id":
+        if row.get('id') == exclude:
+            return True
     else:
         pattern = re.compile(exclude, re.IGNORECASE)
         if row[column] is not None and pattern.match(row[column]):
