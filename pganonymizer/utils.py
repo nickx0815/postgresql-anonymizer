@@ -105,11 +105,16 @@ def row_matches_excludes(row, excludes=None):
     for definition in excludes:
         column = list(definition.keys())[0]
         for exclude in definition.get(column, []):
-            pattern = re.compile(exclude, re.IGNORECASE)
-            if row[column] is not None and pattern.match(row[column]):
-                return True
+            exclude_eval(exclude, column, row)
     return False
 
+def exclude_eval(exclude, column, row):
+    if column == "id":
+        return False
+    else:
+        pattern = re.compile(exclude, re.IGNORECASE)
+        if row[column] is not None and pattern.match(row[column]):
+            return True
 
 def copy_from(connection, data, table, columns):
     """
