@@ -269,7 +269,7 @@ def get_column_values(con, row, columns, row_info):
         if append:
             value = value + append
         column_dict[column_name] = value
-    curser_.close()
+    cursor_.close()
     return column_dict
 
 
