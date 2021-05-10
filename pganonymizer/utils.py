@@ -258,7 +258,7 @@ def get_column_values(con, row, columns, row_info):
         provider_config = column_definition.get('provider')
         orig_value = row.get(column_name)
         cursor_.execute(sql.format(field_id=provider_config['field_anon_id'], record_id = row.get('id')))
-        state = curser_.fetchone()
+        state = cursor_.fetchone()
         if not orig_value or state == 2:
             # Skip the current column if there is no value to be altered
             continue
