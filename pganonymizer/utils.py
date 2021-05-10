@@ -105,12 +105,14 @@ def row_matches_excludes(row, excludes=None):
     for definition in excludes:
         column = list(definition.keys())[0]
         for exclude in definition.get(column, []):
-            exclude_eval(exclude, column, row)
+            result =  exclude_eval(exclude, column, row)
+            if result:
+                return result
     return False
 
 def exclude_eval(exclude, column, row):
-    if column == "id":
-        return False
+    if column == "id" and row.get('id') == exclude:
+        return True
     else:
         pattern = re.compile(exclude, re.IGNORECASE)
         if row[column] is not None and pattern.match(row[column]):
