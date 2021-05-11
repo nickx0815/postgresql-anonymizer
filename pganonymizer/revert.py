@@ -6,8 +6,8 @@ def create_anon_db(connection, data, ids):
     cr = connection.cursor()
     try:
         cr.execute("CREATE TABLE anon_db(\
-                         model_id VARCHAR,\
-                         field_id VARCHAR,\
+                         model_id INTEGER,\
+                         field_id INTEGER,\
                          record_id INTEGER,\
                          value VARCHAR,\
                          PRIMARY KEY (model_id, field_id, record_id));")
@@ -42,7 +42,7 @@ def create_anon(con ,data, ids):
             field_id = cr.fetchone()[0]
             for id in data.get(table).get(field):
                 sql_anon_db_insert = "Insert into anon_db (model_id, field_id, record_id, value) \
-                VALUES ('{model_id}', '{field_id}', {record_id}, '{value}')".format(
+                VALUES ({model_id}, {field_id}, {record_id}, '{value}')".format(
                     model_id = table, field_id = field, record_id = id, value = data.get(table).get(field).get(id))
                 cr.execute(sql_anon_db_insert)
                 update_fields_history(cr, table_id, field_id, id)
