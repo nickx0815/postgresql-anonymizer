@@ -109,8 +109,8 @@ def row_check_history(row, fields, history):
     field_ids = [provider['provider']['field_anon_id'] for provider in providers]
     for field in field_ids:
         if (field, row.get('id')) in history:
-            return False 
-    return True
+            return True 
+    return False
 
 
 def row_matches_excludes(row, excludes=None):
