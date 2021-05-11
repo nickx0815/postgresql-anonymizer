@@ -29,7 +29,7 @@ def anonymize_tables(connection, definitions, verbose=False):
     dic_for_revert = {}
     for definition in definitions:
         table_name = list(definition.keys())[0]
-        history_ids = get_history(table_name, connection)
+        history_ids = get_history(connection)
         table_definition = definition[table_name]
         columns = table_definition.get('fields', [])
         excludes = table_definition.get('excludes', [])
@@ -42,7 +42,7 @@ def anonymize_tables(connection, definitions, verbose=False):
         import_data(connection, column_dict, table_name, table_columns, primary_key, data)
     return dic_for_revert
 
-def get_history(table, con):
+def get_history(con):
     cursor = con.cursor(cursor_factory=psycopg2.extras.DictCursor, name='fetch_large_result')
     sql_model_id = "SELECT id FROM ir_model where model ='{table}'".format(table=table.replace("_","."))
     sql = "select field_id, record_id from ir_model_fields_anonymization_history where state = 2 and model_id = ({sql_model_id}); ".format(sql_model_id = sql_model_id)
