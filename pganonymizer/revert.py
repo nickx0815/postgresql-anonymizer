@@ -27,7 +27,7 @@ def _run_query(con, data, ids):
 
 
 
-def create_anon(data, ids):
+def create_anon(con ,data, ids):
     cr = con.cursor()
     for table in data:
         table_sql = "Select id FROM ir_model WHERE model = '{model_data}'".format(model_data=_(table))
