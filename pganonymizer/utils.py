@@ -36,7 +36,6 @@ def anonymize_tables(connection, definitions, verbose=False):
         column_dict = get_column_dict(columns)
         primary_key = table_definition.get('primary_key', DEFAULT_PRIMARY_KEY)
         total_count = get_table_count(connection, table_name)
-        #history = get_history(connection, table_name, columns)
         data, table_columns, original_data = build_data(connection, table_name, columns, excludes, total_count, history_ids, verbose)
         dic_for_revert[table_name]=original_data
         import_data(connection, column_dict, table_name, table_columns, primary_key, data)
