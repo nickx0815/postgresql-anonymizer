@@ -19,6 +19,15 @@ def create_anon_db(connection, data, ids):
     
     
 def _run_query(con, data, ids):
+    for table in data:
+        if table == 'anon':
+            create_anon(con ,data[table], ids)
+        elif table == 'truncate':
+            create_truncate(con, data[table])
+
+
+
+def create_anon(data, ids):
     cr = con.cursor()
     for table in data:
         table_sql = "Select id FROM ir_model WHERE model = '{model_data}'".format(model_data=_(table))
@@ -37,6 +46,12 @@ def _run_query(con, data, ids):
                     model_id = table, field_id = field, record_id = id, value = data.get(table).get(field).get(id))
                 cr.execute(sql_anon_db_insert)
                 update_fields_history(cr, table_id, field_id, id)
+    cr.execute("COMMIT;")
+    cr.close()
+
+def create_truncate(con, data):
+    cr = con.cursor()
+    x = "s"
     cr.execute("COMMIT;")
     cr.close()
     
