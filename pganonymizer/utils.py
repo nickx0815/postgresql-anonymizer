@@ -29,7 +29,7 @@ def anonymize_tables(connection, definitions, verbose=False):
     dic_for_revert = {}
     for definition in definitions:
         table_name = list(definition.keys())[0]
-        logging.info('Found table definition "%s"', table_name)
+        history_ids = get_history(table_name, connection)
         table_definition = definition[table_name]
         columns = table_definition.get('fields', [])
         excludes = table_definition.get('excludes', [])
@@ -37,19 +37,28 @@ def anonymize_tables(connection, definitions, verbose=False):
         primary_key = table_definition.get('primary_key', DEFAULT_PRIMARY_KEY)
         total_count = get_table_count(connection, table_name)
         #history = get_history(connection, table_name, columns)
-        data, table_columns, original_data = build_data(connection, table_name, columns, excludes, total_count, verbose)
+        data, table_columns, original_data = build_data(connection, table_name, columns, excludes, total_count, verbose, history_ids)
         dic_for_revert[table_name]=original_data
         import_data(connection, column_dict, table_name, table_columns, primary_key, data)
     return dic_for_revert
 
-# def get_history(connection, tabel, fields):
-#     cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor, name='fetch_large_result')
-#     sql = "SELECT id FROM ir_model where model ='{table}';".format(table=table.replace("_","."))
-#     cursor.execute(sql)
-#     model_id = cursor.fetchone()
-#     cursor.close()
-#     
-def build_data(connection, table, columns, excludes, total_count, verbose=False):
+def get_history(table, con):
+    cursor = con.cursor(cursor_factory=psycopg2.extras.DictCursor, name='fetch_large_result')
+    sql_model_id = "SELECT id FROM ir_model where model ='{table}';".format(table=table.replace("_","."))
+    sql = "select field_id, record_id, state from ir_model_fields_anonymization_history where field_id = {field_id} and model_id = ({sql_model_id}); ".format(sql_model_id = sql_model_id)
+    cursor.execute(sql)
+    history_data = []
+    while True:
+        records = cursor.fetchmany(size=2000)
+        if not records:
+            break
+        for row in records:
+            history_data.append((row.get('field_id'), row.get('record_id'), row.get('state')))
+    cursor.close()
+    return history_data
+     
+     
+def build_data(connection, table, columns, excludes, total_count, verbose=False, history_ids):
     """
     Select all data from a table and return it together with a list of table columns.
 
@@ -76,8 +85,8 @@ def build_data(connection, table, columns, excludes, total_count, verbose=False)
             break
         for row in records:
             row_column_dict = {}
-            if not row_matches_excludes(row, excludes):
-                row_column_dict = get_column_values(connection ,row, columns, {'id':row.get('id'), 'table':table})
+            if not row_matches_excludes(row, excludes) or not row_check_history(row, columns, history_ids):
+                row_column_dict = get_column_values(row, columns, {'id':row.get('id'), 'table':table})
                 for key, value in row_column_dict.items():
                     if not original_data.get(key):
                         original_data[key] = {}
@@ -94,6 +103,10 @@ def build_data(connection, table, columns, excludes, total_count, verbose=False)
     cursor.close()
     
     return data, table_columns, original_data
+
+def row_check_history(row, fields, history):
+    x = 2
+    return
 
 
 def row_matches_excludes(row, excludes=None):
@@ -236,7 +249,7 @@ def get_column_dict(columns):
     return column_dict
 
 
-def get_column_values(con, row, columns, row_info):
+def get_column_values(row, columns, row_info):
     """
     Return a dictionary for a single data row, with altered data.
 
@@ -249,17 +262,13 @@ def get_column_values(con, row, columns, row_info):
         {'guest_email': '12faf5a9bb6f6f067608dca3027c8fcb@localhost'}
     :rtype: dict
     """
-    cursor_ = con.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    sql = "select state from ir_model_fields_anonymization_history where field_id = {field_id} and record_id = {record_id}; "
     column_dict = {}
     for definition in columns:
         column_name = list(definition.keys())[0]
         column_definition = definition[column_name]
         provider_config = column_definition.get('provider')
         orig_value = row.get(column_name)
-        cursor_.execute(sql.format(field_id=provider_config['field_anon_id'], record_id = row.get('id')))
-        state = cursor_.fetchone()
-        if not orig_value or (state and state.get('state') == 2):
+        if not orig_value:
             # Skip the current column if there is no value to be altered
             continue
         provider = get_provider(provider_config)
@@ -269,7 +278,6 @@ def get_column_values(con, row, columns, row_info):
         if append:
             value = value + append
         column_dict[column_name] = value
-    cursor_.close()
     return column_dict
 
 
