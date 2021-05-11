@@ -45,7 +45,7 @@ def anonymize_tables(connection, definitions, verbose=False):
 def get_history(table, con):
     cursor = con.cursor(cursor_factory=psycopg2.extras.DictCursor, name='fetch_large_result')
     sql_model_id = "SELECT id FROM ir_model where model ='{table}'".format(table=table.replace("_","."))
-    sql = "select field_id, record_id, state from ir_model_fields_anonymization_history where model_id = ({sql_model_id}); ".format(sql_model_id = sql_model_id)
+    sql = "select field_id, record_id from ir_model_fields_anonymization_history where state = 2 and model_id = ({sql_model_id}); ".format(sql_model_id = sql_model_id)
     cursor.execute(sql)
     history_data = []
     while True:
@@ -53,7 +53,7 @@ def get_history(table, con):
         if not records:
             break
         for row in records:
-            history_data.append((row.get('field_id'), row.get('record_id'), row.get('state')))
+            history_data.append((row.get('field_id'), row.get('record_id')))
     cursor.close()
     return history_data
      
@@ -108,8 +108,8 @@ def row_check_history(row, fields, history):
     providers = [list(col.values())[0] for col in fields]
     field_ids = [provider['provider']['field_anon_id'] for provider in providers]
     for field in field_ids:
-        if (field, row.get('id'), 2) in history:
-            False 
+        if (field, row.get('id')) in history:
+            return False 
     return True
 
 
