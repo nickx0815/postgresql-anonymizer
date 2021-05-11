@@ -299,6 +299,7 @@ def truncate_tables(connection, tables):
     logging.info('Truncating tables "%s"', table_names)
     cursor.execute('TRUNCATE TABLE {tables};'.format(tables=table_names))
     cursor.close()
+    return table_names
 
 
 def create_database_dump(filename, db_args):
