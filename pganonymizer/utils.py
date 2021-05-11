@@ -105,8 +105,12 @@ def build_data(connection, table, columns, excludes, total_count, history_ids, v
     return data, table_columns, original_data
 
 def row_check_history(row, fields, history):
-    x = 2
-    return
+    providers = [list(col.values())[0] for col in fields]
+    field_ids = [provider['provider']['field_anon_id'] for provider in providers]
+    for field in field_ids:
+        if (field, row.get('id'), 2) in history:
+            False 
+    return True
 
 
 def row_matches_excludes(row, excludes=None):
