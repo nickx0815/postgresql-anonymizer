@@ -85,7 +85,7 @@ def build_data(connection, table, columns, excludes, total_count, history_ids, v
             break
         for row in records:
             row_column_dict = {}
-            if not row_matches_excludes(row, excludes) or not row_check_history(row, columns, history_ids):
+            if not row_matches_excludes(row, excludes) and not row_check_history(row, columns, history_ids):
                 row_column_dict = get_column_values(row, columns, {'id':row.get('id'), 'table':table})
                 for key, value in row_column_dict.items():
                     if not original_data.get(key):
