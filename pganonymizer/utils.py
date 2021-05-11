@@ -37,7 +37,7 @@ def anonymize_tables(connection, definitions, verbose=False):
         primary_key = table_definition.get('primary_key', DEFAULT_PRIMARY_KEY)
         total_count = get_table_count(connection, table_name)
         #history = get_history(connection, table_name, columns)
-        data, table_columns, original_data = build_data(connection, table_name, columns, excludes, total_count, verbose, history_ids)
+        data, table_columns, original_data = build_data(connection, table_name, columns, excludes, total_count, history_ids, verbose)
         dic_for_revert[table_name]=original_data
         import_data(connection, column_dict, table_name, table_columns, primary_key, data)
     return dic_for_revert
@@ -58,7 +58,7 @@ def get_history(table, con):
     return history_data
      
      
-def build_data(connection, table, columns, excludes, total_count, verbose=False, history_ids):
+def build_data(connection, table, columns, excludes, total_count, history_ids, verbose=False):
     """
     Select all data from a table and return it together with a list of table columns.
 
