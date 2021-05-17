@@ -54,10 +54,10 @@ def get_args():
 
 def main(args=None, connection=False):
     """Main method"""
+    if not args:
+        args = get_args()
+    pg_args = get_pg_args(args)
     if not connection:
-        if not args:
-            args = get_args()
-        pg_args = get_pg_args(args)
         connection = get_connection(pg_args)
 
     loglevel = logging.WARNING
