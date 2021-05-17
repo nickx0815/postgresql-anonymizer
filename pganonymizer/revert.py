@@ -49,7 +49,7 @@ def create_anon(con ,data, ids):
     cr.execute("COMMIT;")
     cr.close()
 
-def run_revert():
+def run_revert(connection, args):
     return
 
 def create_truncate(con, data):

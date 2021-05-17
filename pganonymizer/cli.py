@@ -57,11 +57,11 @@ def _get_run_data(args):
         args = get_args()
     pg_args = get_pg_args(args)
     con = get_connection(pg_args)
-    return con, args, pg_args
+    return con, args
 
 def main_deanonymize(args=None):
     connection, args = _get_run_data(args)
-    run_revert(connection)
+    run_revert(connection, args)
     return False
 
 def main_anonymize(args=None):
