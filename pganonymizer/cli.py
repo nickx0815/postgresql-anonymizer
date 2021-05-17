@@ -52,10 +52,13 @@ def get_args():
     args = parser.parse_args()
     return args
 
-def main(args=None):
+def main(args=None, connection=False):
     """Main method"""
-    if not args:
-        args = get_args()
+    if not connection:
+        if not args:
+            args = get_args()
+        pg_args = get_pg_args(args)
+        connection = get_connection(pg_args)
 
     loglevel = logging.WARNING
     if args.verbose:
@@ -68,8 +71,6 @@ def main(args=None):
 
     schema = yaml.load(open(args.schema), Loader=yaml.FullLoader)
 
-    pg_args = get_pg_args(args)
-    connection = get_connection(pg_args)
     start_time = time.time()
     data_dic = {}
     data_dic['truncate']  = truncate_tables(connection, schema.get('truncate', []))

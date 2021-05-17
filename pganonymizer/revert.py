@@ -49,10 +49,13 @@ def create_anon(con ,data, ids):
     cr.execute("COMMIT;")
     cr.close()
 
+def run_revert():
+    return
+
 def create_truncate(con, data):
     cr = con.cursor()
-    x = "s"
-    cr.execute("COMMIT;")
+#     x = "s"
+#     cr.execute("COMMIT;")
     cr.close()
     
 def _(t):
