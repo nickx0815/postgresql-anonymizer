@@ -12,7 +12,7 @@ import yaml
 from pganonymizer.constants import DATABASE_ARGS, DEFAULT_SCHEMA_FILE
 from pganonymizer.providers import PROVIDERS
 from pganonymizer.utils import anonymize_tables, create_database_dump, get_connection, truncate_tables
-from pganonymizer.revert import create_anon_db
+from pganonymizer.revert import create_anon_db, run_revert
 
 
 def get_pg_args(args):
@@ -55,17 +55,17 @@ def get_args():
 def _get_run_data(args):
     if not args:
         args = get_args()
-    pg_args = get_pg_args(args)
     con = get_connection(pg_args)
     return con, args, pg_args
 
 def main_deanonymize(args=None):
-    connection, args, pg_args = _get_run_data(args)
+    connection, args = _get_run_data(args)
+    run_revert(connection)
     return False
 
 def main_anonymize(args=None):
     """Main method"""
-    connection, args, pg_args = _get_run_data(args)
+    connection, args = _get_run_data(args)
 
     loglevel = logging.WARNING
     if args.verbose:
@@ -86,7 +86,7 @@ def main_anonymize(args=None):
         connection.commit()
     end_time = time.time()
     logging.info('Anonymization took {:.2f}s'.format(end_time - start_time))
-
+    pg_args = get_pg_args(args)
     if args.dump_file:
         create_database_dump(args.dump_file, pg_args)
     
