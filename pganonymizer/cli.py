@@ -52,7 +52,7 @@ def get_args():
     args = parser.parse_args()
     return args
 
-def main(args=None, connection=False):
+def main_anonymize(args=None, connection=False):
     """Main method"""
     if not args:
         args = get_args()
@@ -87,5 +87,5 @@ def main(args=None, connection=False):
     connection.close()
 
 
-if __name__ == '__main__':
-    main()
+# if __name__ == '__main__':
+#     main()
