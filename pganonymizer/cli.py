@@ -52,20 +52,20 @@ def get_args():
     args = parser.parse_args()
     return args
 
-def _get_run_data(args, con):
+def _get_run_data(args):
     if not args:
         args = get_args()
     pg_args = get_pg_args(args)
-    if not con:
-        con = get_connection(pg_args)
+    con = get_connection(pg_args)
     return con, args, pg_args
 
-def main_deanonymize(args=None, connection=False):
-    connection, args, pg_args = _get_run_data(args, connection)
+def main_deanonymize(args=None):
+    connection, args, pg_args = _get_run_data(args)
+    return False
 
-def main_anonymize(args=None, connection=False):
+def main_anonymize(args=None):
     """Main method"""
-    connection, args, pg_args = _get_run_data(args, connection)
+    connection, args, pg_args = _get_run_data(args)
 
     loglevel = logging.WARNING
     if args.verbose:
