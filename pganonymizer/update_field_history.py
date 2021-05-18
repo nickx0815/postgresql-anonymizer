@@ -1,5 +1,4 @@
 import psycopg2, datetime
-from pypika import Query, Table, Field
 
 def update_fields_history(cr, model_id, record, state, field_id=False, revert_field=False):
     now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
