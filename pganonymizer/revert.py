@@ -54,7 +54,7 @@ def create_anon(con ,data, ids):
                 VALUES ('{model_id}', '{field_id}', {record_id}, '{value}')".format(
                     model_id = table, field_id = field, record_id = id, value = data.get(table).get(field).get(id))
                 cr.execute(sql_anon_db_insert)
-                update_fields_history(cr, table_id, field_id, id, 2)
+                update_fields_history(cr, table_id, field_id, id)
     cr.execute("COMMIT;")
     cr.close()
 
