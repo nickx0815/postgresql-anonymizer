@@ -105,7 +105,7 @@ def run_revert(connection, args):
                 if not records:
                     break
                 for record in records:
-                    value = table+"_"+original_field+"_"+record['record_id']
+                    value = table+"_"+original_field+"_"+str(record['record_id'])
                     get_migrated_field_sql = "UPDATE {mapped_table} SET {mapped_field} = '{original_value}' WHERE  {mapped_field} = '{value}'".format(mapped_table=mapped_table,
                                                                                                                                                     mapped_field=migrated_field,
                                                                                                                                                     original_value=record['value'],
