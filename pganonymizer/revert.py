@@ -115,12 +115,12 @@ def run_revert(connection, args):
                     cr3.execute(record_db_id_sql)
                     record_db_id = cr3.fetchone()[0]
                     #need id of record that are updated
-                    get_migrated_field_sql = "UPDATE {mapped_table} SET {mapped_field} = '{original_value}' WHERE  id = {rec_id}".format(mapped_table=mapped_table,
+                    get_migrated_field_sql = "UPDATE {mapped_table} SET {mapped_field} = '{original_value}' WHERE  id = {rec_id};".format(mapped_table=mapped_table,
                                                                                                                                                     mapped_field=migrated_field,
                                                                                                                                                     original_value=record['value'],
                                                                                                                                                     rec_id = record_db_id)
                     cr2.execute(get_migrated_field_sql)
-                    update_fields_history(cr2, migrated_model_id, record_db_id, 3, revert_field_id = migrated_field_id)
+                    update_fields_history(cr2, migrated_model_id, record_db_id, 3, revert_field = migrated_field_id)
                     cr2.execute("COMMIT;")
     cr2.close()
     cr1.close()
