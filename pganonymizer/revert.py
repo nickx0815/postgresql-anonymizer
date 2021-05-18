@@ -35,7 +35,7 @@ def _run_query(con, data, ids):
 
 
 
-def create_anon(con ,data, ids):
+def create_anon(con, data, ids):
     cr = con.cursor()
     for table in data:
         table_sql = "Select id FROM ir_model WHERE model = '{model_data}'".format(model_data=_(table))
@@ -69,31 +69,52 @@ def insert_anon_field_rec(cr, field, table):
     if not record:
         cr.execute(sql_insert)
         
-def get_field_mappings(connection, args):
+def get_anon_fields(connection, args):
     data = {}
     cr = connection.cursor(cursor_factory=psycopg2.extras.DictCursor, name='fetch_large_result')
-    get_field_mapping_sql = "select * from field_mapping_version_12".format(table_name=args.anon_table)
-    cr.execute(get_field_mapping_sql)
+    get_anon_fields = "SELECT * FROM anon_fields_db;"
+    cr.execute(get_anon_fields)
     while True:
         records = cr.fetchmany(size=2000)
         if not records:
             break
         for record in records:
-            return
+            model = record.model_id
+            field = record.field_id
+            if not data.get(model):
+                data[model] = []
+            data[model].append(field)
     cr.close()
+    return data
 
 def run_revert(connection, args):
-    field_mappings = get_field_mappings(connection, args)
-    cr = connection.cursor(cursor_factory=psycopg2.extras.DictCursor, name='fetch_large_result')
-    get_anon_data_sql = "select model_id, field_id, record_id from {table_name} where 1=1".format(table_name=args.anon_table)
-    cr.execute(get_anon_data_sql)
-    while True:
-        records = cr.fetchmany(size=2000)
-        if not records:
-            break
-        for record in records:
-            break
-    cr.close()
+    anon_fields = get_anon_fields(connection, args)
+    cr1 = connection.cursor(cursor_factory=psycopg2.extras.DictCursor, name='fetch_large_result')
+    cr2 = connection.cursor(cursor_factory=psycopg2.extras.DictCursor, name='fetch_large_result')
+    for table, field in anon_fields.items():
+        mapped_table, mapped_field = get_mapped_field_data(table, field)
+        get_anon_data_sql = "SELECT * FROM {table_name} where model_id = '{original_table}' and field=id = '{original_field}';".format(table_name=args.anon_table,
+                                                                                                                                       original_model = table,
+                                                                                                                                       original_field = field)
+        cr1.execute(get_anon_data_sql)
+        while True:
+            records = cr1.fetchmany(size=2000)
+            if not records:
+                break
+            for record in records:
+                value = table+"_"+field+"_"+record.id
+                get_migrated_field_sql = "UPDATE {mapped_table} SET {mapped_field} = '{original_value}' WHERE  {mapped_field} = '{value}'".format(mapped_table=mapped_table,
+                                                                                                                                                mapped_field=mapped_field,
+                                                                                                                                                original_value=record.value,
+                                                                                                                                                value=value)
+                cr2.execute(get_migrated_field_sql)
+            
+    cr2.close()
+    cr1.close()
+
+def get_mapped_field_data(table, field):
+    # insert mapping functionality
+    return table, field
 
 def create_truncate(con, data):
     cr = con.cursor()
