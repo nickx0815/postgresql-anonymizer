@@ -108,7 +108,7 @@ def run_revert(connection, args):
                 for record in records:
                     cr3 = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
                     value = table+"_"+original_field+"_"+str(record['record_id'])
-                    record_db_id_sql = "SELECT ID FROM {mapped_table} where {mapped_field} = '{value}".format(
+                    record_db_id_sql = "SELECT ID FROM {mapped_table} where {mapped_field} = '{value}';".format(
                         mapped_table=mapped_table,
                         mapped_field=migrated_field,
                         value=value)
