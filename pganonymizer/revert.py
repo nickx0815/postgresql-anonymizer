@@ -18,7 +18,7 @@ def create_anon_db(connection, data, ids):
         cr.execute("CREATE TABLE anon_fields_db(\
                          model_id VARCHAR,\
                          field_id VARCHAR,\
-                         PRIMARY KEY (model_id, field_id);")
+                         PRIMARY KEY (model_id, field_id));")
         cr.execute("COMMIT;")
     except:
         cr.execute("ROLLBACK;")
@@ -59,14 +59,16 @@ def create_anon(con ,data, ids):
     cr.close()
 
 def insert_anon_field_rec(cr, field, table):
-        sql_insert = "INSERT INTO anon_fields_db (model_id, field_id) \
-                       VALUES ('{table}', '{field}') \
-                       WHERE NOT EXISTS ( SELECT * FROM anon_fields_db \
-                               WHERE model_id = '{table}' \
-                                       AND field_id = '{field}');".format(table=table, field=field)
+    sql_select = "INSERT INTO anon_fields_db (model_id, field_id) \
+                   VALUES ('{table}', '{field}');".format(table=table, field=field)
+    sql_insert = "SELECT *  from anon_fields_db \
+                            WHERE model_id = '{table}' \
+                                   AND field_id = '{field}';".format(table=table, field=field)
+    cr.execute(sql_select)
+    record = cr.fetchone()
+    if not record:
         cr.execute(sql_insert)
         
-
 def get_field_mappings(connection, args):
     data = {}
     cr = connection.cursor(cursor_factory=psycopg2.extras.DictCursor, name='fetch_large_result')
