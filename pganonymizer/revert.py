@@ -59,15 +59,14 @@ def create_anon(con ,data, ids):
     cr.close()
 
 def insert_anon_field_rec(cr, field, table):
-    sql_select = "INSERT INTO anon_fields_db (model_id, field_id) \
+    sql_insert = "INSERT INTO anon_fields_db (model_id, field_id) \
                    VALUES ('{table}', '{field}');".format(table=table, field=field)
-    sql_insert = "SELECT *  from anon_fields_db \
+    sql_select = "SELECT *  from anon_fields_db \
                             WHERE model_id = '{table}' \
                                    AND field_id = '{field}';".format(table=table, field=field)
     cr.execute(sql_select)
-    try:
-        cr.fetchone()
-    except:
+    record = cr.fetchone()
+    if not record:
         cr.execute(sql_insert)
         
 def get_field_mappings(connection, args):
