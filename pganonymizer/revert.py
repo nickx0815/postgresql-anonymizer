@@ -89,8 +89,8 @@ def get_anon_fields(connection, args):
 
 def run_revert(connection, args):
     anon_fields = get_anon_fields(connection, args)
-    cr1 = connection.cursor(cursor_factory=psycopg2.extras.DictCursor, name='fetch_large_result')
-    cr2 = connection.cursor(cursor_factory=psycopg2.extras.DictCursor, name='fetch_large_result')
+    cr1 = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cr2 = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
     for table, fields in anon_fields.items():
         mapped_table, mapped_fields = get_mapped_field_data(table, fields)
         for mapped_field in mapped_fields:
