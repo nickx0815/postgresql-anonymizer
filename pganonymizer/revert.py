@@ -110,7 +110,7 @@ def run_revert(connection, args):
                     value = table+"_"+original_field+"_"+str(record['record_id'])
                     record_db_id_sql = "SELECT ID FROM {mapped_table} where {mapped_field} = '{value}".format(
                         mapped_table=mapped_table,
-                        mapped_field=mapped_field,
+                        mapped_field=migrated_field,
                         value=value)
                     cr3.execute(record_db_id_sql)
                     record_db_id = cr3.fetchone()[0]
