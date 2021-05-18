@@ -65,8 +65,9 @@ def insert_anon_field_rec(cr, field, table):
                             WHERE model_id = '{table}' \
                                    AND field_id = '{field}';".format(table=table, field=field)
     cr.execute(sql_select)
-    record = cr.fetchone()
-    if not record:
+    try:
+        cr.fetchone()
+    except:
         cr.execute(sql_insert)
         
 def get_field_mappings(connection, args):
