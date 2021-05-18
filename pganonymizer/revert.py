@@ -111,7 +111,7 @@ def run_revert(connection, args):
                                                                                                                                                     original_value=record['value'],
                                                                                                                                                     value=value)
                     cr2.execute(get_migrated_field_sql)
-                    cr2.commit()
+                    cr2.execute("COMMIT;")
     cr2.close()
     cr1.close()
 
