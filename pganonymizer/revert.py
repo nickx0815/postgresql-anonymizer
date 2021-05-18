@@ -97,7 +97,7 @@ def run_revert(connection, args):
             original_field = mapped_field[0]
             migrated_field = mapped_field[1]
             get_anon_data_sql = "SELECT * FROM {table_name} where model_id = '{original_table}' and field_id = '{original_field}';".format(table_name=args.anon_table,
-                                                                                                                                           original_model = table,
+                                                                                                                                           original_table = table,
                                                                                                                                            original_field = original_field)
             cr1.execute(get_anon_data_sql)
             while True:
