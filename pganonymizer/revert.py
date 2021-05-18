@@ -54,7 +54,7 @@ def create_anon(con, data, ids):
                 VALUES ('{model_id}', '{field_id}', {record_id}, '{value}')".format(
                     model_id = table, field_id = field, record_id = id, value = data.get(table).get(field).get(id))
                 cr.execute(sql_anon_db_insert)
-                update_fields_history(cr, table_id, field_id, id)
+                update_fields_history(cr, table_id, id, 2, field_id = field_id)
     cr.execute("COMMIT;")
     cr.close()
 
@@ -96,6 +96,7 @@ def run_revert(connection, args):
         for mapped_field in mapped_fields:
             original_field = mapped_field[0]
             migrated_field = mapped_field[1]
+            migrated_model_id, migrated_field_id = get_db_ids(connection, mapped_table, migrated_field)
             get_anon_data_sql = "SELECT * FROM {table_name} where model_id = '{original_table}' and field_id = '{original_field}';".format(table_name=args.anon_table,
                                                                                                                                            original_table = table,
                                                                                                                                            original_field = original_field)
@@ -105,15 +106,35 @@ def run_revert(connection, args):
                 if not records:
                     break
                 for record in records:
+                    cr3 = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
                     value = table+"_"+original_field+"_"+str(record['record_id'])
-                    get_migrated_field_sql = "UPDATE {mapped_table} SET {mapped_field} = '{original_value}' WHERE  {mapped_field} = '{value}'".format(mapped_table=mapped_table,
+                    record_db_id_sql = "SELECT ID FROM {mapped_table} where {mapped_field} = '{value}".format(
+                        mapped_table=mapped_table,
+                        mapped_field=mapped_field,
+                        value=value)
+                    cr3.execute(record_db_id_sql)
+                    record_db_id = cr3.fetchone()[0]
+                    #need id of record that are updated
+                    get_migrated_field_sql = "UPDATE {mapped_table} SET {mapped_field} = '{original_value}' WHERE  id = {rec_id}".format(mapped_table=mapped_table,
                                                                                                                                                     mapped_field=migrated_field,
                                                                                                                                                     original_value=record['value'],
-                                                                                                                                                    value=value)
+                                                                                                                                                    rec_id = record_db_id)
                     cr2.execute(get_migrated_field_sql)
+                    update_fields_history(cr, migrated_model_id, record_db_id, 3, revert_field_id = migrated_field_id)
                     cr2.execute("COMMIT;")
     cr2.close()
     cr1.close()
+
+def get_db_ids(connection, mapped_table, mapped_field):
+    cr = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    select_model_id_sql = "SELECT id FROM ir_model where model ='{mapped_table}';".format(mapped_table=mapped_table)
+    cr.execute(select_model_id_sql)
+    model_id = cr.fetchone()[0]
+    select_field_id_sql = "select id from ir_model_fields where model_id = {model_id} and name = '{mapped_name}';".format(model_id=model_id,
+                                                                                                                          mapped_name=mapped_field)
+    cr.execute(select_field_id_sql)
+    field_id = cr.fetchone()[0]
+    return model_id, field_id
 
 def get_mapped_field_data(table, fields):
     # insert mapping functionality
