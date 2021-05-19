@@ -92,7 +92,7 @@ def run_revert(connection, args):
     cr1 = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
     cr2 = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
     for table, fields in anon_fields.items():
-        mapped_table, mapped_fields = get_mapped_field_data(cr2, table, fields)
+        mapped_table, mapped_fields = get_mapped_field_data(connection, table, fields)
         original_table = mapped_table[0]
         migrated_table = mapped_table[1]
         for mapped_field in mapped_fields:
@@ -129,6 +129,8 @@ def run_revert(connection, args):
 
 def get_db_ids(connection, mapped_table, mapped_field):
     cr = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    select_model_id_sql = "SELECT id FROM ir_model where model ='{mapped_table}';".format(mapped_table=mapped_table.replace("_","."))
+    cr.execute(select_model_id_sql)
     model_id = cr.fetchone()[0]
     select_field_id_sql = "select id from ir_model_fields where model = '{table_name}' and name = '{field_name}';;".format(table_name=mapped_table.replace("_","."),
                                                                                                                           field_name=mapped_field)
@@ -136,7 +138,8 @@ def get_db_ids(connection, mapped_table, mapped_field):
     field_id = cr.fetchone()[0]
     return model_id, field_id
 
-def get_mapped_field_data(cr, table, fields):
+def get_mapped_field_data(connection, table, fields):
+    cr = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
     list_field_mapped = []
     migration_table = False
     for field in fields:
@@ -156,6 +159,7 @@ def get_mapped_field_data(cr, table, fields):
         list_field_mapped.append((field, migration_field))
     if not migration_table:
         migration_table = table
+    cr.close()
     migrated_table = (table, migration_table)
     return migrated_table, list_field_mapped
 
