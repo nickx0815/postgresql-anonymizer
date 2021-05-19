@@ -8,8 +8,8 @@ def update_fields_history(cr, model_id, record, state, field_id=False, revert_fi
             ) values ( \
                 {state}, {model_id},{field_to_group}, {field_id}, '{create_date}', '{write_date}', {create_uid}, {record_id});".format(state = state,
                        model_id = model_id,
-                       field_to_group = field_id,
-                       field_id = field_id,
+                       field_to_group = field_id['field_id'],
+                       field_id = field_id['id'],
                        create_date = str(now),
                        write_date = str(now),
                        create_uid=1,

@@ -44,7 +44,7 @@ def create_anon(con, data, ids):
         for field in data.get(table):
             ids_sql_format = str(set([x for x in ids])).replace("{","(").replace("}",")")
             insert_anon_field_db_rec(cr, field, table)
-            field_sql = "Select field_id From ir_model_fields_anonymization Where field_name = '{field_name}' AND model_id = {table_id} and id in {tuple_ids}".format(field_name=field,
+            field_sql = "Select id, field_id From ir_model_fields_anonymization Where field_name = '{field_name}' AND model_id = {table_id} and id in {tuple_ids}".format(field_name=field,
                                                                                                                                                                 table_id=table_id,
                                                                                                                                                                 tuple_ids=ids_sql_format)
             cr.execute(field_sql)
