@@ -115,15 +115,17 @@ def run_revert(connection, args):
                         mapped_field=migrated_field,
                         value=value)
                     cr3.execute(record_db_id_sql)
-                    record_db_id = cr3.fetchone()[0]
+                    record_db = cr3.fetchone()
+                    if record_db:
+                        record_db_id = record_db[0]
                     #need id of record that are updated
-                    get_migrated_field_sql = "UPDATE {mapped_table} SET {mapped_field} = '{original_value}' WHERE  id = {rec_id};".format(mapped_table=migrated_table,
-                                                                                                                                                    mapped_field=migrated_field,
-                                                                                                                                                    original_value=record['value'],
-                                                                                                                                                    rec_id = record_db_id)
-                    cr2.execute(get_migrated_field_sql)
-                    update_fields_history(cr2, migrated_model_id, record_db_id, 4, revert_field = migrated_field_id)
-                    cr2.execute("COMMIT;")
+                        get_migrated_field_sql = "UPDATE {mapped_table} SET {mapped_field} = '{original_value}' WHERE  id = {rec_id};".format(mapped_table=migrated_table,
+                                                                                                                                                        mapped_field=migrated_field,
+                                                                                                                                                        original_value=record['value'],
+                                                                                                                                                        rec_id = record_db_id)
+                        cr2.execute(get_migrated_field_sql)
+                        update_fields_history(cr2, migrated_model_id, record_db_id, 4, revert_field = migrated_field_id)
+                        cr2.execute("COMMIT;")
     cr3.close()
     cr2.close()
     cr1.close()

@@ -57,7 +57,14 @@ def get_history(con, table):
             history_data.append((row.get('field_id'), row.get('record_id')))
     cursor.close()
     return history_data
-     
+
+def build_sql_select(table, search):
+    sql_select = "SELECT * FROM {table}".format(table=table)
+    if search:
+        sql = "{select} WHERE {search_condition};".format(select=sql_select, search_condition=search)
+    else:
+        sql = "{select};".format(select=sql_select)
+    return sql
      
 def build_data(connection, table, columns, excludes, total_count, history_ids, search,verbose=False):
     """
@@ -68,6 +75,7 @@ def build_data(connection, table, columns, excludes, total_count, history_ids, s
     :param list columns: A list of table fields
     :param list[dict] excludes: A list of exclude definitions.
     :param str search: A SQL WHERE (search_condition) to filter and keep only the searched rows.
+    :param list history ids.
     :param int total_count: The amount of rows for the current table
     :param bool verbose: Display logging information and a progress bar.
     :return: A tuple containing the data list and a complete list of all table columns.
@@ -75,11 +83,7 @@ def build_data(connection, table, columns, excludes, total_count, history_ids, s
     """
     if verbose:
         progress_bar = IncrementalBar('Anonymizing', max=total_count)
-    sql_select = "SELECT * FROM {table}".format(table=table)
-    if search:
-        sql = "{select} WHERE {search_condition};".format(select=sql_select, search_condition=search)
-    else:
-        sql = "{select};".format(select=sql_select)
+    sql = build_sql_select(table, search)
     cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor, name='fetch_large_result')
     cursor.execute(sql)
     data = []
