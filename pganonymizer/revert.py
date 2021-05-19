@@ -15,7 +15,7 @@ def create_anon_db(connection, data, ids):
     except:
         cr.execute("ROLLBACK;")
     try:
-        cr.execute("CREATE TABLE anon_fields_db(\
+        cr.execute("CREATE TABLE anon_field_db(\
                          model_id VARCHAR,\
                          field_id VARCHAR,\
                          PRIMARY KEY (model_id, field_id));")
@@ -43,7 +43,7 @@ def create_anon(con, data, ids):
         table_id = cr.fetchone()[0]
         for field in data.get(table):
             ids_sql_format = str(set([x for x in ids])).replace("{","(").replace("}",")")
-            insert_anon_field_rec(cr, field, table)
+            insert_anon_field_db_rec(cr, field, table)
             field_sql = "Select id From ir_model_fields_anonymization Where field_name = '{field_name}' AND model_id = {table_id} and id in {tuple_ids}".format(field_name=field,
                                                                                                                                                                 table_id=table_id,
                                                                                                                                                                 tuple_ids=ids_sql_format)
@@ -58,10 +58,10 @@ def create_anon(con, data, ids):
     cr.execute("COMMIT;")
     cr.close()
 
-def insert_anon_field_rec(cr, field, table):
-    sql_insert = "INSERT INTO anon_fields_db (model_id, field_id) \
+def insert_anon_field_db_rec(cr, field, table):
+    sql_insert = "INSERT INTO anon_field_db (model_id, field_id) \
                    VALUES ('{table}', '{field}');".format(table=table, field=field)
-    sql_select = "SELECT *  from anon_fields_db \
+    sql_select = "SELECT *  from anon_field_db \
                             WHERE model_id = '{table}' \
                                    AND field_id = '{field}';".format(table=table, field=field)
     cr.execute(sql_select)
@@ -72,7 +72,7 @@ def insert_anon_field_rec(cr, field, table):
 def get_anon_fields(connection, args):
     data = {}
     cr = connection.cursor(cursor_factory=psycopg2.extras.DictCursor, name='fetch_large_result')
-    get_anon_fields = "SELECT * FROM anon_fields_db;"
+    get_anon_fields = "SELECT * FROM anon_field_db;"
     cr.execute(get_anon_fields)
     while True:
         records = cr.fetchmany(size=2000)
@@ -92,7 +92,7 @@ def run_revert(connection, args):
     cr1 = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
     cr2 = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
     for table, fields in anon_fields.items():
-        mapped_table, mapped_fields = get_mapped_field_data(table, fields)
+        mapped_table, mapped_fields = get_mapped_field_data(cr2, table, fields)
         for mapped_field in mapped_fields:
             original_field = mapped_field[0]
             migrated_field = mapped_field[1]
@@ -136,13 +136,28 @@ def get_db_ids(connection, mapped_table, mapped_field):
     field_id = cr.fetchone()[0]
     return model_id, field_id
 
-def get_mapped_field_data(table, fields):
-    # insert mapping functionality
-    list_mapped = []
+def get_mapped_field_data(cr, table, fields):
+    list_field_mapped = []
+    migration_table = False
     for field in fields:
+        sql_select = "SELECT *  from ir_model_fields_anonymization_migration_fix \
+                                WHERE model_id = '{table}' \
+                                       AND field_id = '{field}';".format(table=table, field=field)
+        cr.execute(sql_select)
+        record = cr.fetchone()
+        if record and record.get('migration_field'):
+            migration_field = record.get('migration_field')
+        else:
+            migration_field = field
+        if record and record.get('migration_model') and not migration_table:
+            migration_table = record.get('migration_model')
+        else:
+            migration_table = table
+        # insert mapping functionality
         #[(field, mapped_field), (field, mapped_field)...]
-        list_mapped.append((field, field))
-    return table, list_mapped
+        list_field_mapped.append((field, migration_field))
+    migrated_table = (table, migration_table)
+    return migrated_table, list_field_mapped
 
 def create_truncate(con, data):
     cr = con.cursor()
