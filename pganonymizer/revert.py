@@ -129,11 +129,9 @@ def run_revert(connection, args):
 
 def get_db_ids(connection, mapped_table, mapped_field):
     cr = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    select_model_id_sql = "SELECT id FROM ir_model where model ='{mapped_table}';".format(mapped_table=mapped_table.replace("_","."))
-    cr.execute(select_model_id_sql)
     model_id = cr.fetchone()[0]
-    select_field_id_sql = "select id from ir_model_fields where model_id = {model_id} and name = '{mapped_name}';".format(model_id=model_id,
-                                                                                                                          mapped_name=mapped_field)
+    select_field_id_sql = "select id from ir_model_fields where model = '{table_name}' and name = '{field_name}';;".format(table_name=mapped_table.replace("_","."),
+                                                                                                                          field_name=mapped_field)
     cr.execute(select_field_id_sql)
     field_id = cr.fetchone()[0]
     return model_id, field_id
