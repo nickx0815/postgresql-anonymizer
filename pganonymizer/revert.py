@@ -54,7 +54,7 @@ def create_anon(con, data, ids):
                 VALUES ('{model_id}', '{field_id}', {record_id}, '{value}')".format(
                     model_id = table, field_id = field, record_id = id, value = data.get(table).get(field).get(id))
                 cr.execute(sql_anon_db_insert)
-                update_fields_history(cr, table_id, id, "2", field_id = field_id)
+                update_fields_history(cr, table_id, id, 2, field_id = field_id)
     cr.execute("COMMIT;")
     cr.close()
 
@@ -124,7 +124,7 @@ def run_revert(connection, args):
                                                                                                                                                         original_value=record['value'],
                                                                                                                                                         rec_id = record_db_id)
                         cr2.execute(get_migrated_field_sql)
-                        update_fields_history(cr2, migrated_model_id, record_db_id, "4", revert_field = migrated_field_id)
+                        update_fields_history(cr2, migrated_model_id, record_db_id, 4, revert_field = migrated_field_id)
                         cr2.execute("COMMIT;")
     cr3.close()
     cr2.close()

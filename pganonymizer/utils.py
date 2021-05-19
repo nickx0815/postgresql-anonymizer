@@ -46,7 +46,7 @@ def anonymize_tables(connection, definitions, verbose=False):
 def get_history(con, table):
     cursor = con.cursor(cursor_factory=psycopg2.extras.DictCursor, name='fetch_large_result')
     sql_model_id = "SELECT id FROM ir_model where model ='{table}'".format(table=table.replace("_","."))
-    sql = "select field_id, record_id from ir_model_fields_anonymization_history where state = '2' and model_id = ({sql_model_id}); ".format(sql_model_id = sql_model_id)
+    sql = "select field_id, record_id from ir_model_fields_anonymization_history where state = 2 and model_id = ({sql_model_id}); ".format(sql_model_id = sql_model_id)
     cursor.execute(sql)
     history_data = []
     while True:
