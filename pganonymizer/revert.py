@@ -48,7 +48,7 @@ def create_anon(con, data, ids):
                                                                                                                                                                 table_id=table_id,
                                                                                                                                                                 tuple_ids=ids_sql_format)
             cr.execute(field_sql)
-            field_id = cr.fetchone()[0]
+            field_id = cr.fetchone()
             for id in data.get(table).get(field):
                 sql_anon_db_insert = "Insert into anon_db (model_id, field_id, record_id, value) \
                 VALUES ('{model_id}', '{field_id}', {record_id}, '{value}')".format(
