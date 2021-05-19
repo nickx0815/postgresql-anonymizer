@@ -93,12 +93,14 @@ def run_revert(connection, args):
     cr2 = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
     for table, fields in anon_fields.items():
         mapped_table, mapped_fields = get_mapped_field_data(cr2, table, fields)
+        original_table = mapped_table[0]
+        migrated_table = mapped_table[1]
         for mapped_field in mapped_fields:
             original_field = mapped_field[0]
             migrated_field = mapped_field[1]
-            migrated_model_id, migrated_field_id = get_db_ids(connection, mapped_table, migrated_field)
+            migrated_model_id, migrated_field_id = get_db_ids(connection, migrated_table, migrated_field)
             get_anon_data_sql = "SELECT * FROM {table_name} where model_id = '{original_table}' and field_id = '{original_field}';".format(table_name=args.anon_table,
-                                                                                                                                           original_table = table,
+                                                                                                                                           original_table = original_table,
                                                                                                                                            original_field = original_field)
             cr1.execute(get_anon_data_sql)
             while True:
@@ -107,15 +109,15 @@ def run_revert(connection, args):
                     break
                 for record in records:
                     cr3 = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
-                    value = table+"_"+original_field+"_"+str(record['record_id'])
+                    value = original_table+"_"+original_field+"_"+str(record['record_id'])
                     record_db_id_sql = "SELECT ID FROM {mapped_table} where {mapped_field} = '{value}';".format(
-                        mapped_table=mapped_table,
+                        mapped_table=migrated_table,
                         mapped_field=migrated_field,
                         value=value)
                     cr3.execute(record_db_id_sql)
                     record_db_id = cr3.fetchone()[0]
                     #need id of record that are updated
-                    get_migrated_field_sql = "UPDATE {mapped_table} SET {mapped_field} = '{original_value}' WHERE  id = {rec_id};".format(mapped_table=mapped_table,
+                    get_migrated_field_sql = "UPDATE {mapped_table} SET {mapped_field} = '{original_value}' WHERE  id = {rec_id};".format(mapped_table=migrated_table,
                                                                                                                                                     mapped_field=migrated_field,
                                                                                                                                                     original_value=record['value'],
                                                                                                                                                     rec_id = record_db_id)
@@ -151,11 +153,11 @@ def get_mapped_field_data(cr, table, fields):
             migration_field = field
         if record and record.get('migration_model') and not migration_table:
             migration_table = record.get('migration_model')
-        else:
-            migration_table = table
         # insert mapping functionality
         #[(field, mapped_field), (field, mapped_field)...]
         list_field_mapped.append((field, migration_field))
+    if not migration_table:
+        migration_table = table
     migrated_table = (table, migration_table)
     return migrated_table, list_field_mapped
 
