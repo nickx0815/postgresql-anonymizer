@@ -61,7 +61,8 @@ def get_history(con, table):
 def build_sql_select(table, search):
     sql_select = "SELECT * FROM {table}".format(table=table)
     if search:
-        sql = "{select} WHERE {search_condition};".format(select=sql_select, search_condition=search)
+        sql_statement = " AND ".join(search)
+        sql = "{select} WHERE {search_condition};".format(select=sql_select, search_condition=sql_statement)
     else:
         sql = "{select};".format(select=sql_select)
     return sql
