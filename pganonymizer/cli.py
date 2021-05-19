@@ -12,6 +12,7 @@ import yaml
 from pganonymizer.constants import DATABASE_ARGS, DEFAULT_SCHEMA_FILE
 from pganonymizer.providers import PROVIDERS
 from pganonymizer.utils import anonymize_tables, create_database_dump, get_connection, truncate_tables
+from pganonymizer.revert import create_anon_db, run_revert
 
 
 def get_pg_args(args):
@@ -32,9 +33,7 @@ def list_provider_classes():
     for provider_cls in PROVIDERS:
         print('{:<10} {}'.format(provider_cls.id, provider_cls.__doc__))
 
-
-def main():
-    """Main method"""
+def get_args():
     parser = argparse.ArgumentParser(description='Anonymize data of a PostgreSQL database')
     parser.add_argument('-v', '--verbose', action='count', help='Increase verbosity')
     parser.add_argument('-l', '--list-providers', action='store_true', help='Show a list of all available providers',
@@ -51,6 +50,23 @@ def main():
     parser.add_argument('--dump-file', help='Create a database dump file with the given name')
 
     args = parser.parse_args()
+    return args
+
+def _get_run_data(args):
+    if not args:
+        args = get_args()
+    pg_args = get_pg_args(args)
+    con = get_connection(pg_args)
+    return con, args
+
+def main_deanonymize(args=None):
+    connection, args = _get_run_data(args)
+    run_revert(connection, args)
+    return False
+
+def main_anonymize(args=None):
+    """Main method"""
+    connection, args = _get_run_data(args)
 
     loglevel = logging.WARNING
     if args.verbose:
@@ -63,23 +79,21 @@ def main():
 
     schema = yaml.load(open(args.schema), Loader=yaml.FullLoader)
 
-    pg_args = get_pg_args(args)
-    connection = get_connection(pg_args)
-
     start_time = time.time()
-    truncate_tables(connection, schema.get('truncate', []))
-    anonymize_tables(connection, schema.get('tables', []), verbose=args.verbose)
-
+    data_dic = {}
+    data_dic['truncate']  = truncate_tables(connection, schema.get('truncate', []))
+    data_dic['anon'] = anonymize_tables(connection, schema.get('tables', []), verbose=args.verbose)
     if not args.dry_run:
         connection.commit()
-    connection.close()
-
     end_time = time.time()
     logging.info('Anonymization took {:.2f}s'.format(end_time - start_time))
-
+    pg_args = get_pg_args(args)
     if args.dump_file:
         create_database_dump(args.dump_file, pg_args)
+    
+    create_anon_db(connection, data_dic, schema.get('ids', []))
+    connection.close()
 
 
-if __name__ == '__main__':
-    main()
+# if __name__ == '__main__':
+#     main()

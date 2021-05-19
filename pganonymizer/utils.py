@@ -27,9 +27,10 @@ def anonymize_tables(connection, definitions, verbose=False):
     :param list definitions: A list of table definitions from the YAML schema.
     :param bool verbose: Display logging information and a progress bar.
     """
+    dic_for_revert = {}
     for definition in definitions:
         table_name = list(definition.keys())[0]
-        logging.info('Found table definition "%s"', table_name)
+        history_ids = get_history(connection, table_name)
         table_definition = definition[table_name]
         columns = table_definition.get('fields', [])
         excludes = table_definition.get('excludes', [])
@@ -37,11 +38,28 @@ def anonymize_tables(connection, definitions, verbose=False):
         column_dict = get_column_dict(columns)
         primary_key = table_definition.get('primary_key', DEFAULT_PRIMARY_KEY)
         total_count = get_table_count(connection, table_name)
-        data, table_columns = build_data(connection, table_name, columns, excludes, search, total_count, verbose)
+        data, table_columns, original_data = build_data(connection, table_name, columns, excludes, total_count, history_ids,search, verbose)
+        dic_for_revert[table_name]=original_data
         import_data(connection, column_dict, table_name, table_columns, primary_key, data)
+    return dic_for_revert
 
-
-def build_data(connection, table, columns, excludes, search, total_count, verbose=False):
+def get_history(con, table):
+    cursor = con.cursor(cursor_factory=psycopg2.extras.DictCursor, name='fetch_large_result')
+    sql_model_id = "SELECT id FROM ir_model where model ='{table}'".format(table=table.replace("_","."))
+    sql = "select field_id, record_id from ir_model_fields_anonymization_history where state = 2 and model_id = ({sql_model_id}); ".format(sql_model_id = sql_model_id)
+    cursor.execute(sql)
+    history_data = []
+    while True:
+        records = cursor.fetchmany(size=2000)
+        if not records:
+            break
+        for row in records:
+            history_data.append((row.get('field_id'), row.get('record_id')))
+    cursor.close()
+    return history_data
+     
+     
+def build_data(connection, table, columns, excludes, total_count, history_ids, search,verbose=False):
     """
     Select all data from a table and return it together with a list of table columns.
 
@@ -66,15 +84,19 @@ def build_data(connection, table, columns, excludes, search, total_count, verbos
     cursor.execute(sql)
     data = []
     table_columns = None
+    original_data = {}
     while True:
         records = cursor.fetchmany(size=2000)
         if not records:
             break
         for row in records:
             row_column_dict = {}
-            if not row_matches_excludes(row, excludes):
-                row_column_dict = get_column_values(row, columns)
+            if not row_matches_excludes(row, excludes) and not row_check_history(row, columns, history_ids):
+                row_column_dict = get_column_values(row, columns, {'id':row.get('id'), 'table':table})
                 for key, value in row_column_dict.items():
+                    if not original_data.get(key):
+                        original_data[key] = {}
+                    original_data[key].update({row.get('id'): row[key]})                    
                     row[key] = value
             if verbose:
                 progress_bar.next()
@@ -85,7 +107,16 @@ def build_data(connection, table, columns, excludes, search, total_count, verbos
     if verbose:
         progress_bar.finish()
     cursor.close()
-    return data, table_columns
+    
+    return data, table_columns, original_data
+
+def row_check_history(row, fields, history):
+    providers = [list(col.values())[0] for col in fields]
+    field_ids = [provider['provider']['field_anon_id'] for provider in providers]
+    for field in field_ids:
+        if (field, row.get('id')) in history:
+            return True 
+    return False
 
 
 def row_matches_excludes(row, excludes=None):
@@ -104,11 +135,19 @@ def row_matches_excludes(row, excludes=None):
     for definition in excludes:
         column = list(definition.keys())[0]
         for exclude in definition.get(column, []):
-            pattern = re.compile(exclude, re.IGNORECASE)
-            if row[column] is not None and pattern.match(row[column]):
-                return True
+            result =  exclude_eval(exclude, column, row)
+            if result:
+                return result
     return False
 
+def exclude_eval(exclude, column, row):
+    if column == "id":
+        if row.get('id') == exclude:
+            return True
+    else:
+        pattern = re.compile(exclude, re.IGNORECASE)
+        if row[column] is not None and pattern.match(row[column]):
+            return True
 
 def copy_from(connection, data, table, columns):
     """
@@ -233,7 +272,7 @@ def get_column_dict(columns):
     return column_dict
 
 
-def get_column_values(row, columns):
+def get_column_values(row, columns, row_info):
     """
     Return a dictionary for a single data row, with altered data.
 
@@ -256,7 +295,8 @@ def get_column_values(row, columns):
             # Skip the current column if there is no value to be altered
             continue
         provider = get_provider(provider_config)
-        value = provider.alter_value(orig_value)
+        row_info.update({'field':column_name})
+        value = provider.alter_value(orig_value, row_info)
         append = column_definition.get('append')
         if append:
             value = value + append
@@ -276,8 +316,9 @@ def truncate_tables(connection, tables):
     cursor = connection.cursor()
     table_names = ', '.join(tables)
     logging.info('Truncating tables "%s"', table_names)
-    cursor.execute('TRUNCATE TABLE {tables};'.format(tables=table_names))
+    cursor.execute('TRUNCATE TABLE {tables} CASCADE;'.format(tables=table_names))
     cursor.close()
+    return table_names
 
 
 def create_database_dump(filename, db_args):
