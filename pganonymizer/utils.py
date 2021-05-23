@@ -90,16 +90,12 @@ def build_data(connection, table, columns, excludes, total_count, history_ids, s
     sql = build_sql_select(table, search)
     cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor, name='fetch_large_result')
     cursor.execute(sql)
-    table_columns = None
-    original_data = {}
-    column_dict = get_column_dict(columns)
     while True:
         records = cursor.fetchmany(size=2000)
         if not records:
             break
         for row in records:
-            table_columns = ['"{}"'.format(column) for column in row.keys()]
-            data = []
+            original_data = {}
             row_column_dict = {}
             res, anon_field_id = row_check_history(row, columns, history_ids)
             if not row_matches_excludes(row, excludes) and not res:
