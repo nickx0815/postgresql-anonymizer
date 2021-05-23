@@ -114,9 +114,9 @@ def build_data(connection, table, columns, excludes, total_count, history_ids, s
             
             if not row_column_dict:
                 continue
-            data.append(row.values())
+            #data.append(row.values())
             # todo update stuff
-            import_data(connection, column_dict, table, table_columns, primary_key, data)
+            import_data(connection, key, table, row.get('id'), primary_key, value)
             _run_query('anon', connection, {table:original_data}, anon_field_id)
     if verbose:
         progress_bar.finish()
@@ -180,7 +180,7 @@ def copy_from(connection, data, table, columns):
     cursor.close()
 
 
-def import_data(connection, column_dict, source_table, table_columns, primary_key, data):
+def import_data(connection, field, source_table, row_id, primary_key, value):
     """
     Import the temporary and anonymized data to a temporary table and write the changes back.
 
@@ -193,20 +193,24 @@ def import_data(connection, column_dict, source_table, table_columns, primary_ke
     :param list data: The table data.
     """
     primary_key = primary_key if primary_key else DEFAULT_PRIMARY_KEY
-    temp_table = '"tmp_{table}"'.format(table=source_table)
+    #temp_table = '"tmp_{table}"'.format(table=source_table)
     cursor = connection.cursor()
-    cursor.execute('CREATE TEMP TABLE %s (LIKE %s INCLUDING ALL) ON COMMIT DROP;' % (temp_table, source_table))
-    cursor.execute('COMMIT;')
-    copy_from(connection, data, temp_table, table_columns)
-    set_columns = ', '.join(['{column} = s.{column}'.format(column='"{}"'.format(key)) for key in column_dict.keys()])
-    sql = (
-        'UPDATE {table} t '
-        'SET {columns} '
-        'FROM {source} s '
-        'WHERE t.{primary_key} = s.{primary_key};'
-    ).format(table=source_table, columns=set_columns, source=temp_table, primary_key=primary_key)
+    sql = "UPDATE {table} SET {field} = '{value}' WHERE ID = {id}".format(table=source_table,
+                                                                          field=field,
+                                                                          value=value,
+                                                                          id=row_id)
+    #cursor.execute('CREATE TEMP TABLE %s (LIKE %s INCLUDING ALL) ON COMMIT DROP;' % (temp_table, source_table))
+    #cursor.execute('COMMIT;')
+    #copy_from(connection, data, temp_table, table_columns)
+    #set_columns = ', '.join(['{column} = s.{column}'.format(column='"{}"'.format(key)) for key in column_dict.keys()])
+    #sql = (
+    #    'UPDATE {table} t '
+    #    'SET {columns} '
+    #    'FROM {source} s '
+    #    'WHERE t.{primary_key} = s.{primary_key};'
+    #).format(table=source_table, columns=set_columns, source=temp_table, primary_key=primary_key)
     cursor.execute(sql)
-    cursor.execute('DROP TABLE %s;' % temp_table)
+    #cursor.execute('DROP TABLE %s;' % temp_table)
     cursor.close()
 
 
