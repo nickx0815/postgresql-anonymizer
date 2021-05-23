@@ -26,7 +26,7 @@ def create_anon_db(connection, data, ids):
     
     
 def _run_query(type, con, data, ids):
-    create_anon(con, data, ids)
+    create_anon_db(con, data, ids)
     if type == 'anon':
         create_anon(con ,data, ids)
     elif type == 'truncate':
