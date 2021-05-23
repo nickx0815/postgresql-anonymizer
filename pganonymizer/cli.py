@@ -68,13 +68,13 @@ def get_schema_batches(schema):
     # idee: list von einzelnen schema, welche immer nur ein table und in feld beinhalten
     # so müssen die nachfolgenden funktionen nicht angepasst werden
     schema_batches = []
-    tables = schema['tables']
-    for table in tables:
-        for table_key, table_attributes in table.items():
-            fields = table_attributes['fields']
-            for field in fields:
-                for field_key, field_attributes in field.items():
-                    schema_batches.append([{table_key:{'fields':[{field_key:field_attributes}]}}])
+    for type, type_attributes in schema:
+        for table in type_attributes:
+            for table_key, table_attributes in table.items():
+                fields = table_attributes['fields']
+                for field in fields:
+                    for field_key, field_attributes in field.items():
+                        schema_batches.append({type:{table_key:{'fields':[{field_key:field_attributes}]}}})
     return schema_batches
 
 def main_anonymize(args=None):
@@ -96,7 +96,7 @@ def main_anonymize(args=None):
     for schema_batch in schema_batches:
         connection = get_connection(pg_args)
         start_time = time.time()
-        #truncate_tables(connection, schema_batch.get('truncate', []))
+        truncate_tables(connection, schema_batch.get('truncate', []))
         anonymize_tables(connection, schema_batch.get('tables', []), verbose=args.verbose)
         if not args.dry_run:
             connection.commit()
