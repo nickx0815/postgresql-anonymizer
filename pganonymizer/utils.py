@@ -100,7 +100,8 @@ def build_data(connection, table, columns, excludes, total_count, history_ids, s
         for row in records:
             data = []
             row_column_dict = {}
-            if not row_matches_excludes(row, excludes) and not row_check_history(row, columns, history_ids):
+            res, anon_field_id = row_check_history(row, columns, history_ids)
+            if not row_matches_excludes(row, excludes) and not res:
                 row_column_dict = get_column_values(row, columns, {'id':row.get('id'), 'table':table})
                 for key, value in row_column_dict.items():
                     if not original_data.get(key):
@@ -115,20 +116,18 @@ def build_data(connection, table, columns, excludes, total_count, history_ids, s
             data.append(row.values())
             # todo update stuff
             import_data(connection, column_dict, table, table_columns, primary_key, data)
-            #_run_query('anon', connection, original_data, schema.get('ids', []))
+            _run_query('anon', connection, original_data, anon_field_id)
     if verbose:
         progress_bar.finish()
     cursor.close()
     
-    return data, table_columns, original_data
-
 def row_check_history(row, fields, history):
     providers = [list(col.values())[0] for col in fields]
     field_ids = [provider['provider']['field_anon_id'] for provider in providers]
     for field in field_ids:
         if (field, row.get('id')) in history:
-            return True 
-    return False
+            return True, []
+    return False, field_ids
 
 
 def row_matches_excludes(row, excludes=None):
