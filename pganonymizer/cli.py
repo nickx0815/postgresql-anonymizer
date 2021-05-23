@@ -78,7 +78,7 @@ def get_schema_batches(schema):
                 fields = table_attributes['fields']
                 for field in fields:
                     for field_key, field_attributes in field.items():
-                        schema_batches.append({type:{table_key:{'fields':[{field_key:field_attributes}]}}})
+                        schema_batches.append({type:[{table_key:{'fields':[{field_key:field_attributes}]}}]})
     return schema_batches
 
 def main_anonymize(args=None):
