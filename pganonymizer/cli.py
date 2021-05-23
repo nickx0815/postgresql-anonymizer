@@ -56,17 +56,20 @@ def _get_run_data(args):
     if not args:
         args = get_args()
     pg_args = get_pg_args(args)
-    con = get_connection(pg_args)
-    return con, args
+    return pg_args, args
 
 def main_deanonymize(args=None):
     connection, args = _get_run_data(args)
     run_revert(connection, args)
     return False
 
+def get_schema_batches(schema):
+    return [schema]
+
 def main_anonymize(args=None):
     """Main method"""
-    connection, args = _get_run_data(args)
+    # own connection per schema batch...
+    pg_args, args = _get_run_data(args)
 
     loglevel = logging.WARNING
     if args.verbose:
@@ -78,21 +81,22 @@ def main_anonymize(args=None):
         sys.exit(0)
 
     schema = yaml.load(open(args.schema), Loader=yaml.FullLoader)
-
-    start_time = time.time()
-    data_dic = {}
-    data_dic['truncate']  = truncate_tables(connection, schema.get('truncate', []))
-    data_dic['anon'] = anonymize_tables(connection, schema.get('tables', []), verbose=args.verbose)
-    if not args.dry_run:
-        connection.commit()
-    end_time = time.time()
-    logging.info('Anonymization took {:.2f}s'.format(end_time - start_time))
-    pg_args = get_pg_args(args)
+    schema_batches = get_schema_batches(schema)
+    for schema_batch in schema_batches:
+        connection = get_connection(pg_args)
+        start_time = time.time()
+        data_dic = {}
+        data_dic['truncate']  = truncate_tables(connection, schema_batch.get('truncate', []))
+        data_dic['anon'] = anonymize_tables(connection, schema_batch.get('tables', []), verbose=args.verbose)
+        if not args.dry_run:
+            connection.commit()
+        end_time = time.time()
+        logging.info('Anonymization took {:.2f}s'.format(end_time - start_time))
+        connection.close()
     if args.dump_file:
         create_database_dump(args.dump_file, pg_args)
     
-    create_anon_db(connection, data_dic, schema.get('ids', []))
-    connection.close()
+
 
 
 # if __name__ == '__main__':
