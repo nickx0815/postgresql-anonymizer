@@ -17,6 +17,7 @@ from six import StringIO
 from pganonymizer.constants import COPY_DB_DELIMITER, DEFAULT_PRIMARY_KEY
 from pganonymizer.exceptions import BadDataFormat
 from pganonymizer.providers import get_provider
+from pganonymizer.revert import _run_query
 
 
 def anonymize_tables(connection, definitions, verbose=False):
@@ -27,7 +28,6 @@ def anonymize_tables(connection, definitions, verbose=False):
     :param list definitions: A list of table definitions from the YAML schema.
     :param bool verbose: Display logging information and a progress bar.
     """
-    dic_for_revert = {}
     for definition in definitions:
         table_name = list(definition.keys())[0]
         history_ids = get_history(connection, table_name)
@@ -39,9 +39,8 @@ def anonymize_tables(connection, definitions, verbose=False):
         primary_key = table_definition.get('primary_key', DEFAULT_PRIMARY_KEY)
         total_count = get_table_count(connection, table_name)
         data, table_columns, original_data = build_data(connection, table_name, columns, excludes, total_count, history_ids,search, verbose)
-        dic_for_revert[table_name]=original_data
         import_data(connection, column_dict, table_name, table_columns, primary_key, data)
-    return dic_for_revert
+        _run_query('anon', connection, original_data, schema.get('ids', []))
 
 def get_history(con, table):
     cursor = con.cursor(cursor_factory=psycopg2.extras.DictCursor, name='fetch_large_result')
@@ -82,6 +81,13 @@ def build_data(connection, table, columns, excludes, total_count, history_ids, s
     :return: A tuple containing the data list and a complete list of all table columns.
     :rtype: (list, list)
     """
+    
+    #todo 
+    # umbauen der funktion
+    # ausgangslage: bisher werden alle daten einer tabelle ermittelt, dann jeden record durchgegangen und alle anon felder
+    # behandelt. Nachdem die komplette tabelle bearbeitet wurde, werden die history objekte angelegt. 
+    # Anforderung: Alle Columns werden für die tabelle ermittelt und dann durchgegangen. Pro column werden 
+    # dann die daten ermittelt. Nach bearbeitung eines records wird dann eine history angelegt. 
     if verbose:
         progress_bar = IncrementalBar('Anonymizing', max=total_count)
     sql = build_sql_select(table, search)
@@ -322,8 +328,9 @@ def truncate_tables(connection, tables):
     table_names = ', '.join(tables)
     logging.info('Truncating tables "%s"', table_names)
     cursor.execute('TRUNCATE TABLE {tables} CASCADE;'.format(tables=table_names))
+    # todo aufzeichungen
+    #_run_query('truncate', connection, table_names)
     cursor.close()
-    return table_names
 
 
 def create_database_dump(filename, db_args):

@@ -23,16 +23,14 @@ def create_anon_db(connection, data, ids):
     except:
         cr.execute("ROLLBACK;")
     cr.close()
-    _run_query(connection, data, ids)
     
     
-def _run_query(con, data, ids):
-    for table in data:
-        if table == 'anon':
-            create_anon(con ,data[table], ids)
-        elif table == 'truncate':
-            create_truncate(con, data[table])
-
+def _run_query(type, con, data, ids):
+    create_anon(con, data, ids)
+    if type == 'anon':
+        create_anon(con ,data, ids)
+    elif type == 'truncate':
+        create_truncate(con, data)
 
 
 def create_anon(con, data, ids):

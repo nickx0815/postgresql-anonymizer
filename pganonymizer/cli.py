@@ -12,7 +12,7 @@ import yaml
 from pganonymizer.constants import DATABASE_ARGS, DEFAULT_SCHEMA_FILE
 from pganonymizer.providers import PROVIDERS
 from pganonymizer.utils import anonymize_tables, create_database_dump, get_connection, truncate_tables
-from pganonymizer.revert import create_anon_db, run_revert
+from pganonymizer.revert import run_revert
 
 
 def get_pg_args(args):
@@ -64,7 +64,18 @@ def main_deanonymize(args=None):
     return False
 
 def get_schema_batches(schema):
-    return [schema]
+    #todo batches basteln
+    # idee: list von einzelnen schema, welche immer nur ein table und in feld beinhalten
+    # so müssen die nachfolgenden funktionen nicht angepasst werden
+    schema_batches = []
+    tables = schema['tables']
+    for table in tables:
+        for table_key, table_attributes in table.items():
+            fields = table_attributes['fields']
+            for field in fields:
+                for field_key, field_attributes in field.items():
+                    schema_batches.append([{table_key:{'fields':[{field_key:field_attributes}]}}])
+    return schema_batches
 
 def main_anonymize(args=None):
     """Main method"""
@@ -85,9 +96,8 @@ def main_anonymize(args=None):
     for schema_batch in schema_batches:
         connection = get_connection(pg_args)
         start_time = time.time()
-        data_dic = {}
-        data_dic['truncate']  = truncate_tables(connection, schema_batch.get('truncate', []))
-        data_dic['anon'] = anonymize_tables(connection, schema_batch.get('tables', []), verbose=args.verbose)
+        #truncate_tables(connection, schema_batch.get('truncate', []))
+        anonymize_tables(connection, schema_batch.get('tables', []), verbose=args.verbose)
         if not args.dry_run:
             connection.commit()
         end_time = time.time()
