@@ -116,7 +116,7 @@ def build_data(connection, table, columns, excludes, total_count, history_ids, s
             data.append(row.values())
             # todo update stuff
             import_data(connection, column_dict, table, table_columns, primary_key, data)
-            _run_query('anon', connection, original_data, anon_field_id)
+            _run_query('anon', connection, {table:original_data}, anon_field_id)
     if verbose:
         progress_bar.finish()
     cursor.close()
