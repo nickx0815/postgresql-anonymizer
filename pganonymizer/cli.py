@@ -69,6 +69,10 @@ def get_schema_batches(schema):
     # so müssen die nachfolgenden funktionen nicht angepasst werden
     schema_batches = []
     for type, type_attributes in schema.items():
+        # fix solange ids noch in den top level im schema auftaucht, soll später durch die ids direkt in den feldoperationen
+        #ersetzt werden
+        if type == 'ids':
+            continue
         for table in type_attributes:
             for table_key, table_attributes in table.items():
                 fields = table_attributes['fields']
