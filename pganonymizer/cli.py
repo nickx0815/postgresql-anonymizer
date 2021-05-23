@@ -68,7 +68,7 @@ def get_schema_batches(schema):
     # idee: list von einzelnen schema, welche immer nur ein table und in feld beinhalten
     # so müssen die nachfolgenden funktionen nicht angepasst werden
     schema_batches = []
-    for type, type_attributes in schema:
+    for type, type_attributes in schema.items():
         for table in type_attributes:
             for table_key, table_attributes in table.items():
                 fields = table_attributes['fields']
