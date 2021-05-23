@@ -98,6 +98,7 @@ def build_data(connection, table, columns, excludes, total_count, history_ids, s
         if not records:
             break
         for row in records:
+            table_columns = ['"{}"'.format(column) for column in row.keys()]
             data = []
             row_column_dict = {}
             res, anon_field_id = row_check_history(row, columns, history_ids)
@@ -110,7 +111,7 @@ def build_data(connection, table, columns, excludes, total_count, history_ids, s
                     row[key] = value
             if verbose:
                 progress_bar.next()
-            table_columns = ['"{}"'.format(column) for column in row.keys()]
+            
             if not row_column_dict:
                 continue
             data.append(row.values())
@@ -195,6 +196,7 @@ def import_data(connection, column_dict, source_table, table_columns, primary_ke
     temp_table = '"tmp_{table}"'.format(table=source_table)
     cursor = connection.cursor()
     cursor.execute('CREATE TEMP TABLE %s (LIKE %s INCLUDING ALL) ON COMMIT DROP;' % (temp_table, source_table))
+    cursor.execute('COMMIT;')
     copy_from(connection, data, temp_table, table_columns)
     set_columns = ', '.join(['{column} = s.{column}'.format(column='"{}"'.format(key)) for key in column_dict.keys()])
     sql = (
