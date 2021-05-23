@@ -35,12 +35,9 @@ def anonymize_tables(connection, definitions, verbose=False):
         columns = table_definition.get('fields', [])
         excludes = table_definition.get('excludes', [])
         search = table_definition.get('search')
-        column_dict = get_column_dict(columns)
         primary_key = table_definition.get('primary_key', DEFAULT_PRIMARY_KEY)
         total_count = get_table_count(connection, table_name)
-        data, table_columns, original_data = build_data(connection, table_name, columns, excludes, total_count, history_ids,search, verbose)
-        import_data(connection, column_dict, table_name, table_columns, primary_key, data)
-        _run_query('anon', connection, original_data, schema.get('ids', []))
+        build_data(connection, table_name, columns, excludes, total_count, history_ids,search, primary_key, verbose)
 
 def get_history(con, table):
     cursor = con.cursor(cursor_factory=psycopg2.extras.DictCursor, name='fetch_large_result')
@@ -66,7 +63,7 @@ def build_sql_select(table, search):
         sql = "{select};".format(select=sql_select)
     return sql
      
-def build_data(connection, table, columns, excludes, total_count, history_ids, search,verbose=False):
+def build_data(connection, table, columns, excludes, total_count, history_ids, search,primary_key, verbose=False):
     """
     Select all data from a table and return it together with a list of table columns.
 
@@ -93,14 +90,15 @@ def build_data(connection, table, columns, excludes, total_count, history_ids, s
     sql = build_sql_select(table, search)
     cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor, name='fetch_large_result')
     cursor.execute(sql)
-    data = []
     table_columns = None
     original_data = {}
+    column_dict = get_column_dict(columns)
     while True:
         records = cursor.fetchmany(size=2000)
         if not records:
             break
         for row in records:
+            data = []
             row_column_dict = {}
             if not row_matches_excludes(row, excludes) and not row_check_history(row, columns, history_ids):
                 row_column_dict = get_column_values(row, columns, {'id':row.get('id'), 'table':table})
@@ -115,6 +113,9 @@ def build_data(connection, table, columns, excludes, total_count, history_ids, s
             if not row_column_dict:
                 continue
             data.append(row.values())
+            # todo update stuff
+            import_data(connection, column_dict, table, table_columns, primary_key, data)
+            #_run_query('anon', connection, original_data, schema.get('ids', []))
     if verbose:
         progress_bar.finish()
     cursor.close()
