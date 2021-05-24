@@ -128,7 +128,8 @@ def start_thread(q, args, pg_args):
         schema_batch = q.get()
         connection = get_connection(pg_args)
         try:
-            truncate_tables(connection, schema_batch.get('truncate', []))
+            #todo implement truncate functionality, not working right now
+            #truncate_tables(connection, schema_batch.get('truncate', []))
             anonymize_tables(connection, schema_batch.get('tables', []), verbose=args.verbose)
             if not args.dry_run:
                 connection.commit()
