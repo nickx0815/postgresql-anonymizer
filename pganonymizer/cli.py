@@ -19,6 +19,15 @@ from pganonymizer.revert import run_revert
 
 jobs = Queue()
 
+class BaseMain():
+    pass
+    
+class AnonymizationMain(BaseMain):
+    pass
+
+class DeAnonymizationMain(BaseMain):
+    pass
+
 def main():
     #todo needs to be implemented, run the script via command line. 
     # the args need to be analysed here, if anonymization or
@@ -69,7 +78,8 @@ def _get_run_data(args):
     return pg_args, args
 
 def main_deanonymize(args=None):
-    connection, args = _get_run_data(args)
+    pg_args, args = _get_run_data(args)
+    connection = get_connection(pg_args)
     run_revert(connection, args)
     return False
 
