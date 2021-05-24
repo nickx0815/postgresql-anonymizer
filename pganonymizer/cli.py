@@ -124,13 +124,14 @@ class AnonymizationMain(BaseMain):
 #             try:
                 #todo implement truncate functionality, not working right now
                 #truncate_tables(connection, schema_batch.get('truncate', []))
-            anonymize_tables(connection, schema.get('tables', []), verbose=args.verbose)
-            if not args.dry_run:
-                connection.commit()
-            end_time = time.time()
-            logging.info('Anonymization took {:.2f}s'.format(end_time - start_time))
-#             except Exception as ex:
-#                 logging.info(ex)
+            try:
+                anonymize_tables(connection, schema.get('tables', []), verbose=args.verbose)
+                if not args.dry_run:
+                    connection.commit()
+                end_time = time.time()
+                logging.info('Anonymization took {:.2f}s'.format(end_time - start_time))
+            except Exception as ex:
+                logging.info(ex)
             connection.close()
             q.task_done()
 
@@ -158,16 +159,13 @@ class DeAnonymizationMain(BaseMain):
             start_time = time.time()
             data = q.get()
             connection = get_connection(pg_args)
-            try:
-                #todo implement truncate functionality, not working right now
-                #truncate_tables(connection, schema_batch.get('truncate', []))
-                run_revert(connection, args, data)
+            #todo implement truncate functionality, not working right now
+            #truncate_tables(connection, schema_batch.get('truncate', []))
+            run_revert(connection, args, data)
 #                 if not args.dry_run:
 #                     connection.commit()
-                end_time = time.time()
-                logging.info('DEAnonymization took {:.2f}s'.format(end_time - start_time))
-            except Exception as ex:
-                logging.info(ex)
+            end_time = time.time()
+            logging.info('DEAnonymization took {:.2f}s'.format(end_time - start_time))
             connection.close()
             q.task_done()
 
