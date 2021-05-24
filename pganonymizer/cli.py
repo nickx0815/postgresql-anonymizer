@@ -6,6 +6,8 @@ import argparse
 import logging
 import sys
 import time
+import threading, time, random
+from queue import Queue
 
 import yaml
 
@@ -13,6 +15,8 @@ from pganonymizer.constants import DATABASE_ARGS, DEFAULT_SCHEMA_FILE
 from pganonymizer.providers import PROVIDERS
 from pganonymizer.utils import anonymize_tables, create_database_dump, get_connection, truncate_tables
 from pganonymizer.revert import run_revert
+
+jobs = Queue()
 
 
 def get_pg_args(args):
@@ -78,8 +82,7 @@ def get_schema_batches(schema):
                 fields = table_attributes['fields']
                 for field in fields:
                     for field_key, field_attributes in field.items():
-                        schema_batches.append({type:[{table_key:{'fields':[{field_key:field_attributes}]}}]})
-    return schema_batches
+                        jobs.put({type:[{table_key:{'fields':[{field_key:field_attributes}]}}]})
 
 def main_anonymize(args=None):
     """Main method"""
@@ -96,8 +99,19 @@ def main_anonymize(args=None):
         sys.exit(0)
 
     schema = yaml.load(open(args.schema), Loader=yaml.FullLoader)
-    schema_batches = get_schema_batches(schema)
-    for schema_batch in schema_batches:
+    get_schema_batches(schema)
+    
+    for schema in range(4):
+        worker = threading.Thread(target=start_thread, args=(jobs,args, pg_args))
+        worker.start()
+    
+    print("waiting for queue to complete", jobs.qsize(), "tasks")
+    jobs.join()
+    print("all done")
+
+def start_thread(q, args, pg_args):
+    while not q.empty():
+        schema_batch = q.get()
         connection = get_connection(pg_args)
         start_time = time.time()
         truncate_tables(connection, schema_batch.get('truncate', []))
