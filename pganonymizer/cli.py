@@ -111,6 +111,7 @@ def main_anonymize(args=None):
 
 def start_thread(q, args, pg_args):
     while not q.empty():
+        print("started thread")
         schema_batch = q.get()
         connection = get_connection(pg_args)
         start_time = time.time()
@@ -121,8 +122,8 @@ def start_thread(q, args, pg_args):
         end_time = time.time()
         logging.info('Anonymization took {:.2f}s'.format(end_time - start_time))
         connection.close()
-    if args.dump_file:
-        create_database_dump(args.dump_file, pg_args)
+#     if args.dump_file:
+#         create_database_dump(args.dump_file, pg_args)
     
 
 
