@@ -101,12 +101,12 @@ def main_anonymize(args=None):
 
     schema = yaml.load(open(args.schema), Loader=yaml.FullLoader)
     get_schema_batches(schema)
-    
-    for schema in range(4):
+    queue_size = jobs.qsize()
+    for schema in range(queue_size if queue_size < 4 else 4):
         worker = threading.Thread(target=start_thread, args=(jobs,args, pg_args))
         worker.start()
     
-    print("waiting for queue to complete", jobs.qsize(), "tasks")
+    print("waiting for queue to complete tasks")
     jobs.join()
     print("all done")
 
