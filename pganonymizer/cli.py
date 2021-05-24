@@ -18,7 +18,16 @@ from pganonymizer.providers import PROVIDERS
 from pganonymizer.utils import anonymize_tables, create_database_dump, get_connection, truncate_tables
 from pganonymizer.revert import run_revert
 
-
+def get_pg_args(args):
+        """
+        Map all commandline arguments with database keys.
+    
+        :param argparse.Namespace args: The commandline arguments
+        :return: A dictionary with database arguments
+        :rtype: dict
+        """
+        return ({name: value for name, value in
+                 zip(DATABASE_ARGS, (args.dbname, args.user, args.password, args.host, args.port))})
 
 class BaseMain():
     def __init__(self):
@@ -49,17 +58,6 @@ class BaseMain():
         self.jobs.join()
         print("all done")
     
-    def get_pg_args(self, args):
-        """
-        Map all commandline arguments with database keys.
-    
-        :param argparse.Namespace args: The commandline arguments
-        :return: A dictionary with database arguments
-        :rtype: dict
-        """
-        return ({name: value for name, value in
-                 zip(DATABASE_ARGS, (args.dbname, args.user, args.password, args.host, args.port))})
-
 
     def list_provider_classes(self):
         """List all available provider classes."""
@@ -89,7 +87,7 @@ class BaseMain():
     def _get_run_data(self, args):
         if not args:
             args = self.get_args()
-        pg_args = self.get_pg_args(args)
+        pg_args = get_pg_args(args)
         return pg_args, args
     
     def get_thread_number(self):
