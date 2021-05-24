@@ -76,9 +76,8 @@ def main_deanonymize(args=None):
 def get_schema_batches(schema):
     for type, type_attributes in schema.items():
         for table in type_attributes:
-            if type(table) == list:
-                for tb in table:
-                    jobs.put({type: [tb]})
+            if type(table) == str:
+                jobs.put({type: [table]})
             else:
                 for table_key, table_attributes in table.items():
                     fields = table_attributes['fields']
