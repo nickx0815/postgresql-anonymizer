@@ -162,8 +162,8 @@ class DeAnonymizationMain(BaseMain):
                 #todo implement truncate functionality, not working right now
                 #truncate_tables(connection, schema_batch.get('truncate', []))
                 run_revert(connection, args, data)
-                if not args.dry_run:
-                    connection.commit()
+#                 if not args.dry_run:
+#                     connection.commit()
                 end_time = time.time()
                 logging.info('DEAnonymization took {:.2f}s'.format(end_time - start_time))
             except Exception as ex:
