@@ -103,7 +103,7 @@ def main_anonymize(args=None):
     get_schema_batches(schema)
     queue_size = jobs.qsize()
     number_threads = queue_size if queue_size < NUMBER_MAX_THREADS else NUMBER_MAX_THREADS
-    print("Number of threads started: "+number_threads)
+    print("Number of threads started: {number}".format(number=number_threads))
     for schema in range(number_threads):
         worker = threading.Thread(target=start_thread, args=(jobs,args, pg_args))
         worker.start()
