@@ -112,6 +112,7 @@ def run_revert(connection, args, ids=None):
             cr1.execute(get_anon_data_sql)
             while True:
                 records = cr1.fetchmany(size=2000)
+                logging.info("was updated    "+records)
                 if not records:
                     break
                 for record in records:
