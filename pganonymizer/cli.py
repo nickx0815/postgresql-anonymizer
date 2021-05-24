@@ -5,7 +5,8 @@ from __future__ import absolute_import, print_function
 import argparse
 import logging
 import sys
-import time, time.sleep as sleep
+import time
+from time import sleep
 import threading, time, random
 from queue import Queue
 
