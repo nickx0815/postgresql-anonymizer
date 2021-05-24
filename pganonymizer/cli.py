@@ -6,8 +6,9 @@ import argparse
 import logging
 import sys
 import time
+import exceptions
 from time import sleep
-import threading, time, random
+import threading, time
 from queue import Queue
 
 import yaml
@@ -19,6 +20,11 @@ from pganonymizer.revert import run_revert
 
 jobs = Queue()
 
+def main():
+    #todo needs to be implemented, run the script via command line. 
+    # the args need to be analysed here, if anonymization or
+    # deanonymization is running
+    return
 
 def get_pg_args(args):
     """
@@ -69,21 +75,17 @@ def main_deanonymize(args=None):
     return False
 
 def get_schema_batches(schema):
-    #todo batches basteln
-    # idee: list von einzelnen schema, welche immer nur ein table und in feld beinhalten
-    # so müssen die nachfolgenden funktionen nicht angepasst werden
-    #schema_batches = []
     for type, type_attributes in schema.items():
-        # fix solange ids noch in den top level im schema auftaucht, soll später durch die ids direkt in den feldoperationen
-        #ersetzt werden
-        if type == 'ids':
-            continue
         for table in type_attributes:
-            for table_key, table_attributes in table.items():
-                fields = table_attributes['fields']
-                for field in fields:
-                    for field_key, field_attributes in field.items():
-                        jobs.put({type:[{table_key:{'fields':[{field_key:field_attributes}]}}]})
+            if type(table) == list:
+                for tb in table:
+                    jobs.put({type: [tb]})
+            else:
+                for table_key, table_attributes in table.items():
+                    fields = table_attributes['fields']
+                    for field in fields:
+                        for field_key, field_attributes in field.items():
+                            jobs.put({type: [{table_key:{'fields':[{field_key:field_attributes}]}}]})
 
 def main_anonymize(args=None):
     """Main method"""
@@ -130,5 +132,5 @@ def start_thread(q, args, pg_args):
 
 
 
-# if __name__ == '__main__':
-#     main()
+if __name__ == '__main__':
+    main()
