@@ -118,12 +118,16 @@ def start_thread(q, args, pg_args):
         start_time = time.time()
         schema_batch = q.get()
         connection = get_connection(pg_args)
-        truncate_tables(connection, schema_batch.get('truncate', []))
-        anonymize_tables(connection, schema_batch.get('tables', []), verbose=args.verbose)
-        if not args.dry_run:
-            connection.commit()
-        end_time = time.time()
-        logging.info('Anonymization took {:.2f}s'.format(end_time - start_time))
+        try:
+            truncate_tables(connection, schema_batch.get('truncate', []))
+            anonymize_tables(connection, schema_batch.get('tables', []), verbose=args.verbose)
+            if not args.dry_run:
+                connection.commit()
+            end_time = time.time()
+            logging.info('Anonymization took {:.2f}s'.format(end_time - start_time))
+        except RuntimeError as runError:
+            logging.info(runError)
+            pass
         connection.close()
         q.task_done()
 #     if args.dump_file:
