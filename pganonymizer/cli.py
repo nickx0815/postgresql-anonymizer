@@ -12,7 +12,7 @@ from queue import Queue
 
 import yaml
 
-from pganonymizer.constants import DATABASE_ARGS, DEFAULT_SCHEMA_FILE
+from pganonymizer.constants import DATABASE_ARGS, DEFAULT_SCHEMA_FILE, NUMBER_MAX_THREADS
 from pganonymizer.providers import PROVIDERS
 from pganonymizer.utils import anonymize_tables, create_database_dump, get_connection, truncate_tables
 from pganonymizer.revert import run_revert
@@ -102,7 +102,7 @@ def main_anonymize(args=None):
     schema = yaml.load(open(args.schema), Loader=yaml.FullLoader)
     get_schema_batches(schema)
     queue_size = jobs.qsize()
-    for schema in range(queue_size if queue_size < 4 else 4):
+    for schema in range(queue_size if queue_size < NUMBER_MAX_THREADS else NUMBER_MAX_THREADS):
         worker = threading.Thread(target=start_thread, args=(jobs,args, pg_args))
         worker.start()
     
@@ -114,7 +114,6 @@ def start_thread(q, args, pg_args):
     while not q.empty():
         print("started thread")
         start_time = time.time()
-        sleep(1)
         schema_batch = q.get()
         connection = get_connection(pg_args)
         truncate_tables(connection, schema_batch.get('truncate', []))
@@ -124,6 +123,7 @@ def start_thread(q, args, pg_args):
         end_time = time.time()
         logging.info('Anonymization took {:.2f}s'.format(end_time - start_time))
         connection.close()
+        q.task_done()
 #     if args.dump_file:
 #         create_database_dump(args.dump_file, pg_args)
     
