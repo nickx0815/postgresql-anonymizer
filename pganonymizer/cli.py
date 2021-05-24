@@ -102,7 +102,9 @@ def main_anonymize(args=None):
     schema = yaml.load(open(args.schema), Loader=yaml.FullLoader)
     get_schema_batches(schema)
     queue_size = jobs.qsize()
-    for schema in range(queue_size if queue_size < NUMBER_MAX_THREADS else NUMBER_MAX_THREADS):
+    number_threads = queue_size if queue_size < NUMBER_MAX_THREADS else NUMBER_MAX_THREADS
+    print("Number of threads started: "+number_threads)
+    for schema in range(number_threads):
         worker = threading.Thread(target=start_thread, args=(jobs,args, pg_args))
         worker.start()
     
@@ -112,7 +114,6 @@ def main_anonymize(args=None):
 
 def start_thread(q, args, pg_args):
     while not q.empty():
-        print("started thread")
         start_time = time.time()
         schema_batch = q.get()
         connection = get_connection(pg_args)
