@@ -6,7 +6,6 @@ import argparse
 import logging
 import sys
 import time
-import exceptions
 from time import sleep
 import threading, time
 from queue import Queue
