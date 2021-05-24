@@ -88,7 +88,7 @@ def build_data(connection, table, columns, excludes, total_count, history_ids, s
     if verbose:
         progress_bar = IncrementalBar('Anonymizing', max=total_count)
     sql = build_sql_select(table, search)
-    cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor, name='fetch_large_result')
+    cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
     cursor.execute(sql)
     while True:
         records = cursor.fetchmany(size=2000)
