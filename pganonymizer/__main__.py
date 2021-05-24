@@ -5,9 +5,9 @@ import sys
 #test
 
 def main():
-    from pganonymizer.cli import main_anonymize
+    #from pganonymizer.cli import main_anonymize
     try:
-        main_anonymize()
+        #main_anonymize()
         exit_status = 0
     except KeyboardInterrupt:
         exit_status = 1
