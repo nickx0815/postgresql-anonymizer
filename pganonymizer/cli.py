@@ -126,7 +126,6 @@ def start_thread(q, args, pg_args):
             logging.info('Anonymization took {:.2f}s'.format(end_time - start_time))
         except RuntimeError as runError:
             logging.info(runError)
-            pass
         connection.close()
         q.task_done()
 #     if args.dump_file:
