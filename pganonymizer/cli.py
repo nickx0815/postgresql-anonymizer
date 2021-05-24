@@ -119,12 +119,12 @@ class AnonymizationMain(BaseMain):
     def start_thread(self, q, args, pg_args):
         while not q.empty():
             start_time = time.time()
-            ids = q.get()
+            schema = q.get()
             connection = get_connection(pg_args)
             try:
                 #todo implement truncate functionality, not working right now
                 #truncate_tables(connection, schema_batch.get('truncate', []))
-                run_revert(connection, args, ids)
+                anonymize_tables(connection, schema.get('tables', []), verbose=args.verbose)
                 if not args.dry_run:
                     connection.commit()
                 end_time = time.time()
