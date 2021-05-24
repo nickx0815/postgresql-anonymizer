@@ -32,6 +32,9 @@ def _run_query(type, con, data, ids):
     elif type == 'truncate':
         create_truncate(con, data)
 
+def _get_ids_sql_format(ids):
+    return str(set([x for x in ids])).replace("{","(").replace("}",")")
+
 
 def create_anon(con, data, ids):
     cr = con.cursor()
@@ -40,7 +43,7 @@ def create_anon(con, data, ids):
         cr.execute(table_sql)
         table_id = cr.fetchone()[0]
         for field in data.get(table):
-            ids_sql_format = str(set([x for x in ids])).replace("{","(").replace("}",")")
+            ids_sql_format = _get_ids_sql_format(ids)
             insert_anon_field_db_rec(cr, field, table)
             field_sql = "Select id, field_id From ir_model_fields_anonymization Where field_name = '{field_name}' AND model_id = {table_id} and id in {tuple_ids}".format(field_name=field,
                                                                                                                                                                 table_id=table_id,
@@ -67,10 +70,14 @@ def insert_anon_field_db_rec(cr, field, table):
     if not record:
         cr.execute(sql_insert)
         
-def get_anon_fields(connection, args):
+def get_anon_fields(connection, args, ids=None):
     data = {}
     cr = connection.cursor(cursor_factory=psycopg2.extras.DictCursor, name='fetch_large_result')
-    get_anon_fields = "SELECT * FROM anon_field_db;"
+    if ids:
+        where_clause = "WHERE ID IN {ids}".format(ids = _get_ids_sql_format(ids))
+    else:
+        where_clause = " "
+    get_anon_fields = "SELECT * FROM anon_field_db {WHERE};".format(WHERE=where_clause)
     cr.execute(get_anon_fields)
     while True:
         records = cr.fetchmany(size=2000)
@@ -85,8 +92,8 @@ def get_anon_fields(connection, args):
     cr.close()
     return data
 
-def run_revert(connection, args):
-    anon_fields = get_anon_fields(connection, args)
+def run_revert(connection, args, ids=None):
+    anon_fields = get_anon_fields(connection, args, ids=ids)
     cr1 = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
     cr2 = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
     for table, fields in anon_fields.items():
