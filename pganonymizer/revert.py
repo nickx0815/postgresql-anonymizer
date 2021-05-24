@@ -115,6 +115,7 @@ def run_revert(connection, args, ids=None):
                 if not records:
                     break
                 for record in records:
+                    logging.info(" yea yea yea")
                     cr3 = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
                     value = original_table+"_"+original_field+"_"+str(record['record_id'])
                     record_db_id_sql = "SELECT ID FROM {mapped_table} where {mapped_field} = '{value}';".format(
@@ -131,7 +132,6 @@ def run_revert(connection, args, ids=None):
                                                                                                                                                         original_value=record['value'],
                                                                                                                                                         rec_id = record_db_id)
                         cr2.execute(get_migrated_field_sql)
-                        cr2.execute("COMMIT;")
                         update_fields_history(cr2, migrated_model_id, record_db_id, "4", revert_field = migrated_field_id)
                         cr2.execute("COMMIT;")
                     cr3.close()
