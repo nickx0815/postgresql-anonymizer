@@ -74,16 +74,16 @@ def main_deanonymize(args=None):
     return False
 
 def get_schema_batches(schema):
-    for type, type_attributes in schema.items():
+    for type_, type_attributes in schema.items():
         for table in type_attributes:
             if type(table) == str:
-                jobs.put({type: [table]})
+                jobs.put({type_: [table]})
             else:
                 for table_key, table_attributes in table.items():
                     fields = table_attributes['fields']
                     for field in fields:
                         for field_key, field_attributes in field.items():
-                            jobs.put({type: [{table_key:{'fields':[{field_key:field_attributes}]}}]})
+                            jobs.put({type_: [{table_key:{'fields':[{field_key:field_attributes}]}}]})
 
 def main_anonymize(args=None):
     """Main method"""
