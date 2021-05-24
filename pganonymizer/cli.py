@@ -5,7 +5,7 @@ from __future__ import absolute_import, print_function
 import argparse
 import logging
 import sys
-import time
+import time, time.sleep as sleep
 import threading, time, random
 from queue import Queue
 
@@ -71,7 +71,7 @@ def get_schema_batches(schema):
     #todo batches basteln
     # idee: list von einzelnen schema, welche immer nur ein table und in feld beinhalten
     # so müssen die nachfolgenden funktionen nicht angepasst werden
-    schema_batches = []
+    #schema_batches = []
     for type, type_attributes in schema.items():
         # fix solange ids noch in den top level im schema auftaucht, soll später durch die ids direkt in den feldoperationen
         #ersetzt werden
@@ -112,6 +112,7 @@ def main_anonymize(args=None):
 def start_thread(q, args, pg_args):
     while not q.empty():
         print("started thread")
+        sleep(1)
         schema_batch = q.get()
         connection = get_connection(pg_args)
         start_time = time.time()
