@@ -113,10 +113,10 @@ def main_anonymize(args=None):
 def start_thread(q, args, pg_args):
     while not q.empty():
         print("started thread")
+        start_time = time.time()
         sleep(1)
         schema_batch = q.get()
         connection = get_connection(pg_args)
-        start_time = time.time()
         truncate_tables(connection, schema_batch.get('truncate', []))
         anonymize_tables(connection, schema_batch.get('tables', []), verbose=args.verbose)
         if not args.dry_run:
