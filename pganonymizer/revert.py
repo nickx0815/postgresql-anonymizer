@@ -112,7 +112,6 @@ def run_revert(connection, args, ids=None):
             cr1.execute(get_anon_data_sql)
             while True:
                 records = cr1.fetchmany(size=2000)
-                logging.info("was updated    "+str(records))
                 if not records:
                     break
                 for record in records:
@@ -132,7 +131,6 @@ def run_revert(connection, args, ids=None):
                                                                                                                                                         original_value=record['value'],
                                                                                                                                                         rec_id = record_db_id)
                         cr2.execute(get_migrated_field_sql)
-                        logging.info("was updated    "+get_migrated_field_sql)
                         update_fields_history(cr2, migrated_model_id, record_db_id, "4", revert_field = migrated_field_id)
                         cr2.execute("COMMIT;")
     cr3.close()
