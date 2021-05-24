@@ -1,5 +1,6 @@
 import psycopg2
 from pganonymizer.update_field_history import update_fields_history
+import logging
 
 
 def create_anon_db(connection, data, ids):
@@ -77,6 +78,7 @@ def get_anon_fields(connection, args, ids=None):
         where_clause = "WHERE ID IN {ids}".format(ids = _get_ids_sql_format(ids))
     else:
         where_clause = " "
+    logging.info("here is the where clause    "+where_clause)
     get_anon_fields = "SELECT * FROM anon_field_db {WHERE};".format(WHERE=where_clause)
     cr.execute(get_anon_fields)
     while True:
