@@ -141,7 +141,7 @@ class DeAnonymizationMain(BaseMain):
         pg_args, args = self._get_run_data(args)
         connection = get_connection(pg_args)
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        cursor.execute("select id from anon_field_db where 1=1")
+        cursor.execute("select id from migrated_fields where 1=1")
         while True:
             records = cursor.fetchmany(size=NUMBER_FIELD_PER_THREAD)
             if not records:

@@ -2,27 +2,27 @@ import psycopg2
 from pganonymizer.update_field_history import update_fields_history
 
 
-def create_migrated_data(connection, data, ids):
-    cr = connection.cursor()
-    try:
-        cr.execute("CREATE TABLE migrated_data(\
-                         model_id VARCHAR,\
-                         field_id VARCHAR,\
-                         record_id INTEGER,\
-                         value VARCHAR,\
-                         PRIMARY KEY (model_id, field_id, record_id));")
-        cr.execute("COMMIT;")
-    except:
-        cr.execute("ROLLBACK;")
-    try:
-        cr.execute("CREATE TABLE migrated_fields(\
-                         model_id VARCHAR,\
-                         field_id VARCHAR,\
-                         PRIMARY KEY (model_id, field_id));")
-        cr.execute("COMMIT;")
-    except:
-        cr.execute("ROLLBACK;")
-    cr.close()
+# def create_migrated_data(connection, data, ids):
+#     cr = connection.cursor()
+#     try:
+#         cr.execute("CREATE TABLE migrated_data(\
+#                          model_id VARCHAR,\
+#                          field_id VARCHAR,\
+#                          record_id INTEGER,\
+#                          value VARCHAR,\
+#                          PRIMARY KEY (model_id, field_id, record_id));")
+#         cr.execute("COMMIT;")
+#     except:
+#         cr.execute("ROLLBACK;")
+#     try:
+#         cr.execute("CREATE TABLE migrated_fields(\
+#                          model_id VARCHAR,\
+#                          field_id VARCHAR,\
+#                          PRIMARY KEY (model_id, field_id));")
+#         cr.execute("COMMIT;")
+#     except:
+#         cr.execute("ROLLBACK;")
+#     cr.close()
     
     
 def _run_query(type, con, data, ids):
@@ -70,13 +70,11 @@ def insert_migrated_fields_rec(cr, field, table):
     if not record:
         cr.execute(sql_insert)
         
-def get_anon_fields(connection, args, ids=None):
+def get_anon_fields(connection, args, ids=None, where_clause=""):
     data = {}
     cr = connection.cursor(cursor_factory=psycopg2.extras.DictCursor, name='fetch_large_result')
     if ids:
         where_clause = "WHERE ID IN {ids}".format(ids = _get_ids_sql_format(ids))
-    else:
-        where_clause = " "
     get_anon_fields = "SELECT * FROM migrated_fields {WHERE};".format(WHERE=where_clause)
     cr.execute(get_anon_fields)
     while True:
