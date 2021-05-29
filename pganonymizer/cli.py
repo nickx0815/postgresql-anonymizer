@@ -143,11 +143,13 @@ class DeAnonymizationMain(BaseMain):
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
         cursor.execute("select id from migrated_fields where 1=1")
         while True:
+            job_ids = []
             records = cursor.fetchmany(size=NUMBER_FIELD_PER_THREAD)
             if not records:
                 break
             for row in records:
-                self.jobs.put([row['id']])
+                job_ids.append(row['id'])
+            self.jobs.put(job_ids)
         cursor.close()
 
         

@@ -1,4 +1,4 @@
-import psycopg2
+import psycopg2, logging
 from pganonymizer.update_field_history import update_fields_history
 
 
@@ -92,6 +92,7 @@ def get_anon_fields(connection, args, ids=None, where_clause=""):
 
 def run_revert(connection, args, ids=None):
     anon_fields = get_anon_fields(connection, args, ids=ids)
+    logging.info(str(anon_fields)+" started to reverse")
     cr1 = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
     cr2 = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
     for table, fields in anon_fields.items():
@@ -105,6 +106,7 @@ def run_revert(connection, args, ids=None):
             get_anon_data_sql = "SELECT * FROM {table_name} where model_id = '{original_table}' and field_id = '{original_field}';".format(table_name=args.anon_table,
                                                                                                                                            original_table = original_table,
                                                                                                                                            original_field = original_field)
+            logging.info(get_anon_data_sql)
             cr1.execute(get_anon_data_sql)
             while True:
                 records = cr1.fetchmany(size=2000)
@@ -117,6 +119,7 @@ def run_revert(connection, args, ids=None):
                         mapped_table=migrated_table,
                         mapped_field=migrated_field,
                         value=value)
+                    logging.info(record_db_id_sql)
                     cr3.execute(record_db_id_sql)
                     record_db = cr3.fetchone()
                     if record_db:
@@ -126,6 +129,7 @@ def run_revert(connection, args, ids=None):
                                                                                                                                                         mapped_field=migrated_field,
                                                                                                                                                         original_value=record['value'],
                                                                                                                                                         rec_id = record_db_id)
+                        logging.info(get_migrated_field_sql)
                         cr2.execute(get_migrated_field_sql)
                         update_fields_history(cr2, migrated_model_id, record_db_id, "4", revert_field = migrated_field_id)
                         cr2.execute("COMMIT;")
