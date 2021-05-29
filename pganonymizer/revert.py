@@ -2,10 +2,10 @@ import psycopg2
 from pganonymizer.update_field_history import update_fields_history
 
 
-def create_anon_db(connection, data, ids):
+def create_migrated_data(connection, data, ids):
     cr = connection.cursor()
     try:
-        cr.execute("CREATE TABLE anon_db(\
+        cr.execute("CREATE TABLE migrated_data(\
                          model_id VARCHAR,\
                          field_id VARCHAR,\
                          record_id INTEGER,\
@@ -15,7 +15,7 @@ def create_anon_db(connection, data, ids):
     except:
         cr.execute("ROLLBACK;")
     try:
-        cr.execute("CREATE TABLE anon_field_db(\
+        cr.execute("CREATE TABLE migrated_fields(\
                          model_id VARCHAR,\
                          field_id VARCHAR,\
                          PRIMARY KEY (model_id, field_id));")
@@ -26,7 +26,7 @@ def create_anon_db(connection, data, ids):
     
     
 def _run_query(type, con, data, ids):
-    create_anon_db(con, data, ids)
+    create_migrated_data(con, data, ids)
     if type == 'anon':
         create_anon(con ,data, ids)
     elif type == 'truncate':
@@ -44,25 +44,25 @@ def create_anon(con, data, ids):
         table_id = cr.fetchone()[0]
         for field in data.get(table):
             ids_sql_format = _get_ids_sql_format(ids)
-            insert_anon_field_db_rec(cr, field, table)
+            insert_migrated_fields_rec(cr, field, table)
             field_sql = "Select id, field_id From ir_model_fields_anonymization Where field_name = '{field_name}' AND model_id = {table_id} and id in {tuple_ids}".format(field_name=field,
                                                                                                                                                                 table_id=table_id,
                                                                                                                                                                 tuple_ids=ids_sql_format)
             cr.execute(field_sql)
             field_id = cr.fetchone()
             for id in data.get(table).get(field):
-                sql_anon_db_insert = "Insert into anon_db (model_id, field_id, record_id, value) \
+                sql_migrated_data_insert = "Insert into migrated_data (model_id, field_id, record_id, value) \
                 VALUES ('{model_id}', '{field_id}', {record_id}, '{value}')".format(
                     model_id = table, field_id = field, record_id = id, value = data.get(table).get(field).get(id))
-                cr.execute(sql_anon_db_insert)
+                cr.execute(sql_migrated_data_insert)
                 update_fields_history(cr, table_id, id, "2", field_id = field_id)
     cr.execute("COMMIT;")
     cr.close()
 
-def insert_anon_field_db_rec(cr, field, table):
-    sql_insert = "INSERT INTO anon_field_db (model_id, field_id) \
+def insert_migrated_fields_rec(cr, field, table):
+    sql_insert = "INSERT INTO migrated_fields (model_id, field_id) \
                    VALUES ('{table}', '{field}');".format(table=table, field=field)
-    sql_select = "SELECT *  from anon_field_db \
+    sql_select = "SELECT *  from migrated_fields \
                             WHERE model_id = '{table}' \
                                    AND field_id = '{field}';".format(table=table, field=field)
     cr.execute(sql_select)
@@ -77,7 +77,7 @@ def get_anon_fields(connection, args, ids=None):
         where_clause = "WHERE ID IN {ids}".format(ids = _get_ids_sql_format(ids))
     else:
         where_clause = " "
-    get_anon_fields = "SELECT * FROM anon_field_db {WHERE};".format(WHERE=where_clause)
+    get_anon_fields = "SELECT * FROM migrated_fields {WHERE};".format(WHERE=where_clause)
     cr.execute(get_anon_fields)
     while True:
         records = cr.fetchmany(size=2000)
