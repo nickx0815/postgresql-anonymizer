@@ -26,7 +26,7 @@ def create_migrated_data(connection, data, ids):
     
     
 def _run_query(type, con, data, ids):
-    create_migrated_data(con, data, ids)
+    #create_migrated_data(con, data, ids)
     if type == 'anon':
         create_anon(con ,data, ids)
     elif type == 'truncate':
