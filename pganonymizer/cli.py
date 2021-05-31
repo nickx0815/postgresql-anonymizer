@@ -143,7 +143,7 @@ class DeAnonymizationMain(BaseMain):
         connection = get_connection(pg_args)
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
         if args:
-            where_clause = "id in {ids}".format(ids=_get_ids_sql_format(args(0)))
+            where_clause = "id in {ids}".format(ids=_get_ids_sql_format(args[0]))
         cursor.execute("select id from migrated_fields where {where}").format(where=where_clause)
         while True:
             job_ids = []
@@ -166,7 +166,7 @@ class DeAnonymizationMain(BaseMain):
             connection = get_connection(pg_args)
             #todo implement truncate functionality, not working right now
             try:
-                run_revert(connection, args, data)
+                run_revert(connection, _args, data)
     #                 if not args.dry_run:
     #                     connection.commit()
                 end_time = time.time()
