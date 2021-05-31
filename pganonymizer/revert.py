@@ -155,7 +155,7 @@ def _get_mapped_data(con, table):
     #todo function to determine which mapping (10,11,12...)
     cr = con.cursor(cursor_factory=psycopg2.extras.DictCursor)
     data = []
-    select_model_id_sql = "SELECT * FROM migration_mapping where old_model_name = {old_table};".format(old_table=table)
+    select_model_id_sql = "SELECT * FROM model_migration_mapping where old_model_name = {old_table};".format(old_table=table)
     cr.execute(select_model_id_sql)
     while True:
         records = cr.fetchmany(size=2000)
