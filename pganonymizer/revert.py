@@ -1,5 +1,6 @@
-import psycopg2, logging
+import psycopg2, logging, csv
 from pganonymizer.update_field_history import update_fields_history
+from docutils.nodes import row
 
 
 # def create_migrated_data(connection, data, ids):
@@ -96,12 +97,12 @@ def run_revert(connection, args, ids=None):
     cr1 = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
     cr2 = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
     for table, fields in anon_fields.items():
-        mapped_table, mapped_fields = get_mapped_field_data(connection, table, fields)
-        original_table = mapped_table[0]
-        migrated_table = mapped_table[1]
-        for mapped_field in mapped_fields:
-            original_field = mapped_field[0]
-            migrated_field = mapped_field[1]
+        mapped_field_data = get_mapped_field_data(connection, table, fields)
+        for mapped_field in mapped_field_data:
+            original_table = mapped_field[0]
+            original_field = mapped_field[1]
+            migrated_table = mapped_field[2]
+            migrated_field = mapped_field[3]
             migrated_model_id, migrated_field_id = get_db_ids(connection, migrated_table, migrated_field)
             get_anon_data_sql = "SELECT * FROM {table_name} where model_id = '{original_table}' and field_id = '{original_field}';".format(table_name=args.anon_table,
                                                                                                                                            original_table = original_table,
@@ -149,30 +150,34 @@ def get_db_ids(connection, mapped_table, mapped_field):
     field_id = cr.fetchone()[0]
     return model_id, field_id
 
+def _get_mapped_data(table):
+    #todo function to determine which mapping (10,11,12...)
+    data = []
+    with open('field.mapping.version.12.csv', newline='') as csvfile:
+       first = True
+       mapping_reader = csv.reader(csvfile, delimiter=',', quotechar='|')
+       for row in mapping_reader:
+           if not first and row[0] == table:
+               data.append(tuple(r for r in row))
+           first=False
+    return data
+
+def mapping_exists(table, field, mapped_data):
+    for mapping_data in mapped_data:
+        if mapping_data[2] == field:
+            return mapping_data[1],mapping_data[3]
+    return False
+
 def get_mapped_field_data(connection, table, fields):
-    cr = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    list_field_mapped = []
-    migration_table = False
+    list_field_data_mapped = []
+    mapped_data = _get_mapped_data(table)
     for field in fields:
-        sql_select = "SELECT *  from ir_model_fields_anonymization_migration_fix \
-                                WHERE model_id = '{table}' \
-                                       AND field_id = '{field}';".format(table=table, field=field)
-        cr.execute(sql_select)
-        record = cr.fetchone()
-        if record and record.get('migration_field'):
-            migration_field = record.get('migration_field')
+        mapped_data = mapping_exists(table, field, mapped_data)
+        if mapped_data:
+            list_field_data_mapped.append((table, field, mapped_data[0], mapped_data[1]))
         else:
-            migration_field = field
-        if record and record.get('migration_model') and not migration_table:
-            migration_table = record.get('migration_model')
-        # insert mapping functionality
-        #[(field, mapped_field), (field, mapped_field)...]
-        list_field_mapped.append((field, migration_field))
-    if not migration_table:
-        migration_table = table
-    cr.close()
-    migrated_table = (table, migration_table)
-    return migrated_table, list_field_mapped
+            list_field_data_mapped.append((table, field, table,field))
+    return list_field_data_mapped
 
 def create_truncate(con, data):
     cr = con.cursor()
