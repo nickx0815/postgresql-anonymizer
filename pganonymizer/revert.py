@@ -162,7 +162,7 @@ def _get_mapped_data(con, table):
         if not records:
             break
         for row in records:
-            data.append(tuple(row.get('old_model_name'), row.get('new_model_name'),  row.get('old_field_name'), row.get('new_field_name')))
+            data.append((row.get('old_model_name'), row.get('new_model_name'),  row.get('old_field_name'), row.get('new_field_name'))
     return data
 
 
