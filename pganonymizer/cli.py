@@ -33,7 +33,7 @@ class BaseMain():
     def __init__(self):
         self.jobs = Queue()
         
-    def main_anonymize(self, args_=None, *args):
+    def main_anonymize(self, args_, *args):
         """Main method"""
         # own connection per schema batch...
         pg_args, args_ = self._get_run_data(args_)
