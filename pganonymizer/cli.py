@@ -47,7 +47,7 @@ class BaseMain():
             self.list_provider_classes()
             sys.exit(0)
     
-        self.update_queue(args_, args)
+        self.update_queue(args_, *args)
         number_threads = self.get_thread_number()
         print("Number of threads started: {number}".format(number=number_threads))
         for i in range(number_threads):
@@ -142,7 +142,7 @@ class DeAnonymizationMain(BaseMain):
         pg_args, args_ = self._get_run_data(args_)
         connection = get_connection(pg_args)
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        if len(args)!=0:
+        if args:
             where_clause = "id in {ids}".format(ids=_get_ids_sql_format(args[0]))
         cursor.execute("select id from migrated_fields where {where}").format(where=where_clause)
         while True:
