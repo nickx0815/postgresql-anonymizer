@@ -16,7 +16,7 @@ import yaml
 from pganonymizer.constants import DATABASE_ARGS, DEFAULT_SCHEMA_FILE, NUMBER_MAX_THREADS
 from pganonymizer.providers import PROVIDERS
 from pganonymizer.utils import anonymize_tables, create_database_dump, get_connection, truncate_tables
-from pganonymizer.revert import run_revert
+from pganonymizer.revert import run_revert, _get_ids_sql_format
 
 def get_pg_args(args):
         """
@@ -33,25 +33,25 @@ class BaseMain():
     def __init__(self):
         self.jobs = Queue()
         
-    def main_anonymize(self, args=None):
+    def main_anonymize(self, args_=None, *args):
         """Main method"""
         # own connection per schema batch...
-        pg_args, args = self._get_run_data(args)
+        pg_args, args_ = self._get_run_data(args_)
     
         loglevel = logging.WARNING
-        if args.verbose:
+        if args_.verbose:
             loglevel = logging.DEBUG
         logging.basicConfig(format='%(levelname)s: %(message)s', level=loglevel)
     
-        if args.list_providers:
+        if args_.list_providers:
             self.list_provider_classes()
             sys.exit(0)
     
-        self.update_queue(args)
+        self.update_queue(args_, args)
         number_threads = self.get_thread_number()
         print("Number of threads started: {number}".format(number=number_threads))
         for i in range(number_threads):
-            worker = threading.Thread(target=self.start_thread, args=(self.jobs,args, pg_args))
+            worker = threading.Thread(target=self.start_thread, args_=(self.jobs,args, pg_args))
             worker.start()
         
         print("waiting for queue to complete tasks")
@@ -136,12 +136,15 @@ class AnonymizationMain(BaseMain):
             q.task_done()
 
 class DeAnonymizationMain(BaseMain):
-    def update_queue(self,args):
+    def update_queue(self,args_, *args):
+        where_clause = " 1=1"
         NUMBER_FIELD_PER_THREAD = 1
-        pg_args, args = self._get_run_data(args)
+        pg_args, args_ = self._get_run_data(args_)
         connection = get_connection(pg_args)
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        cursor.execute("select id from migrated_fields where 1=1")
+        if args:
+            where_clause = "id in {ids}".format(ids=_get_ids_sql_format(args(0)))
+        cursor.execute("select id from migrated_fields where {where}").format(where=where_clause)
         while True:
             job_ids = []
             records = cursor.fetchmany(size=NUMBER_FIELD_PER_THREAD)
@@ -156,7 +159,7 @@ class DeAnonymizationMain(BaseMain):
     def get_thread_number(self):
         return NUMBER_MAX_THREADS
     
-    def start_thread(self, q, args, pg_args):
+    def start_thread(self, q, _args, pg_args):
         while not q.empty():
             start_time = time.time()
             data = q.get()
