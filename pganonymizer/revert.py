@@ -100,8 +100,8 @@ def run_revert(connection, args, ids=None):
         mapped_field_data = get_mapped_field_data(connection, table, fields)
         for mapped_field in mapped_field_data:
             original_table = mapped_field[0]
-            original_field = mapped_field[1]
-            migrated_table = mapped_field[2]
+            migrated_table = mapped_field[1]
+            original_field = mapped_field[2]
             migrated_field = mapped_field[3]
             migrated_model_id, migrated_field_id = get_db_ids(connection, migrated_table, migrated_field)
             get_anon_data_sql = "SELECT * FROM {table_name} where model_id = '{original_table}' and field_id = '{original_field}';".format(table_name=args.anon_table,
@@ -155,31 +155,29 @@ def _get_mapped_data(con, table):
     #todo function to determine which mapping (10,11,12...)
     cr = con.cursor(cursor_factory=psycopg2.extras.DictCursor)
     data = []
-    select_model_id_sql = "SELECT * FROM model_migration_mapping where old_model_name = '{old_table}';".format(old_table=table)
+    select_model_id_sql = "SELECT old_model_name, new_model_name, old_field_name, new_field_name FROM model_migration_mapping where old_model_name = '{old_table}';".format(old_table=table)
     cr.execute(select_model_id_sql)
     while True:
         records = cr.fetchmany(size=2000)
         if not records:
             break
         for row in records:
-            data.append(tuple(r for r in row))
+            data.append(tuple(row.get('old_model_name'), row.get('new_model_name'),  row.get('old_field_name'), row.get('new_field_name')))
     return data
+
 
 def mapping_exists(table, field, mapped_data):
     for mapping_data in mapped_data:
         if mapping_data[2] == field:
-            return mapping_data[1],mapping_data[3]
-    return False
+            return mapping_data
+    return (table, table, field, field)
 
 def get_mapped_field_data(connection, table, fields):
     list_field_data_mapped = []
     mapped_data = _get_mapped_data(connection, table)
     for field in fields:
         mapped_data = mapping_exists(table, field, mapped_data)
-        if mapped_data:
-            list_field_data_mapped.append((table, field, mapped_data[0], mapped_data[1]))
-        else:
-            list_field_data_mapped.append((table, field, table,field))
+        list_field_data_mapped.append(mapped_data)
     return list_field_data_mapped
 
 def create_truncate(con, data):
