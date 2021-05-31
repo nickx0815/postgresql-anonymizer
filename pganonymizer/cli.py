@@ -142,7 +142,7 @@ class DeAnonymizationMain(BaseMain):
         pg_args, args_ = self._get_run_data(args_)
         connection = get_connection(pg_args)
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        if args:
+        if len(args)!=0:
             where_clause = "id in {ids}".format(ids=_get_ids_sql_format(args[0]))
         cursor.execute("select id from migrated_fields where {where}").format(where=where_clause)
         while True:
