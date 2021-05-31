@@ -144,7 +144,7 @@ class DeAnonymizationMain(BaseMain):
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
         if args:
             where_clause = "id in {ids}".format(ids=_get_ids_sql_format(args[0]))
-        cursor.execute("select id from migrated_fields where {where}").format(where=where_clause)
+        cursor.execute(("select id from migrated_fields where {where}").format(where=where_clause))
         while True:
             job_ids = []
             records = cursor.fetchmany(size=NUMBER_FIELD_PER_THREAD)
