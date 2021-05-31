@@ -148,18 +148,21 @@ def get_db_ids(connection, mapped_table, mapped_field):
                                                                                                                           field_name=mapped_field)
     cr.execute(select_field_id_sql)
     field_id = cr.fetchone()[0]
+    cr.close()
     return model_id, field_id
 
-def _get_mapped_data(table):
+def _get_mapped_data(con, table):
     #todo function to determine which mapping (10,11,12...)
+    cr = con.cursor(cursor_factory=psycopg2.extras.DictCursor)
     data = []
-    with open('field.mapping.version.12.csv', newline='') as csvfile:
-       first = True
-       mapping_reader = csv.reader(csvfile, delimiter=',', quotechar='|')
-       for row in mapping_reader:
-           if not first and row[0] == table:
-               data.append(tuple(r for r in row))
-           first=False
+    select_model_id_sql = "SELECT * FROM migration_mapping where old_model_name = {old_table};".format(old_table=table)
+    cr.execute(select_model_id_sql)
+    while True:
+        records = cr.fetchmany(size=2000)
+        if not records:
+            break
+        for row in records:
+            data.append(tuple(r for r in row))
     return data
 
 def mapping_exists(table, field, mapped_data):
@@ -170,7 +173,7 @@ def mapping_exists(table, field, mapped_data):
 
 def get_mapped_field_data(connection, table, fields):
     list_field_data_mapped = []
-    mapped_data = _get_mapped_data(table)
+    mapped_data = _get_mapped_data(connection, table)
     for field in fields:
         mapped_data = mapping_exists(table, field, mapped_data)
         if mapped_data:
