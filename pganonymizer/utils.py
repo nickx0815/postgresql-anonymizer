@@ -204,7 +204,6 @@ def import_data(connection, field, source_table, row_id, primary_key, value):
                                                                           field=field,
                                                                           value=value,
                                                                           id=row_id)
-    print("to be executed "+sql)
     #cursor.execute('CREATE TEMP TABLE %s (LIKE %s INCLUDING ALL) ON COMMIT DROP;' % (temp_table, source_table))
     #cursor.execute('COMMIT;')
     #copy_from(connection, data, temp_table, table_columns)
