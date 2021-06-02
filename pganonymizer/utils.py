@@ -54,14 +54,18 @@ def get_history(con, table):
     cursor.close()
     return history_data
 
-def build_sql_select(table, search):
-    sql_select = "SELECT * FROM {table}".format(table=table)
+def build_sql_select(table, search, select="*"):
+    cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    
+    sql_select = "SELECT {select} FROM {table}".format(select=select,
+                                                       table=table)
     if search:
         sql_statement = " AND ".join(search)
         sql = "{select} WHERE {search_condition};".format(select=sql_select, search_condition=sql_statement)
     else:
         sql = "{select};".format(select=sql_select)
-    return sql
+    cursor.execute(sql)
+    return cursor
      
 def build_data(connection, table, columns, excludes, total_count, history_ids, search,primary_key, verbose=False):
     """
@@ -87,15 +91,19 @@ def build_data(connection, table, columns, excludes, total_count, history_ids, s
     # dann die daten ermittelt. Nach bearbeitung eines records wird dann eine history angelegt. 
     if verbose:
         progress_bar = IncrementalBar('Anonymizing', max=total_count)
-    sql = build_sql_select(table, search)
-    print("to be executed "+sql)
-    cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cursor.execute(sql)
+    cursor = build_sql_select(table, search, select="count(*)")
+    total_number = cursor.fetchone()[0]
+    print("total records: "+str(total_number))
+    cursor.close()
+    cursor = build_sql_select(table, search)
+    number=1
     while True:
         records = cursor.fetchmany(size=2000)
         if not records:
             break
         for row in records:
+            print("record"+str(number)+" ("+number/total_number+" %)")
+            number=number+1
             original_data = {}
             row_column_dict = {}
             res, anon_field_id = row_check_history(row, columns, history_ids)
