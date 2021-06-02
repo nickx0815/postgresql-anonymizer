@@ -102,7 +102,7 @@ def build_data(connection, table, columns, excludes, total_count, history_ids, s
         if not records:
             break
         for row in records:
-            print("record"+str(number)+" ("+str(number/total_number)+" %)")
+            print("record"+str(number)+" ("+str("%.2f" % number/total_number)+" %)")
             number=number+1
             original_data = {}
             row_column_dict = {}
