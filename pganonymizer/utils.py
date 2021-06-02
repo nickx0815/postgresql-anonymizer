@@ -54,7 +54,7 @@ def get_history(con, table):
     cursor.close()
     return history_data
 
-def build_sql_select(table, search, select="*"):
+def build_sql_select(connection, table, search, select="*"):
     cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
     
     sql_select = "SELECT {select} FROM {table}".format(select=select,
@@ -91,11 +91,11 @@ def build_data(connection, table, columns, excludes, total_count, history_ids, s
     # dann die daten ermittelt. Nach bearbeitung eines records wird dann eine history angelegt. 
     if verbose:
         progress_bar = IncrementalBar('Anonymizing', max=total_count)
-    cursor = build_sql_select(table, search, select="count(*)")
+    cursor = build_sql_select(connection, table, search, select="count(*)")
     total_number = cursor.fetchone()[0]
     print("total records: "+str(total_number))
     cursor.close()
-    cursor = build_sql_select(table, search)
+    cursor = build_sql_select(connection, table, search)
     number=1
     while True:
         records = cursor.fetchmany(size=2000)
