@@ -57,6 +57,7 @@ def create_anon(con, data, ids):
                 sql_migrated_data_insert = "Insert into migrated_data (model_id, field_id, record_id, value) \
                 VALUES ('{model_id}', '{field_id}', {record_id}, '{value}')".format(
                     model_id = table, field_id = field, record_id = id, value = data.get(table).get(field).get(id))
+                print("to be executed "+sql_migrated_data_insert)
                 cr.execute(sql_migrated_data_insert)
                 update_fields_history(cr, table_id, id, "2", field_id = field_id)
     cr.execute("COMMIT;")

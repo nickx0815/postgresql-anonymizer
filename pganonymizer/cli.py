@@ -125,6 +125,7 @@ class AnonymizationMain(BaseMain):
                 #todo implement truncate functionality, not working right now
                 #truncate_tables(connection, schema_batch.get('truncate', []))
             try:
+                print("starting thread "+str(self))
                 anonymize_tables(connection, schema.get('tables', []), verbose=args.verbose)
                 if not args.dry_run:
                     connection.commit()

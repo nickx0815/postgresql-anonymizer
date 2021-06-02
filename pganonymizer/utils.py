@@ -88,6 +88,7 @@ def build_data(connection, table, columns, excludes, total_count, history_ids, s
     if verbose:
         progress_bar = IncrementalBar('Anonymizing', max=total_count)
     sql = build_sql_select(table, search)
+    print("to be executed "+sql)
     cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
     cursor.execute(sql)
     while True:
@@ -195,6 +196,7 @@ def import_data(connection, field, source_table, row_id, primary_key, value):
                                                                           field=field,
                                                                           value=value,
                                                                           id=row_id)
+    print("to be executed "+sql)
     #cursor.execute('CREATE TEMP TABLE %s (LIKE %s INCLUDING ALL) ON COMMIT DROP;' % (temp_table, source_table))
     #cursor.execute('COMMIT;')
     #copy_from(connection, data, temp_table, table_columns)
