@@ -33,7 +33,7 @@ class BaseMain():
     def __init__(self):
         self.jobs = Queue()
         
-    def main_anonymize(self, args_, *args):
+    def main_anonymize(self, args_, *args, thread=True):
         """Main method"""
         # own connection per schema batch...
         pg_args, args_ = self._get_run_data(args_)
@@ -48,17 +48,19 @@ class BaseMain():
             sys.exit(0)
     
         self.update_queue(args_, *args)
-        number_threads = self.get_thread_number()
-        print("Number of threads started: {number}".format(number=number_threads))
-        for i in range(number_threads):
-            worker = threading.Thread(target=self.start_thread, args=(self.jobs,args_, pg_args))
-            worker.start()
-        
-        print("waiting for queue to complete tasks")
-        self.jobs.join()
+        if thread:
+            number_threads = self.get_thread_number()
+            print("Number of threads started: {number}".format(number=number_threads))
+            for i in range(number_threads):
+                worker = threading.Thread(target=self.start_thread, args=(self.jobs,args_, pg_args))
+                worker.start()
+            
+            print("waiting for queue to complete tasks")
+            self.jobs.join()
+        else:
+            self.start_thread(self.jobs, args_, pg_args)   
         print("all done")
-    
-
+        
     def list_provider_classes(self):
         """List all available provider classes."""
         print('Available provider classes:\n')
