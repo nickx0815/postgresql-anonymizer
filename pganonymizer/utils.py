@@ -17,7 +17,7 @@ from six import StringIO
 from pganonymizer.constants import COPY_DB_DELIMITER, DEFAULT_PRIMARY_KEY
 from pganonymizer.exceptions import BadDataFormat
 from pganonymizer.providers import get_provider
-from pganonymizer.revert import _run_query
+from pganonymizer.revert import _run_query, _get_ids_sql_format
 
 
 def anonymize_tables(connection, definitions, verbose=False):
@@ -95,6 +95,7 @@ def build_data(connection, table, columns, excludes, total_count, history_ids, s
     total_number = cursor.fetchone()[0]
     print("total records: "+str(total_number))
     cursor.close()
+    search, anon_field_id = row_check_history(columns, history_ids, search)
     cursor = build_sql_select(connection, table, search)
     number=1
     while True:
@@ -106,8 +107,7 @@ def build_data(connection, table, columns, excludes, total_count, history_ids, s
             number=number+1
             original_data = {}
             row_column_dict = {}
-            res, anon_field_id = row_check_history(row, columns, history_ids)
-            if not row_matches_excludes(row, excludes) and not res:
+            if not row_matches_excludes(row, excludes):
                 row_column_dict = get_column_values(row, columns, {'id':row.get('id'), 'table':table})
                 for key, value in row_column_dict.items():
                     if not original_data.get(key):
@@ -127,13 +127,16 @@ def build_data(connection, table, columns, excludes, total_count, history_ids, s
         progress_bar.finish()
     cursor.close()
     
-def row_check_history(row, fields, history):
-    providers = [list(col.values())[0] for col in fields]
-    field_ids = [provider['provider']['field_anon_id'] for provider in providers]
-    for field in field_ids:
-        if (field, row.get('id')) in history:
-            return True, []
-    return False, field_ids
+def row_check_history(columns, history, search):
+    anon_field_id = columns[0].get('name').get('provider').get('field_anon_id')
+    history = [ x for x in history if x[0]==anon_field_id]
+    not_id = [id[1] for id in history]
+    not_id = _get_ids_sql_format(not_id)
+    if search:
+        search = search + " AND id not in {id_list}".format(id_list=not_id)
+    else:
+        search = " where id not in {id_list}".format(not_id)
+    return search, anon_field_id
 
 
 def row_matches_excludes(row, excludes=None):
