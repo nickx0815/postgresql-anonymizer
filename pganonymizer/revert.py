@@ -34,7 +34,9 @@ def _run_query(type, con, data, ids):
         create_truncate(con, data)
 
 def _get_ids_sql_format(ids):
-    return str(set([x for x in ids])).replace("{","(").replace("}",")")
+    if ids:
+        return str(set([x for x in ids])).replace("{","(").replace("}",")")
+    return False
 
 
 
