@@ -96,14 +96,14 @@ def build_data(connection, table, columns, excludes, total_count, history_ids, s
     print("total records: "+str(total_number))
     cursor.close()
     search, anon_field_id, field = row_check_history(columns, history_ids, search)
-    cursor = build_sql_select(connection, table, search)
+    cursor = build_sql_select(connection, table, search, select="id,"+field)
     number=1
     while True:
         records = cursor.fetchmany(size=2000)
         if not records:
             break
         for row in records:
-            print("record"+str(number)+" ("+str(number/total_number)+" %)")
+            print("record"+str(number)+" ("+str(number/total_number*100)+" %)")
             number=number+1
             original_data = {}
             row_column_dict = {}
@@ -122,7 +122,7 @@ def build_data(connection, table, columns, excludes, total_count, history_ids, s
             #data.append(row.values())
             # todo update stuff
             import_data(connection, key, table, row.get('id'), primary_key, value)
-            _run_query('anon', connection, {table:original_data}, anon_field_id)
+            _run_query('anon', connection, {table:original_data}, [anon_field_id])
     if verbose:
         progress_bar.finish()
     cursor.close()
