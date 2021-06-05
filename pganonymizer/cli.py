@@ -33,7 +33,7 @@ class BaseMain():
     def __init__(self):
         self.jobs = Queue()
         
-    def main_anonymize(self, args_, *args, thread=True):
+    def main_anonymize(self, args_, opt_args):
         """Main method"""
         # own connection per schema batch...
         pg_args, args_ = self._get_run_data(args_)
@@ -47,8 +47,8 @@ class BaseMain():
             self.list_provider_classes()
             sys.exit(0)
     
-        self.update_queue(args_, *args)
-        if thread:
+        self.update_queue(args_, opt_args)
+        if opt_args.get('threading'):
             number_threads = self.get_thread_number()
             print("Number of threads started: {number}".format(number=number_threads))
             for i in range(number_threads):
@@ -96,7 +96,7 @@ class BaseMain():
         return 0
     
 class AnonymizationMain(BaseMain):
-    def update_queue(self, args):
+    def update_queue(self, args, opt_args):
         schema = yaml.load(open(args.schema), Loader=yaml.FullLoader)
         self.get_schema_batches(schema)
     
@@ -139,14 +139,14 @@ class AnonymizationMain(BaseMain):
             q.task_done()
 
 class DeAnonymizationMain(BaseMain):
-    def update_queue(self,args_, *args):
+    def update_queue(self,args_, opt_args):
         where_clause = " 1=1"
         NUMBER_FIELD_PER_THREAD = 1
         pg_args, args_ = self._get_run_data(args_)
         connection = get_connection(pg_args)
         cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        if args:
-            where_clause = "id in {ids}".format(ids=_get_ids_sql_format(args[0]))
+        if opt_args.get('ids'):
+            where_clause = "id in {ids}".format(ids=_get_ids_sql_format(opt_args.get('ids')))
         cursor.execute(("select id from migrated_fields where {where}").format(where=where_clause))
         while True:
             job_ids = []
