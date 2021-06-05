@@ -95,8 +95,8 @@ def build_data(connection, table, columns, excludes, total_count, history_ids, s
     total_number = cursor.fetchone()[0]
     print("total records: "+str(total_number))
     cursor.close()
-    search, anon_field_id = row_check_history(columns, history_ids, search)
-    cursor = build_sql_select(connection, table, search, select=list(columns[0].keys())[0])
+    search, anon_field_id, field = row_check_history(columns, history_ids, search)
+    cursor = build_sql_select(connection, table, search, select=field)
     number=1
     while True:
         records = cursor.fetchmany(size=2000)
@@ -128,7 +128,8 @@ def build_data(connection, table, columns, excludes, total_count, history_ids, s
     cursor.close()
     
 def row_check_history(columns, history, search):
-    anon_field_id = columns[0].get('name').get('provider').get('field_anon_id')
+    field = list(columns[0].keys())[0]
+    anon_field_id = columns[0].get(field).get('provider').get('field_anon_id')
     history = [ x for x in history if x[0]==anon_field_id]
     not_id = [id[1] for id in history]
     not_id = _get_ids_sql_format(not_id)
@@ -136,7 +137,7 @@ def row_check_history(columns, history, search):
         search = search.append("id not in {id_list}".format(id_list=not_id))
     else:
         search = ["id not in {id_list}".format(id_list=not_id)]
-    return search, anon_field_id
+    return search, anon_field_id, field
 
 
 def row_matches_excludes(row, excludes=None):
