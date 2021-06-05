@@ -134,10 +134,11 @@ def row_check_history(columns, history, search):
         history = [ x for x in history if x[0]==anon_field_id]
         not_id = [id[1] for id in history]
         not_id = _get_ids_sql_format(not_id)
-        if search:
-            search = search.append("id not in {id_list}".format(id_list=not_id))
-        else:
-            search = ["id not in {id_list}".format(id_list=not_id)]
+        if not_id:
+            if search:
+                search = search.append("id not in {id_list}".format(id_list=not_id))
+            else:
+                search = ["id not in {id_list}".format(id_list=not_id)]
     return search, anon_field_id, field
 
 
