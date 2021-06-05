@@ -96,7 +96,7 @@ def build_data(connection, table, columns, excludes, total_count, history_ids, s
     print("total records: "+str(total_number))
     cursor.close()
     search, anon_field_id, field = row_check_history(columns, history_ids, search)
-    cursor = build_sql_select(connection, table, search, select="id, "+field)
+    cursor = build_sql_select(connection, table, search)
     number=1
     while True:
         records = cursor.fetchmany(size=2000)
