@@ -102,6 +102,7 @@ class AnonymizationMain(BaseMain):
     
     def get_schema_batches(self, schema):
         #todo konfigurierbar
+        #search wird nicht übernommen
         for type_, type_attributes in schema.items():
             for table in type_attributes:
                 if type(table) == str:

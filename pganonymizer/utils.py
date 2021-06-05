@@ -130,13 +130,14 @@ def build_data(connection, table, columns, excludes, total_count, history_ids, s
 def row_check_history(columns, history, search):
     field = list(columns[0].keys())[0]
     anon_field_id = columns[0].get(field).get('provider').get('field_anon_id')
-    history = [ x for x in history if x[0]==anon_field_id]
-    not_id = [id[1] for id in history]
-    not_id = _get_ids_sql_format(not_id)
-    if search:
-        search = search.append("id not in {id_list}".format(id_list=not_id))
-    else:
-        search = ["id not in {id_list}".format(id_list=not_id)]
+    if len(history)>0:
+        history = [ x for x in history if x[0]==anon_field_id]
+        not_id = [id[1] for id in history]
+        not_id = _get_ids_sql_format(not_id)
+        if search:
+            search = search.append("id not in {id_list}".format(id_list=not_id))
+        else:
+            search = ["id not in {id_list}".format(id_list=not_id)]
     return search, anon_field_id, field
 
 
