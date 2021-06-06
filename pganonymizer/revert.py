@@ -43,8 +43,9 @@ def _get_ids_sql_format(ids):
 
 def create_anon(con, data, ids, table_id):
     cr = con.cursor()
-    for table, field in data.items():
+    for table, field_data in data.items():
         ids_sql_format = _get_ids_sql_format(ids)
+        field = list(field_data.keys())[0]
         insert_migrated_fields_rec(cr, field, table)
         field_sql = "Select id, field_id From ir_model_fields_anonymization Where field_name = '{field_name}' AND model_id = {table_id} and id in {tuple_ids}".format(field_name=field,
                                                                                                                                                             table_id=table_id,
