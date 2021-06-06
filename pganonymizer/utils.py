@@ -17,7 +17,7 @@ from six import StringIO
 from pganonymizer.constants import COPY_DB_DELIMITER, DEFAULT_PRIMARY_KEY
 from pganonymizer.exceptions import BadDataFormat
 from pganonymizer.providers import get_provider
-from pganonymizer.revert import _run_query, _get_ids_sql_format
+from pganonymizer.revert import _run_query, _get_ids_sql_format, _
 
 
 def anonymize_tables(connection, definitions, verbose=False):
@@ -95,6 +95,9 @@ def build_data(connection, table, columns, excludes, total_count, history_ids, s
     total_number = cursor.fetchone()[0]
     print("total records: "+str(total_number))
     cursor.close()
+    cursor = build_sql_select(connection, 'ir_model', ["model_id = '{model_data}'".format(model_data=_(table))], select="id")
+    table_id = cursor.fetchone()[0]
+    cursor.close()
     search, anon_field_id, field = row_check_history(columns, history_ids, search)
     cursor = build_sql_select(connection, table, search, select="id,"+field)
     number=1
@@ -122,7 +125,7 @@ def build_data(connection, table, columns, excludes, total_count, history_ids, s
             #data.append(row.values())
             # todo update stuff
             import_data(connection, key, table, row.get('id'), primary_key, value)
-            _run_query('anon', connection, {table:original_data}, [anon_field_id])
+            _run_query('anon', connection, {table:original_data}, [anon_field_id], table_id)
     if verbose:
         progress_bar.finish()
     cursor.close()

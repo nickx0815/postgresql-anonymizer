@@ -26,10 +26,10 @@ from docutils.nodes import row
 #     cr.close()
     
     
-def _run_query(type, con, data, ids):
+def _run_query(type, con, data, ids, table_id):
     #create_migrated_data(con, data, ids)
     if type == 'anon':
-        create_anon(con ,data, ids)
+        create_anon(con ,data, ids, table_id)
     elif type == 'truncate':
         create_truncate(con, data)
 
@@ -41,26 +41,22 @@ def _get_ids_sql_format(ids):
 
 
 
-def create_anon(con, data, ids):
+def create_anon(con, data, ids, table_id):
     cr = con.cursor()
-    for table in data:
-        table_sql = "Select id FROM ir_model WHERE model = '{model_data}'".format(model_data=_(table))
-        cr.execute(table_sql)
-        table_id = cr.fetchone()[0]
-        for field in data.get(table):
-            ids_sql_format = _get_ids_sql_format(ids)
-            insert_migrated_fields_rec(cr, field, table)
-            field_sql = "Select id, field_id From ir_model_fields_anonymization Where field_name = '{field_name}' AND model_id = {table_id} and id in {tuple_ids}".format(field_name=field,
-                                                                                                                                                                table_id=table_id,
-                                                                                                                                                                tuple_ids=ids_sql_format)
-            cr.execute(field_sql)
-            field_id = cr.fetchone()
-            for id in data.get(table).get(field):
-                sql_migrated_data_insert = "Insert into migrated_data (model_id, field_id, record_id, value) \
-                VALUES (%s, %s, %s, %s)"
-                data = (table, field, id, data.get(table).get(field).get(id))
-                cr.execute(sql_migrated_data_insert, data)
-                update_fields_history(cr, table_id, id, "2", field_id = field_id)
+    for table, field in data.keys():
+        ids_sql_format = _get_ids_sql_format(ids)
+        insert_migrated_fields_rec(cr, field, table)
+        field_sql = "Select id, field_id From ir_model_fields_anonymization Where field_name = '{field_name}' AND model_id = {table_id} and id in {tuple_ids}".format(field_name=field,
+                                                                                                                                                            table_id=table_id,
+                                                                                                                                                            tuple_ids=ids_sql_format)
+        cr.execute(field_sql)
+        field_id = cr.fetchone()
+        for id in data.get(table).get(field):
+            sql_migrated_data_insert = "Insert into migrated_data (model_id, field_id, record_id, value) \
+            VALUES (%s, %s, %s, %s)"
+            data = (table, field, id, data.get(table).get(field).get(id))
+            cr.execute(sql_migrated_data_insert, data)
+            update_fields_history(cr, table_id, id, "2", field_id = field_id)
     cr.execute("COMMIT;")
     cr.close()
 
