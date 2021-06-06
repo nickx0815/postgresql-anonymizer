@@ -95,7 +95,7 @@ def build_data(connection, table, columns, excludes, total_count, history_ids, s
     total_number = cursor.fetchone()[0]
     print("total records: "+str(total_number))
     cursor.close()
-    cursor = build_sql_select(connection, 'ir_model', ["model_id = '{model_data}'".format(model_data=_(table))], select="id")
+    cursor = build_sql_select(connection, 'ir_model', ["model = '{model_data}'".format(model_data=_(table))], select="id")
     table_id = cursor.fetchone()[0]
     cursor.close()
     search, anon_field_id, field = row_check_history(columns, history_ids, search)
