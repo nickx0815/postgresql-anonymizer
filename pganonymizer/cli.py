@@ -151,7 +151,7 @@ class AnonymizationMain(BaseMain):
                 if not args.dry_run:
                     connection.commit()
                 end_time = time.time()
-                logging.info('Anonymization took {:.2f}s'.format(end_time - start_time))
+                #logging.info('Anonymization took {:.2f}s'.format(end_time - start_time))
             except Exception as ex:
                 logging.info(ex)
             connection.close()
