@@ -15,7 +15,7 @@ import yaml
 
 from pganonymizer.constants import DATABASE_ARGS, DEFAULT_SCHEMA_FILE, NUMBER_MAX_THREADS
 from pganonymizer.providers import PROVIDERS
-from pganonymizer.utils import anonymize_tables, create_database_dump, get_connection, truncate_tables
+from pganonymizer.utils import anonymize_tables, create_database_dump, get_connection, truncate_tables, build_sql_select
 from pganonymizer.revert import run_revert, _get_ids_sql_format
 
 def get_pg_args(args):
@@ -46,7 +46,7 @@ class BaseMain():
         if args_.list_providers:
             self.list_provider_classes()
             sys.exit(0)
-    
+        opt_args['pg_args']=pg_args
         self.update_queue(args_, opt_args)
         if opt_args.get('threading'):
             number_threads = self.get_thread_number()
@@ -98,21 +98,29 @@ class BaseMain():
 class AnonymizationMain(BaseMain):
     def update_queue(self, args, opt_args):
         schema = yaml.load(open(args.schema), Loader=yaml.FullLoader)
-        self.get_schema_batches(schema)
+        self.get_schema_batches(schema, opt_args)
     
-    def get_schema_batches(self, schema):
+    def get_schema_batches(self, schema, opt_args):
         #todo konfigurierbar
         #search wird nicht übernommen
+        connection = get_connection(opt_args['pg_args'])
         for type_, type_attributes in schema.items():
             for table in type_attributes:
                 if type(table) == str:
                     self.jobs.put({type_: [table]})
                 else:
                     for table_key, table_attributes in table.items():
-                        fields = table_attributes['fields']
-                        for field in fields:
-                            for field_key, field_attributes in field.items():
-                                self.jobs.put({type_: [{table_key:{'fields':[{field_key:field_attributes}]}}]})
+                        cursor = build_sql_select(connection, table_key, table_attributes['search'], select="id")
+                        while True:
+                            list = []
+                            records = cursor.fetchmany(size=1000)
+                            if not records:
+                                break
+                            for row in records:
+                                list.append(row.get('id'))
+                            cur = table_attributes       
+                            cur['search'].append("id in ("+_get_ids_sql_format(list)+")")
+                            self.jobs.put({type_: [{table_key:cur}]})
         
     def get_thread_number(self):
         queue_size = self.jobs.qsize()

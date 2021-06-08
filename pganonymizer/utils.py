@@ -35,9 +35,11 @@ def anonymize_tables(connection, definitions, verbose=False):
         columns = table_definition.get('fields', [])
         excludes = table_definition.get('excludes', [])
         search = table_definition.get('search')
+        column_dict = get_column_dict(columns)
         primary_key = table_definition.get('primary_key', DEFAULT_PRIMARY_KEY)
         total_count = get_table_count(connection, table_name)
-        build_data(connection, table_name, columns, excludes, total_count,search, primary_key, verbose)
+        data, table_columns = build_data(connection, table_name, columns, excludes, total_count,search, primary_key, verbose)
+        import_data(connection, column_dict, table_name, table_columns, primary_key, data)
 
 def get_history(con, table):
     #todo checken ob es hier sinn macht über die history zu suchen
@@ -96,56 +98,60 @@ def build_data(connection, table, columns, excludes, total_count, search,primary
     cursor = build_sql_select(connection, 'ir_model', ["model = '{model_data}'".format(model_data=_(table))], select="id")
     table_id = cursor.fetchone()[0]
     cursor.close()
-    #todo refactor, method name nicht passend
-    search, anon_field_id, field = row_check_history(columns, search)
-    cursor = build_sql_select(connection, table, search, select="id,"+field)
+    sql_select = "SELECT * FROM {table}".format(table=table)
+    if search:
+        sql = "{select} WHERE {search_condition};".format(select=sql_select, search_condition=search)
+    else:
+        sql = "{select};".format(select=sql_select)
+    cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cursor.execute(sql)
+    
     number=1
     while True:
-        records = cursor.fetchmany(size=2000)
-        if not records:
+        row = cursor.fetchone()
+        if not row:
             break
-        for row in records:
             #print("record"+str(number)+" ("+str(number/total_number*100)+" %)")
-            print(number)
-            number=number+1
-            original_data = {}
-            row_column_dict = {}
-            if not row_matches_excludes(row, excludes):
-                row_column_dict = get_column_values(row, columns, {'id':row.get('id'), 'table':table})
-                for key, value in row_column_dict.items():
-                    print(value)
-                    if value == _(table)+"_"+key+"_"+str(row.get('id')):
-                        continue
-                    if not original_data.get(key):
-                        original_data[key] = {}
-                    original_data[key].update({row.get('id'): row[key]})                    
-                    row[key] = value
-            if verbose:
-                progress_bar.next()
-            
-            if not row_column_dict:
-                continue
-            #data.append(row.values())
-            # todo update stuff
-            import_data(connection, key, table, row.get('id'), primary_key, value)
-            _run_query('anon', connection, {table:original_data}, [anon_field_id], table_id)
+        print(number)
+        number=number+1
+        original_data = {}
+        row_column_dict = {}
+        if not row_matches_excludes(row, excludes):
+            row_column_dict = get_column_values(row, columns, {'id':row.get('id'), 'table':table})
+            for key, value in row_column_dict.items():
+                print(value)
+                if value == _(table)+"_"+key+"_"+str(row.get('id')):
+                    continue
+                if not original_data.get(key):
+                    original_data[key] = {}
+                anon_field_id = columns[0].get(key).get('provider').get('field_anon_id')
+                original_data[key].update({row.get('id'): row[key]})
+                row[key] = value
+                import_data(connection, key, table, row.get('id'), primary_key, value)
+                _run_query('anon', connection, {table:original_data}, [anon_field_id], table_id)
+        if verbose:
+            progress_bar.next()
+        
+        #data.append(row.values())
+        # todo update stuff
+        
     if verbose:
         progress_bar.finish()
     cursor.close()
     
-def row_check_history(columns, search, history=False):
-    field = list(columns[0].keys())[0]
-    anon_field_id = columns[0].get(field).get('provider').get('field_anon_id')
-    if history and len(history)>0:
-        history = [ x for x in history if x[0]==anon_field_id]
-        not_id = [id[1] for id in history]
-        not_id = _get_ids_sql_format(not_id)
-        if not_id:
-            if search:
-                search = search.append("id not in {id_list}".format(id_list=not_id))
-            else:
-                search = ["id not in {id_list}".format(id_list=not_id)]
-    return search, anon_field_id, field
+# def row_check_history(columns, search, history=False):
+#     field = list(columns[0].keys())[0]
+#     anon_field_id = columns[0].get(field).get('provider').get('field_anon_id')
+#     if history and len(history)>0:
+#         history = [ x for x in history if x[0]==anon_field_id]
+#         not_id = [id[1] for id in history]
+#         not_id = _get_ids_sql_format(not_id)
+#         if not_id:
+#             if search:
+#                 search = search.append("id not in {id_list}".format(id_list=not_id))
+#             else:
+#                 search = ["id not in {id_list}".format(id_list=not_id)]
+#     return search, anon_field_id, field
 
 
 def row_matches_excludes(row, excludes=None):
