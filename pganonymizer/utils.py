@@ -112,7 +112,7 @@ def build_data(connection, table, columns, excludes, total_count, search,primary
             for key, value in row_column_dict.items():
                 migrated_data = table.replace(".", "_")+"_"+key+"_"+str(row.get('id'))
                 print(value)
-                if value == migrated_data:
+                if row[key] == migrated_data:
                     continue
                 if not original_data.get(key):
                     original_data[key] = {}
