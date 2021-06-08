@@ -133,7 +133,8 @@ def build_data(connection, table, columns, excludes, total_count, search,primary
         progress_bar.finish()
     cursor.close()
 
-def _get_anon_field_id(colums):
+def _get_anon_field_id(columns):
+    dic = {}
     for column in columns:
         for key, value in column.items():
             dic[key] = value.get('provider').get('field_anon_id')
