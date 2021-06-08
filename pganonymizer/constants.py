@@ -14,6 +14,6 @@ section = ['Required','Optional']
 testarg = ['schema', 'dbname', 'user', 'password', 'host', 'port']
 testarg_optional = ['dump', 'dry-run', 'l', 'v']
 
-NUMBER_MAX_THREADS = 4
+NUMBER_MAX_THREADS = 8
 #TODO use other technique
 # available arg ['-v', '-l', '--dry-run']
