@@ -112,9 +112,7 @@ def build_data(connection, table, columns, excludes, total_count, search,primary
         if not row_matches_excludes(row, excludes):
             row_column_dict = get_column_values(row, columns, {'id':row.get('id'), 'table':table})
             for key, value in row_column_dict.items():
-                migrated_data = _(table)+"_"+key+"_"+str(row.get('id'))
-                print(value)
-                print(migrated_data)
+                migrated_data = table.replace(".", "_")+"_"+key+"_"+str(row.get('id'))
                 if value == migrated_data:
                     continue
                 if not original_data.get(key):
