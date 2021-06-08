@@ -114,8 +114,8 @@ def build_data(connection, table, columns, excludes, total_count, search,primary
             for key, value in row_column_dict.items():
                 migrated_data = table.replace(".", "_")+"_"+key+"_"+str(row.get('id'))
                 #print(value)
-                print(migrated_data)
-                print(row[key])
+                #print(migrated_data)
+                #print(row[key])
                 if row[key] == migrated_data:
                     continue
                 if not original_data.get(key):
@@ -123,7 +123,7 @@ def build_data(connection, table, columns, excludes, total_count, search,primary
                 anon_field_id = anon_fields[key]
                 original_data[key].update({row.get('id'): row[key]})
                 row[key] = value
-                print("to be anonymized")
+                #print("to be anonymized")
                 import_data(connection, key, table, row.get('id'), primary_key, value)
                 _run_query('anon', connection, {table:original_data}, [anon_field_id], table_id)
         if verbose:
