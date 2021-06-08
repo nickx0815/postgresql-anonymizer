@@ -30,16 +30,17 @@ def anonymize_tables(connection, definitions, verbose=False):
     """
     for definition in definitions:
         table_name = list(definition.keys())[0]
-        history_ids = get_history(connection, table_name)
+        #history_ids = get_history(connection, table_name)
         table_definition = definition[table_name]
         columns = table_definition.get('fields', [])
         excludes = table_definition.get('excludes', [])
         search = table_definition.get('search')
         primary_key = table_definition.get('primary_key', DEFAULT_PRIMARY_KEY)
         total_count = get_table_count(connection, table_name)
-        build_data(connection, table_name, columns, excludes, total_count, history_ids,search, primary_key, verbose)
+        build_data(connection, table_name, columns, excludes, total_count,search, primary_key, verbose)
 
 def get_history(con, table):
+    #todo checken ob es hier sinn macht über die history zu suchen
     cursor = con.cursor(cursor_factory=psycopg2.extras.DictCursor, name='fetch_large_result')
     sql_model_id = "SELECT id FROM ir_model where model ='{table}'".format(table=table.replace("_","."))
     sql = "select field_id, record_id from ir_model_fields_anonymization_history where state = '2' and model_id = ({sql_model_id}); ".format(sql_model_id = sql_model_id)
@@ -67,7 +68,7 @@ def build_sql_select(connection, table, search, select="*"):
     cursor.execute(sql)
     return cursor
      
-def build_data(connection, table, columns, excludes, total_count, history_ids, search,primary_key, verbose=False):
+def build_data(connection, table, columns, excludes, total_count, search,primary_key, verbose=False):
     """
     Select all data from a table and return it together with a list of table columns.
 
@@ -91,14 +92,12 @@ def build_data(connection, table, columns, excludes, total_count, history_ids, s
     # dann die daten ermittelt. Nach bearbeitung eines records wird dann eine history angelegt. 
     if verbose:
         progress_bar = IncrementalBar('Anonymizing', max=total_count)
-    cursor = build_sql_select(connection, table, search, select="count(*)")
-    total_number = cursor.fetchone()[0]
-    print("total records: "+str(total_number))
-    cursor.close()
+
     cursor = build_sql_select(connection, 'ir_model', ["model = '{model_data}'".format(model_data=_(table))], select="id")
     table_id = cursor.fetchone()[0]
     cursor.close()
-    search, anon_field_id, field = row_check_history(columns, history_ids, search)
+    #todo refactor, method name nicht passend
+    search, anon_field_id, field = row_check_history(columns, search)
     cursor = build_sql_select(connection, table, search, select="id,"+field)
     number=1
     while True:
@@ -113,6 +112,8 @@ def build_data(connection, table, columns, excludes, total_count, history_ids, s
             if not row_matches_excludes(row, excludes):
                 row_column_dict = get_column_values(row, columns, {'id':row.get('id'), 'table':table})
                 for key, value in row_column_dict.items():
+                    if value == _(table)+"_"+key+"_"+row.get('id'):
+                        continue
                     if not original_data.get(key):
                         original_data[key] = {}
                     original_data[key].update({row.get('id'): row[key]})                    
@@ -130,10 +131,10 @@ def build_data(connection, table, columns, excludes, total_count, history_ids, s
         progress_bar.finish()
     cursor.close()
     
-def row_check_history(columns, history, search):
+def row_check_history(columns, search, history=False):
     field = list(columns[0].keys())[0]
     anon_field_id = columns[0].get(field).get('provider').get('field_anon_id')
-    if len(history)>0:
+    if history and len(history)>0:
         history = [ x for x in history if x[0]==anon_field_id]
         not_id = [id[1] for id in history]
         not_id = _get_ids_sql_format(not_id)
