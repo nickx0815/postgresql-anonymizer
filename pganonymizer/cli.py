@@ -7,6 +7,7 @@ import logging
 import sys
 import copy
 import time
+import datetime
 import psycopg2
 from time import sleep
 import threading, time
@@ -131,12 +132,23 @@ class AnonymizationMain(BaseMain):
                             search_list.append("id in "+_get_ids_sql_format(list))
                             cur['search'] = search_list
                             self.jobs.put({type_: [{table_key:cur}]})
-                        self.number_rec[table_key] = (number, 0)
+                        self.number_rec[table_key] = (number, 0, time.time())
                         
     def get_thread_number(self):
         queue_size = self.jobs.qsize()
         number_threads = queue_size if queue_size < NUMBER_MAX_THREADS else NUMBER_MAX_THREADS
         return number_threads
+    
+    def print_info(self, table, total, anonymized, percent_anonymized):
+        print("Table {table} is {percent} % anonymized".format(table=table,
+                                                                percent=percent_anonymized*100))
+        if percent_anonymized == 1:
+            runtime = time.time()-self.number_rec[table][2]
+            time_ = str(datetime.timedelta(seconds=runtime))
+            print("Table {table} is fully anonymized")
+            print("Anonymization of {table} took {time}".format(table=table,
+                                                                time = time_))
+        self.number_rec[table] = (total, anonymized, self.number_rec[table][2])
     
     def start_thread(self, q, args, pg_args):
         start_time = time.time()
@@ -150,9 +162,10 @@ class AnonymizationMain(BaseMain):
             try:
                 print("starting thread "+str(self))
                 res, table = anonymize_tables(connection, schema.get('tables', []), verbose=args.verbose)
-                self.number_rec[table] = (self.number_rec[table][0], self.number_rec[table][1] + res)
-                print(table+": number anonymized "+str(self.number_rec[table][1]))
-                print(table+" "+str(self.number_rec[table][1] / self.number_rec[table][0] * 100)+" %")
+                total_size = self.number_rec[table][0]
+                number_anonymized = self.number_rec[table][1]+res
+                percent_anonymized = number_anonymized/total_size
+                self.print_info(table, total_size, number_anonymized, percent_anonymized)
                 if not args.dry_run:
                     connection.commit()
                 
@@ -163,7 +176,7 @@ class AnonymizationMain(BaseMain):
             connection.close()
             q.task_done()
         end_time = time.time()
-        logging.info('Anonymization took {:.2f}s'.format(end_time - start_time))
+        print('Anonymization took {:.2f}s'.format(end_time - start_time))
 
 class DeAnonymizationMain(BaseMain):
     def update_queue(self,args_, opt_args):
