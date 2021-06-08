@@ -37,7 +37,8 @@ def anonymize_tables(connection, definitions, verbose=False):
         search = table_definition.get('search')
         primary_key = table_definition.get('primary_key', DEFAULT_PRIMARY_KEY)
         total_count = get_table_count(connection, table_name)
-        build_data(connection, table_name, columns, excludes, total_count,search, primary_key, verbose)
+        res = build_data(connection, table_name, columns, excludes, total_count,search, primary_key, verbose)
+        return res, table_name
 
 def get_history(con, table):
     #todo checken ob es hier sinn macht über die history zu suchen
@@ -104,7 +105,7 @@ def build_data(connection, table, columns, excludes, total_count, search,primary
         if not row:
             break
             #print("record"+str(number)+" ("+str(number/total_number*100)+" %)")
-        print(number)
+        #print(number)
         number=number+1
         original_data = {}
         row_column_dict = {}
@@ -112,7 +113,7 @@ def build_data(connection, table, columns, excludes, total_count, search,primary
             row_column_dict = get_column_values(row, columns, {'id':row.get('id'), 'table':table})
             for key, value in row_column_dict.items():
                 migrated_data = table.replace(".", "_")+"_"+key+"_"+str(row.get('id'))
-                print(value)
+                #print(value)
                 if row[key] == migrated_data:
                     continue
                 if not original_data.get(key):
@@ -132,6 +133,7 @@ def build_data(connection, table, columns, excludes, total_count, search,primary
     if verbose:
         progress_bar.finish()
     cursor.close()
+    return number
 
 def _get_anon_field_id(columns):
     dic = {}

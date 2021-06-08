@@ -33,6 +33,7 @@ def get_pg_args(args):
 class BaseMain():
     def __init__(self):
         self.jobs = Queue()
+        self.number_rec = {}
         
     def main_anonymize(self, args_, opt_args):
         """Main method"""
@@ -111,10 +112,13 @@ class AnonymizationMain(BaseMain):
                     self.jobs.put({type_: [table]})
                 else:
                     for table_key, table_attributes in table.items():
+                        number = 0
                         cursor = build_sql_select(connection, table_key, table_attributes['search'], select="id")
                         while True:
                             list = []
                             records = cursor.fetchmany(size=1000)
+                            number = number + len(records)
+                            
                             if not records:
                                 break
                             for row in records:
@@ -122,7 +126,8 @@ class AnonymizationMain(BaseMain):
                             cur = copy.deepcopy(table_attributes)     
                             cur['search'].append("id in "+_get_ids_sql_format(list))
                             self.jobs.put({type_: [{table_key:cur}]})
-        
+                        self.number_rec[table_key] = (number, 0)
+                        
     def get_thread_number(self):
         queue_size = self.jobs.qsize()
         number_threads = queue_size if queue_size < NUMBER_MAX_THREADS else NUMBER_MAX_THREADS
@@ -138,7 +143,9 @@ class AnonymizationMain(BaseMain):
                 #truncate_tables(connection, schema_batch.get('truncate', []))
             try:
                 print("starting thread "+str(self))
-                anonymize_tables(connection, schema.get('tables', []), verbose=args.verbose)
+                res, table = anonymize_tables(connection, schema.get('tables', []), verbose=args.verbose)
+                self.number_rec[table][1] = self.number_rec[table][1] + res
+                print(table+" "+self.number_rec[table][1] / self.number_rec[table][0] * 100+" %")
                 if not args.dry_run:
                     connection.commit()
                 end_time = time.time()
