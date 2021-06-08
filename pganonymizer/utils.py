@@ -35,11 +35,9 @@ def anonymize_tables(connection, definitions, verbose=False):
         columns = table_definition.get('fields', [])
         excludes = table_definition.get('excludes', [])
         search = table_definition.get('search')
-        column_dict = get_column_dict(columns)
         primary_key = table_definition.get('primary_key', DEFAULT_PRIMARY_KEY)
         total_count = get_table_count(connection, table_name)
-        data, table_columns = build_data(connection, table_name, columns, excludes, total_count,search, primary_key, verbose)
-        import_data(connection, column_dict, table_name, table_columns, primary_key, data)
+        build_data(connection, table_name, columns, excludes, total_count,search, primary_key, verbose)
 
 def get_history(con, table):
     #todo checken ob es hier sinn macht über die history zu suchen
