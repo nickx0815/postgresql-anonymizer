@@ -123,8 +123,10 @@ class AnonymizationMain(BaseMain):
                                 break
                             for row in records:
                                 list.append(row.get('id'))
-                            cur = copy.deepcopy(table_attributes)     
-                            cur['search'].append("id in "+_get_ids_sql_format(list))
+                            cur = copy.deepcopy(table_attributes)    
+                            search_list = cur.get('search', [])
+                            search_list.append("id in "+_get_ids_sql_format(list))
+                            cur['search'] = search_list
                             self.jobs.put({type_: [{table_key:cur}]})
                         self.number_rec[table_key] = (number, 0)
                         
