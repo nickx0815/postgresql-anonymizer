@@ -110,21 +110,21 @@ def build_data(connection, table, columns, excludes, total_count, search,primary
         number_print = 500
         if number % number_print == 0:
             print(str(number_print)+" more records anonymized!")
-        original_data = {}
         row_column_dict = {}
         if not row_matches_excludes(row, excludes):
             row_column_dict = get_column_values(row, columns, {'id':row.get('id'), 'table':table})
             for key, value in row_column_dict.items():
+                original_data = {}
                 migrated_data = table.replace(".", "_")+"_"+key+"_"+str(row.get('id'))
                 #print(value)
                 #print(migrated_data)
                 #print(row[key])
                 if row[key] == migrated_data:
                     continue
-                if not original_data.get(key):
-                    original_data[key] = {}
+#                 if not original_data.get(key):
+#                     original_data[key] = {}
                 anon_field_id = anon_fields[key]
-                original_data[key].update({row.get('id'): row[key]})
+                original_data[key] = {row.get('id'): row[key]}
                 row[key] = value
                 #print("to be anonymized")
                 import_data(connection, key, table, row.get('id'), primary_key, value)
