@@ -98,6 +98,7 @@ def build_data(connection, table, columns, excludes, total_count, search,primary
     cursor.close()
     cursor = build_sql_select(connection, table, search)
     number=1
+    anon_fields = _get_anon_field_id(columns)
     while True:
         row = cursor.fetchone()
         if not row:
@@ -116,7 +117,7 @@ def build_data(connection, table, columns, excludes, total_count, search,primary
                     continue
                 if not original_data.get(key):
                     original_data[key] = {}
-                anon_field_id = columns[0].get(key).get('provider').get('field_anon_id')
+                anon_field_id = anon_fields[key]
                 original_data[key].update({row.get('id'): row[key]})
                 row[key] = value
                 print("to be anonymized")
@@ -131,6 +132,12 @@ def build_data(connection, table, columns, excludes, total_count, search,primary
     if verbose:
         progress_bar.finish()
     cursor.close()
+
+def _get_anon_field_id(colums):
+    for column in columns:
+        for key, value in column.items():
+            dic[key] = value.get('provider').get('field_anon_id')
+    return dic
     
 # def row_check_history(columns, search, history=False):
 #     field = list(columns[0].keys())[0]
