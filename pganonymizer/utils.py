@@ -109,7 +109,7 @@ def build_data(connection, table, columns, excludes, total_count, search,primary
         number=number+1
         number_print = 500
         if number % number_print == 0:
-            print(number_print+" more records anonymized!")
+            print(str(number_print)+" more records anonymized!")
         original_data = {}
         row_column_dict = {}
         if not row_matches_excludes(row, excludes):

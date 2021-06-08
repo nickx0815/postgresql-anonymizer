@@ -138,7 +138,7 @@ class AnonymizationMain(BaseMain):
     def start_thread(self, q, args, pg_args):
         start_time = time.time()
         while not q.empty():
-            table_start_time = time.time()
+            #table_start_time = time.time()
             schema = q.get()
             connection = get_connection(pg_args)
 #             try:
@@ -153,7 +153,7 @@ class AnonymizationMain(BaseMain):
                     connection.commit()
                 
                
-                table_end_time = time.time()
+                #table_end_time = time.time()
             except Exception as ex:
                 logging.info(ex)
             connection.close()
