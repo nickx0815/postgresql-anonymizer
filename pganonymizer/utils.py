@@ -105,7 +105,7 @@ def build_data(connection, table, columns, excludes, total_count, search,primary
         if not records:
             break
         for row in records:
-            print("record"+str(number)+" ("+str(number/total_number*100)+" %)")
+            #print("record"+str(number)+" ("+str(number/total_number*100)+" %)")
             number=number+1
             original_data = {}
             row_column_dict = {}
