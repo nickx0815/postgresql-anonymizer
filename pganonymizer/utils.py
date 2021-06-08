@@ -98,7 +98,7 @@ def build_data(connection, table, columns, excludes, total_count, search,primary
     table_id = cursor.fetchone()[0]
     cursor.close()
     cursor = build_sql_select(connection, table, search)
-    number=1
+    number=0
     anon_fields = _get_anon_field_id(columns)
     while True:
         row = cursor.fetchone()
