@@ -106,13 +106,15 @@ def build_data(connection, table, columns, excludes, total_count, search,primary
             break
         for row in records:
             #print("record"+str(number)+" ("+str(number/total_number*100)+" %)")
+            print(number)
             number=number+1
             original_data = {}
             row_column_dict = {}
             if not row_matches_excludes(row, excludes):
                 row_column_dict = get_column_values(row, columns, {'id':row.get('id'), 'table':table})
                 for key, value in row_column_dict.items():
-                    if value == _(table)+"_"+key+"_"+row.get('id'):
+                    print(value)
+                    if value == _(table)+"_"+key+"_"+str(row.get('id')):
                         continue
                     if not original_data.get(key):
                         original_data[key] = {}
