@@ -107,6 +107,9 @@ def build_data(connection, table, columns, excludes, total_count, search,primary
             #print("record"+str(number)+" ("+str(number/total_number*100)+" %)")
         #print(number)
         number=number+1
+        number_print = 500
+        if number % number_print == 0:
+            print(number_print+" more records anonymized!")
         original_data = {}
         row_column_dict = {}
         if not row_matches_excludes(row, excludes):

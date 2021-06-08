@@ -116,7 +116,7 @@ class AnonymizationMain(BaseMain):
                         cursor = build_sql_select(connection, table_key, table_attributes.get('search', False), select="id")
                         while True:
                             list = []
-                            records = cursor.fetchmany(size=1000)
+                            records = cursor.fetchmany(size=5000)
                             number = number + len(records)
                             
                             if not records:
@@ -136,8 +136,9 @@ class AnonymizationMain(BaseMain):
         return number_threads
     
     def start_thread(self, q, args, pg_args):
+        start_time = time.time()
         while not q.empty():
-            start_time = time.time()
+            table_start_time = time.time()
             schema = q.get()
             connection = get_connection(pg_args)
 #             try:
@@ -150,12 +151,15 @@ class AnonymizationMain(BaseMain):
                 print(table+" "+str(self.number_rec[table][1] / self.number_rec[table][0] * 100)+" %")
                 if not args.dry_run:
                     connection.commit()
-                end_time = time.time()
-                #logging.info('Anonymization took {:.2f}s'.format(end_time - start_time))
+                
+               
+                table_end_time = time.time()
             except Exception as ex:
                 logging.info(ex)
             connection.close()
             q.task_done()
+        end_time = time.time()
+        logging.info('Anonymization took {:.2f}s'.format(end_time - start_time))
 
 class DeAnonymizationMain(BaseMain):
     def update_queue(self,args_, opt_args):
