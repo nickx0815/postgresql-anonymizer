@@ -142,6 +142,7 @@ class AnonymizationMain(BaseMain):
     def print_info(self, table, total, anonymized, percent_anonymized):
         print("Table {table} is {percent} % anonymized".format(table=table,
                                                                 percent="{:.2f}".format(percent_anonymized*100)))
+        print("Total Records anonymized {total}".format(total=total))
         if percent_anonymized == 1:
             runtime = time.time()-self.number_rec[table][2]
             time_ = str(datetime.timedelta(seconds=runtime))
@@ -176,7 +177,7 @@ class AnonymizationMain(BaseMain):
             connection.close()
             q.task_done()
         end_time = time.time()
-        print('Anonymization took {:.2f}s'.format(end_time - start_time))
+        #print('Anonymization took {:.2f}s'.format(end_time - start_time))
 
 class DeAnonymizationMain(BaseMain):
     def update_queue(self,args_, opt_args):
