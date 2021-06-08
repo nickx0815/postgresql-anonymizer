@@ -113,7 +113,7 @@ class AnonymizationMain(BaseMain):
                 else:
                     for table_key, table_attributes in table.items():
                         number = 0
-                        cursor = build_sql_select(connection, table_key, table_attributes['search'], select="id")
+                        cursor = build_sql_select(connection, table_key, table_attributes.get('search', False), select="id")
                         while True:
                             list = []
                             records = cursor.fetchmany(size=1000)
