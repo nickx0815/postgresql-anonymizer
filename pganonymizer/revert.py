@@ -44,29 +44,25 @@ def _get_ids_sql_format(ids):
 def create_anon(con, data, ids, table_id):
     cr = con.cursor()
     for table, field_data in data.items():
-        ids_sql_format = _get_ids_sql_format(ids)
+        #ids_sql_format = _get_ids_sql_format(ids)
         field = list(field_data.keys())[0]
         insert_migrated_fields_rec(cr, field, table)
-        field_sql = "Select id, field_id From ir_model_fields_anonymization Where field_name = '{field_name}' AND model_id = {table_id} and id in {tuple_ids}".format(field_name=field,
-                                                                                                                                                            table_id=table_id,
-                                                                                                                                                            tuple_ids=ids_sql_format)
-        cr.execute(field_sql)
-        field_id = cr.fetchone()
-        for id in data.get(table).get(field):
-            sql_migrated_data_insert = "Insert into migrated_data (model_id, field_id, record_id, value) \
+        id = data.get(table).get(field)
+        sql_migrated_data_insert = "Insert into migrated_data (model_id, field_id, record_id, value) \
             VALUES (%s, %s, %s, %s)"
-            data = (table, field, id, data.get(table).get(field).get(id))
-            cr.execute(sql_migrated_data_insert, data)
-            update_fields_history(cr, table_id, id, "2", field_id = field_id)
+        data = (table, field, id, data.get(table).get(field).get(id))
+        cr.execute(sql_migrated_data_insert, data)
+        update_fields_history(cr, table, id, "2", field)
     cr.execute("COMMIT;")
     cr.close()
 
 def insert_migrated_fields_rec(cr, field, table):
     sql_insert = "INSERT INTO migrated_fields (model_id, field_id) \
                    VALUES ('{table}', '{field}');".format(table=table, field=field)
-    sql_select = "SELECT *  from migrated_fields \
+    sql_select = "SELECT id  from migrated_fields \
                             WHERE model_id = '{table}' \
-                                   AND field_id = '{field}';".format(table=table, field=field)
+                                   AND field_id = '{field}' \
+                            LIMIT 1;".format(table=table, field=field)
     cr.execute(sql_select)
     record = cr.fetchone()
     if not record:
