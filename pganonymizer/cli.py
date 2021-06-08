@@ -146,7 +146,7 @@ class AnonymizationMain(BaseMain):
             try:
                 print("starting thread "+str(self))
                 res, table = anonymize_tables(connection, schema.get('tables', []), verbose=args.verbose)
-                self.number_rec[table][1] = self.number_rec[table][1] + res
+                self.number_rec[table] = (self.number_rec[table][0], self.number_rec[table][1] + res)
                 print(table+" "+self.number_rec[table][1] / self.number_rec[table][0] * 100+" %")
                 if not args.dry_run:
                     connection.commit()
