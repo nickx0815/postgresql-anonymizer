@@ -99,7 +99,10 @@ class BaseMain():
     
 class AnonymizationMain(BaseMain):
     def update_queue(self, args, opt_args):
-        schema = yaml.load(open(args.schema), Loader=yaml.FullLoader)
+        try:
+            schema = yaml.load(open(args.schema), Loader=yaml.FullLoader)
+        except:
+            schema = yaml.load(open(args.schema))
         self.get_schema_batches(schema, opt_args)
     
     def get_schema_batches(self, schema, opt_args):
