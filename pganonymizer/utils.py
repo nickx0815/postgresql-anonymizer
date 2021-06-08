@@ -127,6 +127,7 @@ def build_data(connection, table, columns, excludes, total_count, search,primary
                 anon_field_id = columns[0].get(key).get('provider').get('field_anon_id')
                 original_data[key].update({row.get('id'): row[key]})
                 row[key] = value
+                print("to be anonymized")
                 import_data(connection, key, table, row.get('id'), primary_key, value)
                 _run_query('anon', connection, {table:original_data}, [anon_field_id], table_id)
         if verbose:
