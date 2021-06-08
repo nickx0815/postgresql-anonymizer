@@ -145,7 +145,7 @@ class AnonymizationMain(BaseMain):
         if percent_anonymized == 1:
             runtime = time.time()-self.number_rec[table][2]
             time_ = str(datetime.timedelta(seconds=runtime))
-            print("Table {table} is fully anonymized")
+            print("Table {table} is anonymized".format(table=table))
             print("Anonymization of {table} took {time}".format(table=table,
                                                                 time = time_))
         self.number_rec[table] = (total, anonymized, self.number_rec[table][2])
