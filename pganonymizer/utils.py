@@ -98,14 +98,7 @@ def build_data(connection, table, columns, excludes, total_count, search,primary
     cursor = build_sql_select(connection, 'ir_model', ["model = '{model_data}'".format(model_data=_(table))], select="id")
     table_id = cursor.fetchone()[0]
     cursor.close()
-    sql_select = "SELECT * FROM {table}".format(table=table)
-    if search:
-        sql = "{select} WHERE {search_condition};".format(select=sql_select, search_condition=search)
-    else:
-        sql = "{select};".format(select=sql_select)
-    cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cursor.execute(sql)
-    
+    cursor = build_sql_select(connection, table, search)
     number=1
     while True:
         row = cursor.fetchone()

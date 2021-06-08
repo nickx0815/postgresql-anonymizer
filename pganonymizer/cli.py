@@ -119,7 +119,7 @@ class AnonymizationMain(BaseMain):
                             for row in records:
                                 list.append(row.get('id'))
                             cur = table_attributes       
-                            cur['search'].append("id in ("+_get_ids_sql_format(list)+")")
+                            cur['search'].append("id in "+_get_ids_sql_format(list))
                             self.jobs.put({type_: [{table_key:cur}]})
         
     def get_thread_number(self):
