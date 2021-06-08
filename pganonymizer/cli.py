@@ -5,6 +5,7 @@ from __future__ import absolute_import, print_function
 import argparse
 import logging
 import sys
+import copy
 import time
 import psycopg2
 from time import sleep
@@ -118,7 +119,7 @@ class AnonymizationMain(BaseMain):
                                 break
                             for row in records:
                                 list.append(row.get('id'))
-                            cur = table_attributes.copy()     
+                            cur = copy.copy(table_attributes)     
                             cur['search'].append("id in "+_get_ids_sql_format(list))
                             self.jobs.put({type_: [{table_key:cur}]})
         
