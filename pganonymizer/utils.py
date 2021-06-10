@@ -101,16 +101,15 @@ def build_data(connection, table, columns, excludes, total_count, search,primary
     number=0
     anon_fields = _get_anon_field_id(columns)
     while True:
-        rows = cursor.fetchmany(size=100)
+        size = 50
+        rows = cursor.fetchmany(size=size)
         if not rows:
+            print(str(size)+" more records anonymized!")
             break
             #print("record"+str(number)+" ("+str(number/total_number*100)+" %)")
         #print(number)
         for row in rows:
             number=number+1
-            number_print = 500
-            if number % number_print == 0:
-                print(str(number_print)+" more records anonymized!")
             row_column_dict = {}
             if not row_matches_excludes(row, excludes):
                 row_column_dict = get_column_values(row, columns, {'id':row.get('id'), 'table':table})

@@ -136,7 +136,7 @@ class AnonymizationMain(BaseMain):
                         cursor = build_sql_select(connection, table_key, table_attributes.get('search', False), select="id")
                         while True:
                             list = []
-                            records = cursor.fetchmany(size=1000)
+                            records = cursor.fetchmany(size=50)
                             number = number + len(records)
                             
                             if not records:

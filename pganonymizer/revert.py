@@ -113,6 +113,7 @@ def run_revert(connection, args, ids=None):
                     break
                 for record in records:
                     cr3 = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
+                    #todo abfrage so geht nicht, id kann anders sein (id in value nicht record_id)
                     value = original_table+"_"+original_field+"_"+str(record['record_id'])
                     record_db_id_sql = "SELECT ID FROM {mapped_table} where {mapped_field} = '{value}';".format(
                         mapped_table=migrated_table,
