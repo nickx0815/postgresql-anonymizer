@@ -89,6 +89,20 @@ class BaseMain():
         args = parser.parse_args()
         return args
     
+    def start_thread(self, q, args, pg_args):
+        while not q.empty():
+            #table_start_time = time.time()
+            data = q.get()
+            connection = get_connection(pg_args)
+                #todo implement truncate functionality, not working right now
+                #truncate_tables(connection, schema_batch.get('truncate', []))
+            print("starting thread "+str(self))
+            self._runSpecificTask(connection, args, data)
+            if not args.dry_run:
+                connection.commit()
+            connection.close()
+            q.task_done()
+    
     def _get_run_data(self, args):
         if not args:
             args = self.get_args()
@@ -148,30 +162,15 @@ class AnonymizationMain(BaseMain):
                                                                 time = time_))
         self.number_rec[table] = (total, anonymized, self.number_rec[table][2])
     
-    def start_thread(self, q, args, pg_args):
-        while not q.empty():
-            #table_start_time = time.time()
-            schema = q.get()
-            connection = get_connection(pg_args)
-#             try:
-                #todo implement truncate functionality, not working right now
-                #truncate_tables(connection, schema_batch.get('truncate', []))
-            try:
-                print("starting thread "+str(self))
-                res, table = anonymize_tables(connection, schema.get('tables', []), verbose=args.verbose)
-                total_size = self.number_rec[table][0]
-                number_anonymized = self.number_rec[table][1]+res
-                percent_anonymized = number_anonymized/total_size
-                self.print_info(table, total_size, number_anonymized, percent_anonymized)
-                if not args.dry_run:
-                    connection.commit()
-                
-               
-                #table_end_time = time.time()
-            except Exception as ex:
-                logging.info(ex)
-            connection.close()
-            q.task_done()
+    def _runSpecificTask(self, con, args, schema):
+        try:
+            res, table = anonymize_tables(con, schema.get('tables', []), verbose=args.verbose)
+            total_size = self.number_rec[table][0]
+            number_anonymized = self.number_rec[table][1]+res
+            percent_anonymized = number_anonymized/total_size
+            self.print_info(table, total_size, number_anonymized, percent_anonymized)
+        except Exception as ex:
+            logging.info(ex)
 
 class DeAnonymizationMain(BaseMain):
     def update_queue(self,args_, opt_args):
@@ -195,22 +194,14 @@ class DeAnonymizationMain(BaseMain):
             self.jobs.put(job_ids)
         cursor.close()
 
-    def start_thread(self, q, _args, pg_args):
-        while not q.empty():
+    def _runSpecificTask(self, con, args, data):
+        try:
             start_time = time.time()
-            data = q.get()
-            connection = get_connection(pg_args)
-            #todo implement truncate functionality, not working right now
-            try:
-                run_revert(connection, _args, data)
-    #                 if not args.dry_run:
-    #                     connection.commit()
-                end_time = time.time()
-                logging.info('DEAnonymization took {:.2f}s'.format(end_time - start_time))
-            except Exception as ex:
-                logging.info(ex)
-            connection.close()
-            q.task_done()
+            run_revert(con, args, data)
+            end_time = time.time()
+            logging.info('DEAnonymization took {:.2f}s'.format(end_time - start_time))
+        except Exception as ex:
+            logging.info(ex)
 
 def main():
     #todo needs to be implemented, run the script via command line. 

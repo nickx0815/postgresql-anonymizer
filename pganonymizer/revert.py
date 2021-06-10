@@ -102,7 +102,7 @@ def run_revert(connection, args, ids=None):
             original_field = mapped_field[2]
             migrated_field = mapped_field[3]
             migrated_model_id, migrated_field_id = get_db_ids(connection, migrated_table, migrated_field)
-            get_anon_data_sql = "SELECT * FROM {table_name} where model_id = '{original_table}' and field_id = '{original_field}';".format(table_name=args.anon_table,
+            get_anon_data_sql = "SELECT * FROM {anon_table} where model_id = '{original_table}' and field_id = '{original_field}';".format(anon_table=args.anon_table,
                                                                                                                                            original_table = original_table,
                                                                                                                                            original_field = original_field)
             logging.info(get_anon_data_sql)
