@@ -101,7 +101,7 @@ def build_data(connection, table, columns, excludes, total_count, search,primary
     number=0
     anon_fields = _get_anon_field_id(columns)
     while True:
-        size = 50
+        size = 2500
         rows = cursor.fetchmany(size=size)
         if not rows:
             print(str(size)+" more records anonymized!")
