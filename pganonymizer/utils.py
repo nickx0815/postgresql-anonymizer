@@ -103,7 +103,7 @@ def build_data(connection, table, columns, excludes, total_count, search,primary
     while True:
         size = 2500
         #rows = cursor.fetchmany(size=size)
-        row = [cursor.fetchone()]
+        rows = [cursor.fetchone()]
         if not rows:
             print(str(size)+" more records anonymized!")
             break
