@@ -36,7 +36,7 @@ class BaseMain():
         self.jobs = Queue()
         self.number_rec = {}
         
-    def main_anonymize(self, args_, opt_args):
+    def startProcessing(self, args_, opt_args):
         """Main method"""
         # own connection per schema batch...
         pg_args, args_ = self._get_run_data(args_)
@@ -96,7 +96,9 @@ class BaseMain():
         return pg_args, args
     
     def get_thread_number(self):
-        return 0
+        queue_size = self.jobs.qsize()
+        number_threads = queue_size if queue_size < NUMBER_MAX_THREADS else NUMBER_MAX_THREADS
+        return number_threads
     
 class AnonymizationMain(BaseMain):
     def update_queue(self, args, opt_args):
@@ -134,11 +136,6 @@ class AnonymizationMain(BaseMain):
                             self.jobs.put({type_: [{table_key:cur}]})
                         self.number_rec[table_key] = (number, 0, time.time())
                         
-    def get_thread_number(self):
-        queue_size = self.jobs.qsize()
-        number_threads = queue_size if queue_size < NUMBER_MAX_THREADS else NUMBER_MAX_THREADS
-        return number_threads
-    
     def print_info(self, table, total, anonymized, percent_anonymized):
         print("Table {table} is {percent} % anonymized".format(table=table,
                                                                 percent="{:.2f}".format(percent_anonymized*100)))
@@ -152,7 +149,6 @@ class AnonymizationMain(BaseMain):
         self.number_rec[table] = (total, anonymized, self.number_rec[table][2])
     
     def start_thread(self, q, args, pg_args):
-        start_time = time.time()
         while not q.empty():
             #table_start_time = time.time()
             schema = q.get()
@@ -176,11 +172,11 @@ class AnonymizationMain(BaseMain):
                 logging.info(ex)
             connection.close()
             q.task_done()
-        end_time = time.time()
-        #print('Anonymization took {:.2f}s'.format(end_time - start_time))
 
 class DeAnonymizationMain(BaseMain):
     def update_queue(self,args_, opt_args):
+        #todo umbauen, dass ein job jeweils alle migrated_fields eines records beinhaltet. 
+        #todo weitere deanon methoden umbaunen, sodass alle felder mit einem update deanonymsiert werden
         where_clause = " 1=1"
         NUMBER_FIELD_PER_THREAD = 1
         pg_args, args_ = self._get_run_data(args_)
@@ -199,10 +195,6 @@ class DeAnonymizationMain(BaseMain):
             self.jobs.put(job_ids)
         cursor.close()
 
-        
-    def get_thread_number(self):
-        return NUMBER_MAX_THREADS
-    
     def start_thread(self, q, _args, pg_args):
         while not q.empty():
             start_time = time.time()
