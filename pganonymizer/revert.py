@@ -96,7 +96,6 @@ def run_revert(connection, args, data):
     cr2 = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
     for table, data in data.items():
         mapped_field_data = get_mapped_field_data(connection, table, data[0])
-        migrated_model_id, migrated_field_id = get_db_ids(connection, migrated_table, migrated_field)
         get_anon_data_sql = "SELECT * FROM {anon_table} where id in {ids};".format(anon_table=args.anon_table,ids = _get_ids_sql_format(data[1]))
         #logging.info(get_anon_data_sql)
         cr1.execute(get_anon_data_sql)
@@ -112,7 +111,7 @@ def run_revert(connection, args, data):
                     migrated_table = mapped_field[1]
                     original_field = mapped_field[2]
                     migrated_field = mapped_field[3]
-                    
+                    migrated_model_id, migrated_field_id = get_db_ids(connection, migrated_table, migrated_field)
                     cr3 = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
                     value = original_table+"_"+original_field+"_"+str(record['record_id'])
                     record_db_id_sql = "SELECT ID FROM {mapped_table} where {mapped_field} = '{value}';".format(
