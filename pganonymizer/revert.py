@@ -130,7 +130,7 @@ def run_revert(connection, args, data):
                                                                                                                                                         rec_id = record_db_id)
                         logging.info(get_migrated_field_sql)
                         cr2.execute(get_migrated_field_sql)
-                        update_fields_history(cr2, migrated_model_id, record_db_id, "4", revert_field = migrated_field_id)
+                        update_fields_history(cr2, original_table, record_db_id, "4", original_field)
                         cr2.execute("COMMIT;")
                     cr3.close()
     
