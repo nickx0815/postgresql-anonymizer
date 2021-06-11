@@ -18,7 +18,7 @@ import yaml
 from pganonymizer.constants import DATABASE_ARGS, DEFAULT_SCHEMA_FILE, NUMBER_MAX_THREADS
 from pganonymizer.providers import PROVIDERS
 from pganonymizer.utils import anonymize_tables, create_database_dump, get_connection, truncate_tables, build_sql_select
-from pganonymizer.revert import run_revert, _get_ids_sql_format
+from pganonymizer.revert import run_revert, _get_ids_sql_format, get_mapped_field_data
 
 def get_pg_args(args):
         """
@@ -176,11 +176,19 @@ class AnonymizationMain(BaseMain):
 
 class DeAnonymizationMain(BaseMain):
     def update_queue(self,schema, opt_args):
+        connection = get_connection(opt_args['pg_args'])
         #todo umbauen, dass ein job jeweils alle migrated_fields eines records beinhaltet. 
         #todo weitere deanon methoden umbaunen, sodass alle felder mit einem update deanonymsiert werden
         for table, fields in schema.items():
-            for field in fields:
-                self.jobs.put({table: [field]})
+            cursor = build_sql_select(connection, "anon_table", ["model_id = '{model_id}'".format(model_id=table)], select="id")
+            while True:
+                list = []
+                records = cursor.fetchmany(size=1000)
+                if not records:
+                    break
+                for rec in records:
+                    list.append(rec.get('id'))
+                self.jobs.put({table: (fields, list)})
 
     def _runSpecificTask(self, con, args, data):
         try:

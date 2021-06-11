@@ -94,17 +94,15 @@ def run_revert(connection, args, data):
     #logging.info(str(anon_fields)+" started to reverse")
     cr1 = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
     cr2 = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    for table, fields in data.items():
-        mapped_field_data = get_mapped_field_data(connection, table, fields)
+    for table, data in data.items():
+        mapped_field_data = get_mapped_field_data(connection, table, data[0])
         for mapped_field in mapped_field_data:
             original_table = mapped_field[0]
             migrated_table = mapped_field[1]
             original_field = mapped_field[2]
             migrated_field = mapped_field[3]
             migrated_model_id, migrated_field_id = get_db_ids(connection, migrated_table, migrated_field)
-            get_anon_data_sql = "SELECT * FROM {anon_table} where model_id = '{original_table}' and field_id = '{original_field}';".format(anon_table=args.anon_table,
-                                                                                                                                           original_table = original_table,
-                                                                                                                                           original_field = original_field)
+            get_anon_data_sql = "SELECT * FROM {anon_table} where id in {ids}';".format(anon_table=args.anon_table,ids = _get_ids_sql_format(data[1]))
             logging.info(get_anon_data_sql)
             cr1.execute(get_anon_data_sql)
             while True:
