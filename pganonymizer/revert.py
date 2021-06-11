@@ -89,12 +89,12 @@ def get_anon_fields(connection, args, ids=None, where_clause=""):
     cr.close()
     return data
 
-def run_revert(connection, args, ids=None):
-    anon_fields = get_anon_fields(connection, args, ids=ids)
-    logging.info(str(anon_fields)+" started to reverse")
+def run_revert(connection, args, data):
+    #anon_fields = get_anon_fields(connection, args, ids=ids)
+    #logging.info(str(anon_fields)+" started to reverse")
     cr1 = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
     cr2 = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    for table, fields in anon_fields.items():
+    for table, fields in data.items():
         mapped_field_data = get_mapped_field_data(connection, table, fields)
         for mapped_field in mapped_field_data:
             original_table = mapped_field[0]
