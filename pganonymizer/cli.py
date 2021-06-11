@@ -176,26 +176,12 @@ class AnonymizationMain(BaseMain):
             logging.info(ex)
 
 class DeAnonymizationMain(BaseMain):
-    def update_queue(self,args_, opt_args):
+    def update_queue(self,schema, opt_args):
         #todo umbauen, dass ein job jeweils alle migrated_fields eines records beinhaltet. 
         #todo weitere deanon methoden umbaunen, sodass alle felder mit einem update deanonymsiert werden
-        where_clause = " 1=1"
-        NUMBER_FIELD_PER_THREAD = 1
-        pg_args, args_ = self._get_run_data(args_)
-        connection = get_connection(pg_args)
-        cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
-        if opt_args.get('ids'):
-            where_clause = "id in {ids}".format(ids=_get_ids_sql_format(opt_args.get('ids')))
-        cursor.execute(("select id from migrated_fields where {where}").format(where=where_clause))
-        while True:
-            job_ids = []
-            records = cursor.fetchmany(size=NUMBER_FIELD_PER_THREAD)
-            if not records:
-                break
-            for row in records:
-                job_ids.append(row['id'])
-            self.jobs.put(job_ids)
-        cursor.close()
+        for table, fields in schema.items():
+            for field in fields:
+                self.jobs.put({table: [field]})
 
     def _runSpecificTask(self, con, args, data):
         try:
