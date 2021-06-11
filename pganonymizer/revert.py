@@ -116,7 +116,7 @@ def run_revert(connection, args, data):
                         mapped_table=migrated_table,
                         mapped_field=migrated_field,
                         value=value)
-                    logging.info(record_db_id_sql)
+                    #logging.info(record_db_id_sql)
                     cr3.execute(record_db_id_sql)
                     record_db = cr3.fetchone()
                     if record_db:
@@ -126,7 +126,7 @@ def run_revert(connection, args, data):
                                                                                                                                                         mapped_field=migrated_field,
                                                                                                                                                         original_value=record['value'],
                                                                                                                                                         rec_id = record_db_id)
-                        logging.info(get_migrated_field_sql)
+                        #logging.info(get_migrated_field_sql)
                         cr2.execute(get_migrated_field_sql)
                         update_fields_history(cr2, original_table, record_db_id, "4", original_field)
                         cr2.execute("COMMIT;")
