@@ -103,7 +103,7 @@ def run_revert(connection, args, data):
             migrated_field = mapped_field[3]
             migrated_model_id, migrated_field_id = get_db_ids(connection, migrated_table, migrated_field)
             get_anon_data_sql = "SELECT * FROM {anon_table} where id in {ids};".format(anon_table=args.anon_table,ids = _get_ids_sql_format(data[1]))
-            logging.info(get_anon_data_sql)
+            #logging.info(get_anon_data_sql)
             cr1.execute(get_anon_data_sql)
             while True:
                 records = cr1.fetchmany(size=2000)
