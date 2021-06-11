@@ -50,7 +50,8 @@ class BaseMain():
             self.list_provider_classes()
             sys.exit(0)
         opt_args['pg_args']=pg_args
-        self.update_queue(args_, opt_args)
+        schema = self.get_schema(args_)
+        self.update_queue(schema, opt_args)
         if opt_args.get('threading'):
             number_threads = self.get_thread_number()
             print("Number of threads started: {number}".format(number=number_threads))
@@ -63,6 +64,13 @@ class BaseMain():
         else:
             self.start_thread(self.jobs, args_, pg_args)   
         print("all done")
+    
+    def get_schema(self, args):
+        try:
+            schema = yaml.load(open(args.schema), Loader=yaml.FullLoader)
+        except:
+            schema = yaml.load(open(args.schema))
+        return schema
         
     def list_provider_classes(self):
         """List all available provider classes."""
@@ -115,14 +123,8 @@ class BaseMain():
         return number_threads
     
 class AnonymizationMain(BaseMain):
-    def update_queue(self, args, opt_args):
-        try:
-            schema = yaml.load(open(args.schema), Loader=yaml.FullLoader)
-        except:
-            schema = yaml.load(open(args.schema))
-        self.get_schema_batches(schema, opt_args)
     
-    def get_schema_batches(self, schema, opt_args):
+    def update_queue(self, schema, opt_args):
         #todo konfigurierbar
         #search wird nicht übernommen
         connection = get_connection(opt_args['pg_args'])
