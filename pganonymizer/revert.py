@@ -107,6 +107,7 @@ def run_revert(connection, args, data):
             cr1.execute(get_anon_data_sql)
             while True:
                 records = cr1.fetchmany(size=2000)
+                logging.info("record searched")
                 if not records:
                     break
                 for record in records:
@@ -116,6 +117,7 @@ def run_revert(connection, args, data):
                         mapped_table=migrated_table,
                         mapped_field=migrated_field,
                         value=value)
+                    logging.info("record identified")
                     #logging.info(record_db_id_sql)
                     cr3.execute(record_db_id_sql)
                     record_db = cr3.fetchone()
