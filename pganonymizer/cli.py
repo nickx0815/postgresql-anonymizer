@@ -32,9 +32,8 @@ def get_pg_args(args):
                  zip(DATABASE_ARGS, (args.dbname, args.user, args.password, args.host, args.port))})
 
 class BaseMain():
-    def __init__(self):
-        self.jobs = Queue()
-        self.number_rec = {}
+    jobs = Queue()
+    number_rec = {}
         
     def startProcessing(self, args_, opt_args):
         """Main method"""
