@@ -180,7 +180,7 @@ class DeAnonymizationMain(BaseMain):
         #todo umbauen, dass ein job jeweils alle migrated_fields eines records beinhaltet. 
         #todo weitere deanon methoden umbaunen, sodass alle felder mit einem update deanonymsiert werden
         for table, fields in schema.items():
-            cursor = build_sql_select(connection, "anon_table", ["model_id = '{model_id}'".format(model_id=table)], select="id")
+            cursor = build_sql_select(connection, "migrated_data", ["model_id = '{model_id}'".format(model_id=table)], select="id")
             while True:
                 list = []
                 records = cursor.fetchmany(size=1000)
