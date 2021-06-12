@@ -39,15 +39,7 @@ class BaseMain():
         """Main method"""
         # own connection per schema batch...
         pg_args, args_ = self._get_run_data(args_)
-    
         loglevel = logging.WARNING
-        if args_.verbose:
-            loglevel = logging.DEBUG
-        logging.basicConfig(format='%(levelname)s: %(message)s', level=loglevel)
-    
-        if args_.list_providers:
-            self.list_provider_classes()
-            sys.exit(0)
         opt_args['pg_args']=pg_args
         schema = self.get_schema(args_)
         self.update_queue(schema, opt_args)
@@ -122,6 +114,15 @@ class BaseMain():
         return number_threads
     
 class AnonymizationMain(BaseMain):
+    
+    def startProcessing(self, args_, opt_args):
+        if args_.verbose:
+            loglevel = logging.DEBUG
+        logging.basicConfig(format='%(levelname)s: %(message)s', level=loglevel)
+        if args_.list_providers:
+            self.list_provider_classes()
+            sys.exit(0)
+        BaseMain.startProcessing(self, args_, opt_args)
     
     def update_queue(self, schema, opt_args):
         #todo konfigurierbar
