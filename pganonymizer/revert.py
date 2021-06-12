@@ -65,19 +65,20 @@ def run_revert(connection, args, data):
     cr1 = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
     cr2 = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
     for table, data in data.items():
+        number = 0
         mapped_field_data = get_mapped_field_data(connection, table, data[0])
         original_table = mapped_field_data[0]
         migrated_table = mapped_field_data[1]
         original_field = mapped_field_data[2]
         migrated_field = mapped_field_data[3]
         for id in data[1]:
+            number = number + 1
             cr3 = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
             value = original_table+"_"+original_field+"_"+str(id)
             record_db_id_sql = "SELECT ID FROM {mapped_table} where {mapped_field} = '{value}';".format(
                 mapped_table=migrated_table,
                 mapped_field=migrated_field,
                 value=value)
-            logging.info("record identified")
             cr3.execute(record_db_id_sql)
             record_db = cr3.fetchone()
             if record_db:
@@ -86,12 +87,12 @@ def run_revert(connection, args, data):
                                                                                                                                                 mapped_field=migrated_field,
                                                                                                                                                 original_value=record['value'],
                                                                                                                                                 rec_id = record_db_id)
-                logging.info("record updated")
+                print.info("record updated")
                 cr2.execute(get_migrated_field_sql)
                 update_fields_history(cr2, original_table, record_db_id, "4", original_field)
                 cr2.execute("COMMIT;")
             cr3.close()
-    
+    print(str(number)+" records deanonymized!")
     cr2.close()
     cr1.close()
 
