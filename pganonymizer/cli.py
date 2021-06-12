@@ -68,11 +68,8 @@ class BaseMain():
         for provider_cls in PROVIDERS:
             print('{:<10} {}'.format(provider_cls.id, provider_cls.__doc__))
     
-    def get_args(self):
+    def get_args(self, parseargs=True):
         parser = argparse.ArgumentParser(description='Anonymize data of a PostgreSQL database')
-        parser.add_argument('-v', '--verbose', action='count', help='Increase verbosity')
-        parser.add_argument('-l', '--list-providers', action='store_true', help='Show a list of all available providers',
-                            default=False)
         parser.add_argument('--schema', help='A YAML schema file that contains the anonymization rules',
                             default=constants.DEFAULT_SCHEMA_FILE)
         parser.add_argument('--dbname', help='Name of the database')
@@ -80,12 +77,11 @@ class BaseMain():
         parser.add_argument('--password', default='', help='Password for the database user')
         parser.add_argument('--host', help='Database hostname', default='localhost')
         parser.add_argument('--port', help='Port of the database', default='5432')
-        parser.add_argument('--dry-run', action='store_true', help='Don\'t commit changes made on the database',
-                            default=False)
-        parser.add_argument('--dump-file', help='Create a database dump file with the given name')
-    
-        args = parser.parse_args()
-        return args
+        if parseargs:
+            args = parser.parse_args()
+            return args
+        else:
+            return parser
     
     def start_thread(self, q, args, pg_args):
         while not q.empty():
@@ -113,6 +109,18 @@ class BaseMain():
         return number_threads
     
 class AnonymizationMain(BaseMain):
+    
+    def get_args(self):
+        parser =  BaseMain.get_args(self, parseArgs=False)
+        parser.add_argument('-v', '--verbose', action='count', help='Increase verbosity')
+        parser.add_argument('-l', '--list-providers', action='store_true', help='Show a list of all available providers',
+                            default=False)
+        parser.add_argument('--dry-run', action='store_true', help='Don\'t commit changes made on the database',
+                            default=False)
+        parser.add_argument('--dump-file', help='Create a database dump file with the given name')
+        args = parser.parse_args()
+        return args
+    
     
     def startProcessing(self, args_, opt_args):
         loglevel = logging.WARNING
