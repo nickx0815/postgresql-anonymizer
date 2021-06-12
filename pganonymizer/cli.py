@@ -91,7 +91,6 @@ class BaseMain():
             connection = get_connection(pg_args)
                 #todo implement truncate functionality, not working right now
                 #truncate_tables(connection, schema_batch.get('truncate', []))
-            print("starting thread "+str(self))
             self._runSpecificTask(connection, args, data)
             if not args.dry_run:
                 connection.commit()
