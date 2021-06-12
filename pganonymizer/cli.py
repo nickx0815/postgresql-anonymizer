@@ -199,7 +199,7 @@ class DeAnonymizationMain(BaseMain):
                     if not records:
                         break
                     for rec in records:
-                        list.append(rec.get('record_id'))
+                        list.append((rec.get('record_id'), rec.get('value')))
                     self.jobs.put({table: (field, list)})
 
     def _runSpecificTask(self, con, args, data):

@@ -71,7 +71,7 @@ def run_revert(connection, args, data):
         migrated_table = mapped_field_data[1]
         original_field = mapped_field_data[2]
         migrated_field = mapped_field_data[3]
-        for id in data[1]:
+        for id, value in data[1]:
             number = number + 1
             cr3 = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
             value = original_table+"_"+original_field+"_"+str(id)
@@ -85,7 +85,7 @@ def run_revert(connection, args, data):
                 record_db_id = record_db[0]
                 get_migrated_field_sql = "UPDATE {mapped_table} SET {mapped_field} = '{original_value}' WHERE  id = {rec_id};".format(mapped_table=migrated_table,
                                                                                                                                                 mapped_field=migrated_field,
-                                                                                                                                                original_value=record['value'],
+                                                                                                                                                original_value=value,
                                                                                                                                                 rec_id = record_db_id)
                 print.info("record updated")
                 cr2.execute(get_migrated_field_sql)
