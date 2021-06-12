@@ -192,14 +192,14 @@ class DeAnonymizationMain(BaseMain):
                 cursor = build_sql_select(connection, "migrated_data", 
                                                                     ["model_id = '{model_id}'".format(model_id=table),
                                                                     "field_id = '{field_id}'".format(field_id=field)],
-                                                                    select="id")
+                                                                    select="record_id")
                 while True:
                     list = []
                     records = cursor.fetchmany(size=constants.DEANON_NUMBER_FIELD_PER_THREAD)
                     if not records:
                         break
                     for rec in records:
-                        list.append(rec.get('id'))
+                        list.append(rec.get('record_id'))
                     self.jobs.put({table: (field, list)})
 
     def _runSpecificTask(self, con, args, data):
