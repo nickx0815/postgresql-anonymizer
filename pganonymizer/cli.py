@@ -192,7 +192,7 @@ class DeAnonymizationMain(BaseMain):
                 cursor = build_sql_select(connection, "migrated_data", 
                                                                     ["model_id = '{model_id}'".format(model_id=table),
                                                                     "field_id = '{field_id}'".format(field_id=field)],
-                                                                    select="record_id")
+                                                                    select="record_id, value")
                 while True:
                     list = []
                     records = cursor.fetchmany(size=constants.DEANON_NUMBER_FIELD_PER_THREAD)
