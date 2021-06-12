@@ -136,11 +136,8 @@ def mapping_exists(table, field, mapped_data):
     return (table, table, field, field)
 
 def get_mapped_field_data(connection, table, field):
-    list_field_data_mapped = []
     mapped_data = _get_mapped_data(connection, table)
-    mapped_data = mapping_exists(table, field, mapped_data)
-    list_field_data_mapped.append(mapped_data)
-    return list_field_data_mapped
+    return mapping_exists(table, field, mapped_data)
 
 def create_truncate(con, data):
     cr = con.cursor()
