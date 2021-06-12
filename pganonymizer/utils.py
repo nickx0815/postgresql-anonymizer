@@ -14,7 +14,7 @@ from progress.bar import IncrementalBar
 from psycopg2.errors import BadCopyFileFormat, InvalidTextRepresentation
 from six import StringIO
 
-from pganonymizer.constants import COPY_DB_DELIMITER, DEFAULT_PRIMARY_KEY
+from pganonymizer.constants import constants
 from pganonymizer.exceptions import BadDataFormat
 from pganonymizer.providers import get_provider
 from pganonymizer.revert import _run_query, _get_ids_sql_format, _
@@ -30,31 +30,14 @@ def anonymize_tables(connection, definitions, verbose=False):
     """
     for definition in definitions:
         table_name = list(definition.keys())[0]
-        #history_ids = get_history(connection, table_name)
         table_definition = definition[table_name]
         columns = table_definition.get('fields', [])
         excludes = table_definition.get('excludes', [])
         search = table_definition.get('search')
-        primary_key = table_definition.get('primary_key', DEFAULT_PRIMARY_KEY)
+        primary_key = table_definition.get('primary_key', constants.DEFAULT_PRIMARY_KEY)
         total_count = get_table_count(connection, table_name)
         res = build_data(connection, table_name, columns, excludes, total_count,search, primary_key, verbose)
         return res, table_name
-
-# def get_history(con, table):
-#     #todo checken ob es hier sinn macht über die history zu suchen
-#     cursor = con.cursor(cursor_factory=psycopg2.extras.DictCursor, name='fetch_large_result')
-#     #sql_model_id = "SELECT id FROM ir_model where model ='{table}'".format(table=table.replace("_","."))
-#     sql = "select field_id, record_id from ir_model_fields_anonymization_history where state = '2' and model_id = ({sql_model_id}); ".format(sql_model_id = table.replace("_","."))
-#     cursor.execute(sql)
-#     history_data = []
-#     while True:
-#         records = cursor.fetchmany(size=2000)
-#         if not records:
-#             break
-#         for row in records:
-#             history_data.append((row.get('field_id'), row.get('record_id')))
-#     cursor.close()
-#     return history_data
 
 def build_sql_select(connection, table, search, select="*"):
     cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -101,14 +84,10 @@ def build_data(connection, table, columns, excludes, total_count, search,primary
     number=0
     anon_fields = _get_anon_field_id(columns)
     while True:
-        size = 2500
-        #rows = cursor.fetchmany(size=size)
-        rows = [cursor.fetchone()]
+        rows = cursor.fetchmany(size=constants.ANON_FETCH_RECORDS)
         if not rows:
-            print(str(size)+" more records anonymized!")
+            print(str(constants.ANON_FETCH_RECORDS)+" more records anonymized!")
             break
-            #print("record"+str(number)+" ("+str(number/total_number*100)+" %)")
-        #print(number)
         for row in rows:
             number=number+1
             row_column_dict = {}
@@ -117,25 +96,15 @@ def build_data(connection, table, columns, excludes, total_count, search,primary
                 for key, value in row_column_dict.items():
                     original_data = {}
                     migrated_data = table.replace(".", "_")+"_"+key+"_"+str(row.get('id'))
-                    #print(value)
-                    #print(migrated_data)
-                    #print(row[key])
                     if row[key] == migrated_data:
                         continue
-    #                 if not original_data.get(key):
-    #                     original_data[key] = {}
                     anon_field_id = anon_fields[key]
                     original_data[key] = {row.get('id'): row[key]}
                     row[key] = value
-                    #print("to be anonymized")
                     import_data(connection, key, table, row.get('id'), primary_key, value)
                     _run_query('anon', connection, {table:original_data}, [anon_field_id], table_id)
         if verbose:
             progress_bar.next()
-        
-        #data.append(row.values())
-        # todo update stuff
-        
     if verbose:
         progress_bar.finish()
     cursor.close()
@@ -148,21 +117,6 @@ def _get_anon_field_id(columns):
             dic[key] = value.get('provider').get('field_anon_id')
     return dic
     
-# def row_check_history(columns, search, history=False):
-#     field = list(columns[0].keys())[0]
-#     anon_field_id = columns[0].get(field).get('provider').get('field_anon_id')
-#     if history and len(history)>0:
-#         history = [ x for x in history if x[0]==anon_field_id]
-#         not_id = [id[1] for id in history]
-#         not_id = _get_ids_sql_format(not_id)
-#         if not_id:
-#             if search:
-#                 search = search.append("id not in {id_list}".format(id_list=not_id))
-#             else:
-#                 search = ["id not in {id_list}".format(id_list=not_id)]
-#     return search, anon_field_id, field
-
-
 def row_matches_excludes(row, excludes=None):
     """
     Check whether a row matches a list of field exclusion patterns.
@@ -206,7 +160,7 @@ def copy_from(connection, data, table, columns):
     new_data = data2csv(data)
     cursor = connection.cursor()
     try:
-        cursor.copy_from(new_data, table, sep=COPY_DB_DELIMITER, null='\\N', columns=columns)
+        cursor.copy_from(new_data, table, sep=constants.COPY_DB_DELIMITER, null='\\N', columns=columns)
     except (BadCopyFileFormat, InvalidTextRepresentation) as exc:
         raise BadDataFormat(exc)
     cursor.close()
@@ -224,26 +178,14 @@ def import_data(connection, field, source_table, row_id, primary_key, value):
     :param str primary_key: Name of the tables primary key.
     :param list data: The table data.
     """
-    primary_key = primary_key if primary_key else DEFAULT_PRIMARY_KEY
-    #temp_table = '"tmp_{table}"'.format(table=source_table)
+    primary_key = primary_key if primary_key else constants.DEFAULT_PRIMARY_KEY
     cursor = connection.cursor()
     sql = "UPDATE {table} SET {field} = '{value}' WHERE ID = {id}".format(table=source_table,
                                                                           field=field,
                                                                           value=value,
                                                                           id=row_id)
-    #cursor.execute('CREATE TEMP TABLE %s (LIKE %s INCLUDING ALL) ON COMMIT DROP;' % (temp_table, source_table))
-    #cursor.execute('COMMIT;')
-    #copy_from(connection, data, temp_table, table_columns)
-    #set_columns = ', '.join(['{column} = s.{column}'.format(column='"{}"'.format(key)) for key in column_dict.keys()])
-    #sql = (
-    #    'UPDATE {table} t '
-    #    'SET {columns} '
-    #    'FROM {source} s '
-    #    'WHERE t.{primary_key} = s.{primary_key};'
-    #).format(table=source_table, columns=set_columns, source=temp_table, primary_key=primary_key)
     cursor.execute(sql)
     cursor.execute("COMMIT ;")
-    #cursor.execute('DROP TABLE %s;' % temp_table)
     cursor.close()
 
 
@@ -284,7 +226,7 @@ def data2csv(data):
     :rtype: StringIO
     """
     buf = StringIO()
-    writer = csv.writer(buf, delimiter=COPY_DB_DELIMITER, lineterminator='\n', quotechar='~')
+    writer = csv.writer(buf, delimiter=constants.COPY_DB_DELIMITER, lineterminator='\n', quotechar='~')
     for row in data:
         row_data = []
         for x in row:

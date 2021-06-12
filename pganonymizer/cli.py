@@ -15,7 +15,7 @@ from queue import Queue
 
 import yaml
 
-from pganonymizer.constants import DATABASE_ARGS, DEFAULT_SCHEMA_FILE, NUMBER_MAX_THREADS
+from pganonymizer.constants import constants
 from pganonymizer.providers import PROVIDERS
 from pganonymizer.utils import anonymize_tables, create_database_dump, get_connection, truncate_tables, build_sql_select
 from pganonymizer.revert import run_revert, _get_ids_sql_format, get_mapped_field_data
@@ -29,7 +29,7 @@ def get_pg_args(args):
         :rtype: dict
         """
         return ({name: value for name, value in
-                 zip(DATABASE_ARGS, (args.dbname, args.user, args.password, args.host, args.port))})
+                 zip(constants.DATABASE_ARGS, (args.dbname, args.user, args.password, args.host, args.port))})
 
 class BaseMain():
     jobs = Queue()
@@ -83,7 +83,7 @@ class BaseMain():
         parser.add_argument('-l', '--list-providers', action='store_true', help='Show a list of all available providers',
                             default=False)
         parser.add_argument('--schema', help='A YAML schema file that contains the anonymization rules',
-                            default=DEFAULT_SCHEMA_FILE)
+                            default=constants.DEFAULT_SCHEMA_FILE)
         parser.add_argument('--dbname', help='Name of the database')
         parser.add_argument('--user', help='Name of the database user')
         parser.add_argument('--password', default='', help='Password for the database user')
@@ -118,7 +118,7 @@ class BaseMain():
     
     def get_thread_number(self):
         queue_size = self.jobs.qsize()
-        number_threads = queue_size if queue_size < NUMBER_MAX_THREADS else NUMBER_MAX_THREADS
+        number_threads = queue_size if queue_size < constants.NUMBER_MAX_THREADS else constants.NUMBER_MAX_THREADS
         return number_threads
     
 class AnonymizationMain(BaseMain):
@@ -137,7 +137,7 @@ class AnonymizationMain(BaseMain):
                         cursor = build_sql_select(connection, table_key, table_attributes.get('search', False), select="id")
                         while True:
                             list = []
-                            records = cursor.fetchmany(size=1000)
+                            records = cursor.fetchmany(size=constants.ANON_NUMBER_FIELD_PER_THREAD)
                             number = number + len(records)
                             
                             if not records:
@@ -180,15 +180,19 @@ class DeAnonymizationMain(BaseMain):
         #todo umbauen, dass ein job jeweils alle migrated_fields eines records beinhaltet. 
         #todo weitere deanon methoden umbaunen, sodass alle felder mit einem update deanonymsiert werden
         for table, fields in schema.items():
-            cursor = build_sql_select(connection, "migrated_data", ["model_id = '{model_id}'".format(model_id=table)], select="id")
-            while True:
-                list = []
-                records = cursor.fetchmany(size=1000)
-                if not records:
-                    break
-                for rec in records:
-                    list.append(rec.get('id'))
-                self.jobs.put({table: (fields, list)})
+            for field in fields:
+                cursor = build_sql_select(connection, "migrated_data", 
+                                                                    ["model_id = '{model_id}'".format(model_id=table),
+                                                                    "field = '{field_id}'".format(field_id=field)], 
+                                                                    select="id")
+                while True:
+                    list = []
+                    records = cursor.fetchmany(size=constants.DEANON_NUMBER_FIELD_PER_THREAD)
+                    if not records:
+                        break
+                    for rec in records:
+                        list.append(rec.get('id'))
+                    self.jobs.put({table: (field, list)})
 
     def _runSpecificTask(self, con, args, data):
         try:
@@ -204,13 +208,6 @@ def main():
     # the args need to be analysed here, if anonymization or
     # deanonymization is running
     return
-
-
-
-
-
-#     if args.dump_file:
-#         create_database_dump(args.dump_file, pg_args)
     
 
 if __name__ == '__main__':

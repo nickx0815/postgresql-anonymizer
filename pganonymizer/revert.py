@@ -2,32 +2,7 @@ import psycopg2, logging, csv
 from pganonymizer.update_field_history import update_fields_history
 from docutils.nodes import row
 
-
-# def create_migrated_data(connection, data, ids):
-#     cr = connection.cursor()
-#     try:
-#         cr.execute("CREATE TABLE migrated_data(\
-#                          model_id VARCHAR,\
-#                          field_id VARCHAR,\
-#                          record_id INTEGER,\
-#                          value VARCHAR,\
-#                          PRIMARY KEY (model_id, field_id, record_id));")
-#         cr.execute("COMMIT;")
-#     except:
-#         cr.execute("ROLLBACK;")
-#     try:
-#         cr.execute("CREATE TABLE migrated_fields(\
-#                          model_id VARCHAR,\
-#                          field_id VARCHAR,\
-#                          PRIMARY KEY (model_id, field_id));")
-#         cr.execute("COMMIT;")
-#     except:
-#         cr.execute("ROLLBACK;")
-#     cr.close()
-    
-    
 def _run_query(type, con, data, ids, table_id):
-    #create_migrated_data(con, data, ids)
     if type == 'anon':
         create_anon(con ,data, ids, table_id)
     elif type == 'truncate':
@@ -37,9 +12,6 @@ def _get_ids_sql_format(ids):
     if ids:
         return str(set([x for x in ids])).replace("{","(").replace("}",")")
     return False
-
-
-
 
 def create_anon(con, data, ids, table_id):
     cr = con.cursor()
@@ -90,14 +62,11 @@ def get_anon_fields(connection, args, ids=None, where_clause=""):
     return data
 
 def run_revert(connection, args, data):
-    #anon_fields = get_anon_fields(connection, args, ids=ids)
-    #logging.info(str(anon_fields)+" started to reverse")
     cr1 = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
     cr2 = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
     for table, data in data.items():
         mapped_field_data = get_mapped_field_data(connection, table, data[0])
         get_anon_data_sql = "SELECT * FROM {anon_table} where id in {ids};".format(anon_table=args.anon_table,ids = _get_ids_sql_format(data[1]))
-        #logging.info(get_anon_data_sql)
         cr1.execute(get_anon_data_sql)
         while True:
             records = cr1.fetchmany(size=2000)
@@ -119,12 +88,10 @@ def run_revert(connection, args, data):
                         mapped_field=migrated_field,
                         value=value)
                     logging.info("record identified")
-                    #logging.info(record_db_id_sql)
                     cr3.execute(record_db_id_sql)
                     record_db = cr3.fetchone()
                     if record_db:
                         record_db_id = record_db[0]
-                    #need id of record that are updated
                         get_migrated_field_sql = "UPDATE {mapped_table} SET {mapped_field} = '{original_value}' WHERE  id = {rec_id};".format(mapped_table=migrated_table,
                                                                                                                                                         mapped_field=migrated_field,
                                                                                                                                                         original_value=record['value'],
@@ -164,7 +131,6 @@ def _get_mapped_data(con, table):
             data.append((row.get('old_model_name'), row.get('new_model_name'),  row.get('old_field_name'), row.get('new_field_name')))
     return data
 
-
 def mapping_exists(table, field, mapped_data):
     for mapping_data in mapped_data:
         if mapping_data[2] == field:
@@ -181,11 +147,8 @@ def get_mapped_field_data(connection, table, fields):
 
 def create_truncate(con, data):
     cr = con.cursor()
-#     x = "s"
-#     cr.execute("COMMIT;")
     cr.close()
     
 def _(t):
     return t.replace("_", ".")
-    
     
