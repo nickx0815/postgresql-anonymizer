@@ -87,7 +87,6 @@ def run_revert(connection, args, data):
                                                                                                                                                 mapped_field=migrated_field,
                                                                                                                                                 original_value=value,
                                                                                                                                                 rec_id = record_db_id)
-                print("record updated")
                 cr2.execute(get_migrated_field_sql)
                 update_fields_history(cr2, original_table, record_db_id, "4", original_field)
                 cr2.execute("COMMIT;")
