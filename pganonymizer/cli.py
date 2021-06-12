@@ -184,7 +184,7 @@ class DeAnonymizationMain(BaseMain):
             for field in fields:
                 cursor = build_sql_select(connection, "migrated_data", 
                                                                     ["model_id = '{model_id}'".format(model_id=table),
-                                                                    "field = '{field_id}'".format(field_id=field)], 
+                                                                    "field_id = '{field_id}'".format(field_id=field)], 
                                                                     select="id")
                 while True:
                     list = []
