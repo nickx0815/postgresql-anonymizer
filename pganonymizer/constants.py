@@ -14,7 +14,7 @@ class constants():
     DEFAULT_SCHEMA_FILE = 'schema.yml'
     
     section = ['Required','Optional']
-    testarg = ['schema', 'dbname', 'user', 'password', 'host', 'port']
+    testarg = ['schema', 'dbname', 'user', 'password', 'host', 'port', 'anon_table']
     testarg_optional = ['dump', 'dry-run', 'l', 'v']
     
     NUMBER_MAX_THREADS = 8

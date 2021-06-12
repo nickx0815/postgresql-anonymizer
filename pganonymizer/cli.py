@@ -82,8 +82,7 @@ class BaseMain():
         if parseargs:
             args = parser.parse_args()
             return args
-        else:
-            return parser
+        return parser
     
     def start_thread(self, q, args, pg_args):
         while not q.empty():
