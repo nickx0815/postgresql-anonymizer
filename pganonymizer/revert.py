@@ -66,6 +66,10 @@ def run_revert(connection, args, data):
     cr2 = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
     for table, data in data.items():
         mapped_field_data = get_mapped_field_data(connection, table, data[0])
+        original_table = mapped_field_data[0]
+        migrated_table = mapped_field_data[1]
+        original_field = mapped_field_data[2]
+        migrated_field = mapped_field_data[3]
         get_anon_data_sql = "SELECT * FROM {anon_table} where id in {ids};".format(anon_table=args.anon_table,ids = _get_ids_sql_format(data[1]))
         cr1.execute(get_anon_data_sql)
         while True:
@@ -74,10 +78,6 @@ def run_revert(connection, args, data):
             if not records:
                 break
             for record in records:
-                original_table = mapped_field_data[0]
-                migrated_table = mapped_field_data[1]
-                original_field = mapped_field_data[2]
-                migrated_field = mapped_field_data[3]
                 migrated_model_id, migrated_field_id = get_db_ids(connection, migrated_table, migrated_field)
                 cr3 = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
                 value = original_table+"_"+original_field+"_"+str(record['record_id'])
