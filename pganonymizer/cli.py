@@ -115,10 +115,10 @@ class BaseMain():
 class AnonymizationMain(BaseMain):
     
     def startProcessing(self, args_, opt_args):
+        loglevel = logging.WARNING
         if args_.verbose:
             loglevel = logging.DEBUG
         logging.basicConfig(format='%(levelname)s: %(message)s', level=loglevel)
-        loglevel = logging.WARNING
         if args_.list_providers:
             self.list_provider_classes()
             sys.exit(0)
