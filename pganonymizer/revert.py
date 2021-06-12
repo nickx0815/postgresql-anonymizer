@@ -70,35 +70,27 @@ def run_revert(connection, args, data):
         migrated_table = mapped_field_data[1]
         original_field = mapped_field_data[2]
         migrated_field = mapped_field_data[3]
-        get_anon_data_sql = "SELECT * FROM {anon_table} where id in {ids};".format(anon_table=args.anon_table,ids = _get_ids_sql_format(data[1]))
-        cr1.execute(get_anon_data_sql)
-        while True:
-            records = cr1.fetchmany(size=2000)
-            logging.info("record searched")
-            if not records:
-                break
-            for record in records:
-                migrated_model_id, migrated_field_id = get_db_ids(connection, migrated_table, migrated_field)
-                cr3 = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
-                value = original_table+"_"+original_field+"_"+str(record['record_id'])
-                record_db_id_sql = "SELECT ID FROM {mapped_table} where {mapped_field} = '{value}';".format(
-                    mapped_table=migrated_table,
-                    mapped_field=migrated_field,
-                    value=value)
-                logging.info("record identified")
-                cr3.execute(record_db_id_sql)
-                record_db = cr3.fetchone()
-                if record_db:
-                    record_db_id = record_db[0]
-                    get_migrated_field_sql = "UPDATE {mapped_table} SET {mapped_field} = '{original_value}' WHERE  id = {rec_id};".format(mapped_table=migrated_table,
-                                                                                                                                                    mapped_field=migrated_field,
-                                                                                                                                                    original_value=record['value'],
-                                                                                                                                                    rec_id = record_db_id)
-                    logging.info("record updated")
-                    cr2.execute(get_migrated_field_sql)
-                    update_fields_history(cr2, original_table, record_db_id, "4", original_field)
-                    cr2.execute("COMMIT;")
-                cr3.close()
+        for id in data[1]:
+            cr3 = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
+            value = original_table+"_"+original_field+"_"+str(id)
+            record_db_id_sql = "SELECT ID FROM {mapped_table} where {mapped_field} = '{value}';".format(
+                mapped_table=migrated_table,
+                mapped_field=migrated_field,
+                value=value)
+            logging.info("record identified")
+            cr3.execute(record_db_id_sql)
+            record_db = cr3.fetchone()
+            if record_db:
+                record_db_id = record_db[0]
+                get_migrated_field_sql = "UPDATE {mapped_table} SET {mapped_field} = '{original_value}' WHERE  id = {rec_id};".format(mapped_table=migrated_table,
+                                                                                                                                                mapped_field=migrated_field,
+                                                                                                                                                original_value=record['value'],
+                                                                                                                                                rec_id = record_db_id)
+                logging.info("record updated")
+                cr2.execute(get_migrated_field_sql)
+                update_fields_history(cr2, original_table, record_db_id, "4", original_field)
+                cr2.execute("COMMIT;")
+            cr3.close()
     
     cr2.close()
     cr1.close()
