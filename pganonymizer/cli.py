@@ -77,6 +77,8 @@ class BaseMain():
         parser.add_argument('--password', default='', help='Password for the database user')
         parser.add_argument('--host', help='Database hostname', default='localhost')
         parser.add_argument('--port', help='Port of the database', default='5432')
+        parser.add_argument('--dry-run', action='store_true', help='Don\'t commit changes made on the database',
+                            default=False)
         if parseargs:
             args = parser.parse_args()
             return args
@@ -114,8 +116,6 @@ class AnonymizationMain(BaseMain):
         parser =  BaseMain.get_args(self, parseArgs=False)
         parser.add_argument('-v', '--verbose', action='count', help='Increase verbosity')
         parser.add_argument('-l', '--list-providers', action='store_true', help='Show a list of all available providers',
-                            default=False)
-        parser.add_argument('--dry-run', action='store_true', help='Don\'t commit changes made on the database',
                             default=False)
         parser.add_argument('--dump-file', help='Create a database dump file with the given name')
         args = parser.parse_args()
