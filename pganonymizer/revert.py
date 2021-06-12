@@ -74,10 +74,11 @@ def run_revert(connection, args, data):
         for id, value in data[1]:
             number = number + 1
             cr3 = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
+            orig_value = original_table+"_"+original_field+"_"+str(id)
             record_db_id_sql = "SELECT ID FROM {mapped_table} where {mapped_field} = '{value}';".format(
                 mapped_table=migrated_table,
                 mapped_field=migrated_field,
-                value=value)
+                value=orig_value)
             cr3.execute(record_db_id_sql)
             record_db = cr3.fetchone()
             if record_db:
