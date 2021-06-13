@@ -2,21 +2,24 @@ import psycopg2, logging, csv
 from pganonymizer.update_field_history import update_fields_history
 from docutils.nodes import row
 
+
 def _run_query(type, con, data, ids, table_id):
     if type == 'anon':
-        create_anon(con ,data, ids, table_id)
+        create_anon(con , data, ids, table_id)
     elif type == 'truncate':
         create_truncate(con, data)
 
+
 def _get_ids_sql_format(ids):
     if ids:
-        return str(set([x for x in ids])).replace("{","(").replace("}",")")
+        return str(set([x for x in ids])).replace("{", "(").replace("}", ")")
     return False
+
 
 def create_anon(con, data, ids, table_id):
     cr = con.cursor()
     for table, field_data in data.items():
-        #ids_sql_format = _get_ids_sql_format(ids)
+        # ids_sql_format = _get_ids_sql_format(ids)
         field = list(field_data.keys())[0]
         insert_migrated_fields_rec(cr, field, table)
         id = data.get(table).get(field)
@@ -29,6 +32,7 @@ def create_anon(con, data, ids, table_id):
     cr.execute("commit;")
     cr.close()
 
+
 def insert_migrated_fields_rec(cr, field, table):
     sql_insert = "INSERT INTO migrated_fields (model_id, field_id) \
                    VALUES ('{table}', '{field}');".format(table=table, field=field)
@@ -40,12 +44,13 @@ def insert_migrated_fields_rec(cr, field, table):
     record = cr.fetchone()
     if not record:
         cr.execute(sql_insert)
+
         
 def get_anon_fields(connection, args, ids=None, where_clause=""):
     data = {}
     cr = connection.cursor(cursor_factory=psycopg2.extras.DictCursor, name='fetch_large_result')
     if ids:
-        where_clause = "WHERE ID IN {ids}".format(ids = _get_ids_sql_format(ids))
+        where_clause = "WHERE ID IN {ids}".format(ids=_get_ids_sql_format(ids))
     get_anon_fields = "SELECT * FROM migrated_fields {WHERE};".format(WHERE=where_clause)
     cr.execute(get_anon_fields)
     while True:
@@ -61,6 +66,7 @@ def get_anon_fields(connection, args, ids=None, where_clause=""):
     cr.close()
     return data
 
+
 def run_revert(connection, args, data):
     for table, data in data.items():
         number = 0
@@ -72,7 +78,7 @@ def run_revert(connection, args, data):
         for id, value in data[1]:
             number = number + 1
             cr3 = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
-            orig_value = original_table+"_"+original_field+"_"+str(id)
+            orig_value = original_table + "_" + original_field + "_" + str(id)
             record_db_id_sql = "SELECT ID FROM {mapped_table} where {mapped_field} = '{value}';".format(
                 mapped_table=migrated_table,
                 mapped_field=migrated_field,
@@ -83,43 +89,44 @@ def run_revert(connection, args, data):
             if record_db:
                 cr1 = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
                 record_db_id = record_db[0]
-                get_migrated_field_sql = "UPDATE {mapped_table} SET {mapped_field} = '{original_value}' WHERE  id = {rec_id};".format(mapped_table=migrated_table,
-                                                                                                                                                mapped_field=migrated_field,
-                                                                                                                                                original_value=value,
-                                                                                                                                                rec_id = record_db_id)
-                cr1.execute(get_migrated_field_sql)
+                get_migrated_field_sql = "UPDATE %s SET %s = %s WHERE id = %s;"
+                cr1.execute(get_migrated_field_sql, (migrated_table, migrated_field, value, record_db_id))
                 update_fields_history(connection.cursor(cursor_factory=psycopg2.extras.DictCursor), original_table, record_db_id, "4", original_field)
                 cr1.execute("commit;")
                 cr1.close()
             
-    print(str(number)+" records deanonymized!")
+    print(str(number) + " records deanonymized!")
+
 
 def get_db_ids(connection, mapped_table, mapped_field):
     cr = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    select_model_id_sql = "SELECT id FROM ir_model where model ='{mapped_table}';".format(mapped_table=mapped_table.replace("_","."))
+    select_model_id_sql = "SELECT id FROM ir_model where model ='{mapped_table}';".format(mapped_table=mapped_table.replace("_", "."))
     cr.execute(select_model_id_sql)
     model_id = cr.fetchone()[0]
-    select_field_id_sql = "select id from ir_model_fields where model = '{table_name}' and name = '{field_name}';;".format(table_name=mapped_table.replace("_","."),
+    select_field_id_sql = "select id from ir_model_fields where model = '{table_name}' and name = '{field_name}';;".format(table_name=mapped_table.replace("_", "."),
                                                                                                                           field_name=mapped_field)
     cr.execute(select_field_id_sql)
     field_id = cr.fetchone()[0]
     cr.close()
     return model_id, field_id
 
+
 def _get_mapped_data(con, table, field):
-    #todo function to determine which mapping (10,11,12...)
+    # todo function to determine which mapping (10,11,12...)
     cr = con.cursor(cursor_factory=psycopg2.extras.DictCursor)
     select_model_id_sql = "SELECT new_model_name, new_field_name FROM model_migration_mapping where old_model_name = '{old_table}'\
-                            and old_field_name = '{field}';".format(old_table=table,field=field)
+                            and old_field_name = '{field}';".format(old_table=table, field=field)
     cr.execute(select_model_id_sql)
     record = cr.fetchone()
     if not record:
         return (table, table, field, field)
-    return (table, record[0].get('new_model_name'),  field, record[0].get('new_field_name'))
+    return (table, record[0].get('new_model_name'), field, record[0].get('new_field_name'))
+
 
 def create_truncate(con, data):
     cr = con.cursor()
     cr.close()
+
     
 def _(t):
     return t.replace("_", ".")
