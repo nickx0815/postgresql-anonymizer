@@ -17,7 +17,9 @@ class constants():
     testarg = ['schema', 'dbname', 'user', 'password', 'host', 'port', 'anon_table']
     testarg_optional = ['dump', 'dry-run', 'l', 'v']
     
-    NUMBER_MAX_THREADS = 8
+    NUMBER_MAX_THREADS_ANON = 8
+    NUMBER_MAX_THREADS_DEANON = 4
+    
     
     DEANON_NUMBER_FIELD_PER_THREAD = 1000
     ANON_NUMBER_FIELD_PER_THREAD = 1000

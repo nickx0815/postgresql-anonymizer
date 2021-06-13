@@ -62,8 +62,6 @@ def get_anon_fields(connection, args, ids=None, where_clause=""):
     return data
 
 def run_revert(connection, args, data):
-    cr1 = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cr2 = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
     for table, data in data.items():
         number = 0
         mapped_field_data = get_mapped_field_data(connection, table, data[0])
@@ -81,19 +79,21 @@ def run_revert(connection, args, data):
                 value=orig_value)
             cr3.execute(record_db_id_sql)
             record_db = cr3.fetchone()
+            cr3.close()
             if record_db:
+                cr1 = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
                 record_db_id = record_db[0]
                 get_migrated_field_sql = "UPDATE {mapped_table} SET {mapped_field} = '{original_value}' WHERE  id = {rec_id};".format(mapped_table=migrated_table,
                                                                                                                                                 mapped_field=migrated_field,
                                                                                                                                                 original_value=value,
                                                                                                                                                 rec_id = record_db_id)
-                cr2.execute(get_migrated_field_sql)
+                cr1.execute(get_migrated_field_sql)
                 update_fields_history(cr2, original_table, record_db_id, "4", original_field)
-                cr2.execute("COMMIT;")
-            cr3.close()
+                cr1.execute("COMMIT;")
+                cr1.close()
+            
     print(str(number)+" records deanonymized!")
     cr2.close()
-    cr1.close()
 
 def get_db_ids(connection, mapped_table, mapped_field):
     cr = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
