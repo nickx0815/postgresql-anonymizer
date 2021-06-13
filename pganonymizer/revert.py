@@ -15,7 +15,6 @@ def _get_ids_sql_format(ids):
         return str(set([x for x in ids])).replace("{", "(").replace("}", ")")
     return False
 
-
 def create_anon(con, data, ids, table_id):
     cr = con.cursor()
     for table, field_data in data.items():
@@ -32,7 +31,6 @@ def create_anon(con, data, ids, table_id):
     cr.execute("commit;")
     cr.close()
 
-
 def insert_migrated_fields_rec(cr, field, table):
     sql_insert = "INSERT INTO migrated_fields (model_id, field_id) \
                    VALUES ('{table}', '{field}');".format(table=table, field=field)
@@ -44,29 +42,7 @@ def insert_migrated_fields_rec(cr, field, table):
     record = cr.fetchone()
     if not record:
         cr.execute(sql_insert)
-
         
-def get_anon_fields(connection, args, ids=None, where_clause=""):
-    data = {}
-    cr = connection.cursor(cursor_factory=psycopg2.extras.DictCursor, name='fetch_large_result')
-    if ids:
-        where_clause = "WHERE ID IN {ids}".format(ids=_get_ids_sql_format(ids))
-    get_anon_fields = "SELECT * FROM migrated_fields {WHERE};".format(WHERE=where_clause)
-    cr.execute(get_anon_fields)
-    while True:
-        records = cr.fetchmany(size=2000)
-        if not records:
-            break
-        for record in records:
-            model = record['model_id']
-            field = record['field_id']
-            if not data.get(model):
-                data[model] = []
-            data[model].append(field)
-    cr.close()
-    return data
-
-
 def run_revert(connection, args, data):
     for table, data in data.items():
         number = 0
@@ -97,20 +73,6 @@ def run_revert(connection, args, data):
                 update_fields_history(connection.cursor(cursor_factory=psycopg2.extras.DictCursor), original_table, record_db_id, "4", original_field)
     print(str(number) + " records deanonymized!")
 
-
-def get_db_ids(connection, mapped_table, mapped_field):
-    cr = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    select_model_id_sql = "SELECT id FROM ir_model where model ='{mapped_table}';".format(mapped_table=mapped_table.replace("_", "."))
-    cr.execute(select_model_id_sql)
-    model_id = cr.fetchone()[0]
-    select_field_id_sql = "select id from ir_model_fields where model = '{table_name}' and name = '{field_name}';;".format(table_name=mapped_table.replace("_", "."),
-                                                                                                                          field_name=mapped_field)
-    cr.execute(select_field_id_sql)
-    field_id = cr.fetchone()[0]
-    cr.close()
-    return model_id, field_id
-
-
 def _get_mapped_data(con, table, field):
     # todo function to determine which mapping (10,11,12...)
     cr = con.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -122,11 +84,9 @@ def _get_mapped_data(con, table, field):
         return (table, table, field, field)
     return (table, record.get('new_model_name'), field, record.get('new_field_name'))
 
-
 def create_truncate(con, data):
     cr = con.cursor()
     cr.close()
-
     
 def _(t):
     return t.replace("_", ".")

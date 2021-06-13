@@ -41,7 +41,7 @@ class BaseMain():
         pg_args, args_ = self._get_run_data(args_)
         opt_args['pg_args']=pg_args
         schema = self.get_schema(args_)
-        self.update_queue(schema, opt_args)
+        tables = self.update_queue(schema, opt_args)
         if opt_args.get('threading'):
             number_threads = self.get_thread_number()
             print("Number of threads started: {number}".format(number=number_threads))
@@ -54,6 +54,14 @@ class BaseMain():
         else:
             self.start_thread(self.jobs, args_, pg_args)   
         print("all done")
+        if tables:
+            connection = get_connection(opt_args['pg_args'])
+            cursor = connection.cursor()
+            for table in tables:
+                cursor.execute("drop table {temp_table};".format(temp_table=table))
+                cursor.execute("commit;")
+            connection.commit()
+            connection.close()
     
     def get_schema(self, args):
         try:
@@ -190,8 +198,14 @@ class DeAnonymizationMain(BaseMain):
         connection = get_connection(opt_args['pg_args'])
         #todo umbauen, dass ein job jeweils alle migrated_fields eines records beinhaltet. 
         #todo weitere deanon methoden umbaunen, sodass alle felder mit einem update deanonymsiert werden
+        crtest = connection.cursor()
+        list_table = []
         for table, fields in schema.items():
+            temp_table = "tmp_"+table
+            list_table.append(temp_table)
+            crtest.execute('CREATE TEMP TABLE %s (LIKE %s INCLUDING ALL);' % (temp_table, table))
             for field in fields:
+                crtest.execute("CREATE INDEX index_{field} ON {temp_table} ({field});".format(field=field,temp_table=temp_table))
                 cursor = build_sql_select(connection, "migrated_data", 
                                                                     ["model_id = '{model_id}'".format(model_id=table),
                                                                     "field_id = '{field_id}'".format(field_id=field)],
@@ -204,6 +218,7 @@ class DeAnonymizationMain(BaseMain):
                     for rec in records:
                         list.append((rec.get('record_id'), rec.get('value')))
                     self.jobs.put({table: (field, list)})
+        return list_table
 
     def _runSpecificTask(self, con, args, data):
         try:
