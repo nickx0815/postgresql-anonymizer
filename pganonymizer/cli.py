@@ -205,7 +205,7 @@ class DeAnonymizationMain(BaseMain):
             migrated_table = mapped_field_data[1]
             temp_table = "tmp_"+migrated_table
             list_table.append(temp_table)
-            crtest.execute('CREATE TEMP TABLE %s select * from %s;' % (temp_table, migrated_table))
+            crtest.execute('CREATE TEMP TABLE %s select %s from %s;' % (temp_table, ",".join(fields), migrated_table))
             for field in fields:
                 mapped_field_data = _get_mapped_data(connection, table, field=field)
                 migrated_field = mapped_field_data[3]
