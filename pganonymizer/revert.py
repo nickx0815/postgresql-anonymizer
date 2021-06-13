@@ -78,7 +78,7 @@ def _get_mapped_data(con, table, field=False):
     cr = con.cursor(cursor_factory=psycopg2.extras.DictCursor)
     select_model_id_sql = "SELECT new_model_name, new_field_name FROM model_migration_mapping where old_model_name = '{old_table}'".format(old_table=table)
     if field:
-        select_model_id_sql+=" old_field_name = '{field}'".format(field=field)
+        select_model_id_sql+=" and old_field_name = '{field}'".format(field=field)
     select_model_id_sql+=";"
     cr.execute(select_model_id_sql)
     record = cr.fetchone()
