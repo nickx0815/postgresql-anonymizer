@@ -111,7 +111,7 @@ class BaseMain():
     
 class AnonymizationMain(BaseMain):
     
-    thread = "NUMBER_MAX_THREADS_ANON"
+    THREAD = "NUMBER_MAX_THREADS_ANON"
     
     def get_args(self):
         parser =  BaseMain.get_args(self, parseArgs=False)
@@ -185,7 +185,7 @@ class AnonymizationMain(BaseMain):
             logging.info(ex)
 
 class DeAnonymizationMain(BaseMain):
-    thread = "NUMBER_MAX_THREADS_DEANON"
+    THREAD = "NUMBER_MAX_THREADS_DEANON"
     
     def update_queue(self,schema, opt_args):
         connection = get_connection(opt_args['pg_args'])
