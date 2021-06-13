@@ -185,7 +185,7 @@ def import_data(connection, field, source_table, row_id, primary_key, value):
                                                                           value=value,
                                                                           id=row_id)
     cursor.execute(sql)
-    cursor.execute("COMMIT ;")
+    cursor.execute("Commit;")
     cursor.close()
 
 

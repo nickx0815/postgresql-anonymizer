@@ -26,7 +26,7 @@ def create_anon(con, data, ids, table_id):
         data = (table, field, id, data.get(table).get(field).get(id))
         cr.execute(sql_migrated_data_insert, data)
         update_fields_history(cr, table, id, "2", field)
-    cr.execute("COMMIT;")
+    cr.execute("commit;")
     cr.close()
 
 def insert_migrated_fields_rec(cr, field, table):
@@ -89,11 +89,10 @@ def run_revert(connection, args, data):
                                                                                                                                                 rec_id = record_db_id)
                 cr1.execute(get_migrated_field_sql)
                 update_fields_history(connection.cursor(cursor_factory=psycopg2.extras.DictCursor), original_table, record_db_id, "4", original_field)
-                cr1.execute("COMMIT;")
+                cr1.execute("commit;")
                 cr1.close()
             
     print(str(number)+" records deanonymized!")
-    cr2.close()
 
 def get_db_ids(connection, mapped_table, mapped_field):
     cr = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
