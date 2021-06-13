@@ -46,7 +46,7 @@ def insert_migrated_fields_rec(cr, field, table):
 def run_revert(connection, args, data):
     for table, data in data.items():
         number = 0
-        mapped_field_data = _get_mapped_data(connection, table, data[0])
+        mapped_field_data = _get_mapped_data(connection, table, field=data[0])
         original_table = mapped_field_data[0]
         migrated_table = mapped_field_data[1]
         original_field = mapped_field_data[2]
@@ -73,11 +73,13 @@ def run_revert(connection, args, data):
                 update_fields_history(connection.cursor(cursor_factory=psycopg2.extras.DictCursor), original_table, record_db_id, "4", original_field)
     print(str(number) + " records deanonymized!")
 
-def _get_mapped_data(con, table, field):
+def _get_mapped_data(con, table, field=False):
     # todo function to determine which mapping (10,11,12...)
     cr = con.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    select_model_id_sql = "SELECT new_model_name, new_field_name FROM model_migration_mapping where old_model_name = '{old_table}'\
-                            and old_field_name = '{field}';".format(old_table=table, field=field)
+    select_model_id_sql = "SELECT new_model_name, new_field_name FROM model_migration_mapping where old_model_name = '{old_table}'".format(old_table=table)
+    if field:
+        select_model_id_sql+=" old_field_name = '{field}'".format(field=field)
+    select_model_id_sql+=";"
     cr.execute(select_model_id_sql)
     record = cr.fetchone()
     if not record:

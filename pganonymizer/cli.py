@@ -18,7 +18,7 @@ import yaml
 from pganonymizer.constants import constants
 from pganonymizer.providers import PROVIDERS
 from pganonymizer.utils import anonymize_tables, create_database_dump, get_connection, truncate_tables, build_sql_select
-from pganonymizer.revert import run_revert, _get_ids_sql_format
+from pganonymizer.revert import run_revert, _get_ids_sql_format, _get_mapped_data
 
 def get_pg_args(args):
         """
@@ -201,11 +201,15 @@ class DeAnonymizationMain(BaseMain):
         crtest = connection.cursor()
         list_table = []
         for table, fields in schema.items():
-            temp_table = "tmp_"+table
+            mapped_field_data = _get_mapped_data(connection, table)
+            migrated_table = mapped_field_data[1]
+            temp_table = "tmp_"+migrated_table
             list_table.append(temp_table)
-            crtest.execute('CREATE TEMP TABLE %s (LIKE %s INCLUDING ALL);' % (temp_table, table))
+            crtest.execute('CREATE TEMP TABLE %s (LIKE %s INCLUDING ALL);' % (temp_table, migrated_table))
             for field in fields:
-                crtest.execute("CREATE INDEX index_{field} ON {temp_table} ({field});".format(field=field,temp_table=temp_table))
+                mapped_field_data = _get_mapped_data(connection, table)
+                migrated_field = mapped_field_data[3]
+                crtest.execute("CREATE INDEX index_{field} ON {temp_table} ({field});".format(field=migrated_field,temp_table=temp_table))
                 cursor = build_sql_select(connection, "migrated_data", 
                                                                     ["model_id = '{model_id}'".format(model_id=table),
                                                                     "field_id = '{field_id}'".format(field_id=field)],
