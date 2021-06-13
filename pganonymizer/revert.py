@@ -64,7 +64,7 @@ def get_anon_fields(connection, args, ids=None, where_clause=""):
 def run_revert(connection, args, data):
     for table, data in data.items():
         number = 0
-        mapped_field_data = get_mapped_field_data(connection, table, data[0])
+        mapped_field_data = _get_mapped_data(connection, table, data[0])
         original_table = mapped_field_data[0]
         migrated_table = mapped_field_data[1]
         original_field = mapped_field_data[2]
@@ -106,29 +106,16 @@ def get_db_ids(connection, mapped_table, mapped_field):
     cr.close()
     return model_id, field_id
 
-def _get_mapped_data(con, table):
+def _get_mapped_data(con, table, field):
     #todo function to determine which mapping (10,11,12...)
     cr = con.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    data = []
-    select_model_id_sql = "SELECT old_model_name, new_model_name, old_field_name, new_field_name FROM model_migration_mapping where old_model_name = '{old_table}';".format(old_table=table)
+    select_model_id_sql = "SELECT new_model_name, new_field_name FROM model_migration_mapping where old_model_name = '{old_table}'\
+                            and old_field_name = '{field}';".format(old_table=table,field=field)
     cr.execute(select_model_id_sql)
-    while True:
-        records = cr.fetchmany(size=2000)
-        if not records:
-            break
-        for row in records:
-            data.append((row.get('old_model_name'), row.get('new_model_name'),  row.get('old_field_name'), row.get('new_field_name')))
-    return data
-
-def mapping_exists(table, field, mapped_data):
-    for mapping_data in mapped_data:
-        if mapping_data[2] == field:
-            return mapping_data
-    return (table, table, field, field)
-
-def get_mapped_field_data(connection, table, field):
-    mapped_data = _get_mapped_data(connection, table)
-    return mapping_exists(table, field, mapped_data)
+    record = cr.fetchone()
+    if not record:
+        return (table, table, field, field)
+    return (table, record[0].get('new_model_name'),  field, record[0].get('new_field_name'))
 
 def create_truncate(con, data):
     cr = con.cursor()

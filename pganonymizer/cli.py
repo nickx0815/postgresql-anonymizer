@@ -88,9 +88,10 @@ class BaseMain():
         while not q.empty():
             #table_start_time = time.time()
             data = q.get()
+            connection = get_connection(pg_args)
                 #todo implement truncate functionality, not working right now
                 #truncate_tables(connection, schema_batch.get('truncate', []))
-            self._runSpecificTask(pg_args, args, data)
+            self._runSpecificTask(connection, args, data)
             if not args.dry_run:
                 connection.commit()
             connection.close()
@@ -173,10 +174,9 @@ class AnonymizationMain(BaseMain):
                                                                 time = time_))
         self.number_rec[table] = (total, anonymized, self.number_rec[table][2])
     
-    def _runSpecificTask(self, pg_args, args, schema):
+    def _runSpecificTask(self, con, args, schema):
         try:
-            connection = get_connection(pg_args)
-            res, table = anonymize_tables(connection, schema.get('tables', []), verbose=args.verbose)
+            res, table = anonymize_tables(con, schema.get('tables', []), verbose=args.verbose)
             total_size = self.number_rec[table][0]
             number_anonymized = self.number_rec[table][1]+res
             percent_anonymized = number_anonymized/total_size
@@ -206,11 +206,10 @@ class DeAnonymizationMain(BaseMain):
                         list.append((rec.get('record_id'), rec.get('value')))
                     self.jobs.put({table: (field, list)})
 
-    def _runSpecificTask(self, pg_args, args, data):
+    def _runSpecificTask(self, con, args, data):
         try:
-            connection = get_connection(pg_args)
             start_time = time.time()
-            run_revert(connection, args, data)
+            run_revert(con, args, data)
             end_time = time.time()
             logging.info('DEAnonymization took {:.2f}s'.format(end_time - start_time))
         except Exception as ex:
