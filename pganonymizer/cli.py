@@ -92,8 +92,7 @@ class BaseMain():
                 #todo implement truncate functionality, not working right now
                 #truncate_tables(connection, schema_batch.get('truncate', []))
             self._runSpecificTask(connection, args, data)
-            if not args.dry_run:
-                connection.commit()
+            connection.commit()
             connection.close()
             q.task_done()
     

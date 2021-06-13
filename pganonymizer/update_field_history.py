@@ -12,5 +12,6 @@ def update_fields_history(cr, model_id, record, state, field_id):
                        write_date = str(now),
                        create_uid=1,
                        record_id=record))
+    cr.execute("commit;")
     cr.close()
 
