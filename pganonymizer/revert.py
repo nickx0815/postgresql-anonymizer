@@ -89,8 +89,9 @@ def run_revert(connection, args, data):
             if record_db:
                 cr1 = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
                 record_db_id = record_db[0]
-                get_migrated_field_sql = "UPDATE %s SET %s = %s WHERE id = %s;"
-                cr1.execute(get_migrated_field_sql, (migrated_table, migrated_field, value, record_db_id))
+                get_migrated_field_sql = "UPDATE {migrated_table} SET {migrated_field} = %s WHERE id = %s;".format(migrated_table=migrated_table,
+                                                                                                                   migrated_field=migrated_field)
+                cr1.execute(get_migrated_field_sql, (value, record_db_id))
                 update_fields_history(connection.cursor(cursor_factory=psycopg2.extras.DictCursor), original_table, record_db_id, "4", original_field)
                 cr1.execute("commit;")
                 cr1.close()
@@ -120,7 +121,7 @@ def _get_mapped_data(con, table, field):
     record = cr.fetchone()
     if not record:
         return (table, table, field, field)
-    return (table, record[0].get('new_model_name'), field, record[0].get('new_field_name'))
+    return (table, record.get('new_model_name'), field, record.get('new_field_name'))
 
 
 def create_truncate(con, data):
