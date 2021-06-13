@@ -18,7 +18,7 @@ class constants():
     testarg_optional = ['dump', 'dry-run', 'l', 'v']
     
     NUMBER_MAX_THREADS_ANON = 8
-    NUMBER_MAX_THREADS_DEANON = 4
+    NUMBER_MAX_THREADS_DEANON = 8
     
     
     DEANON_NUMBER_FIELD_PER_THREAD = 10000
