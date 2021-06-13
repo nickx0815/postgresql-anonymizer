@@ -206,13 +206,15 @@ class DeAnonymizationMain(BaseMain):
             temp_table = "tmp_"+migrated_table
             list_table.append(temp_table)
             crtest.execute('CREATE TABLE %s AS SELECT %s FROM %s;' % (temp_table, ",".join(fields), migrated_table))
+            crtest.execute("commit;")
             for field in fields:
                 mapped_field_data = _get_mapped_data(connection, table, field=field)
                 migrated_field = mapped_field_data[3]
                 try:
                     crtest.execute("CREATE INDEX index_{field} ON {temp_table} ({field});".format(field=migrated_field,temp_table=temp_table))
+                    crtest.execute("commit;")
                 except:
-                    pass
+                    crtest.execute("rollback;")
                 cursor = build_sql_select(connection, "migrated_data", 
                                                                     ["model_id = '{model_id}'".format(model_id=table),
                                                                     "field_id = '{field_id}'".format(field_id=field)],
@@ -225,7 +227,6 @@ class DeAnonymizationMain(BaseMain):
                     for rec in records:
                         list.append((rec.get('record_id'), rec.get('value')))
                     self.jobs.put({table: (field, list)})
-        crtest.execute("commit;")
         return list_table
 
     def _runSpecificTask(self, con, args, data):
