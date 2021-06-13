@@ -18,7 +18,7 @@ import yaml
 from pganonymizer.constants import constants
 from pganonymizer.providers import PROVIDERS
 from pganonymizer.utils import anonymize_tables, create_database_dump, get_connection, truncate_tables, build_sql_select
-from pganonymizer.revert import run_revert, _get_ids_sql_format, get_mapped_field_data
+from pganonymizer.revert import run_revert, _get_ids_sql_format
 
 def get_pg_args(args):
         """
