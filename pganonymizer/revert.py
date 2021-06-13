@@ -88,7 +88,7 @@ def run_revert(connection, args, data):
                                                                                                                                                 original_value=value,
                                                                                                                                                 rec_id = record_db_id)
                 cr1.execute(get_migrated_field_sql)
-                update_fields_history(cr2, original_table, record_db_id, "4", original_field)
+                update_fields_history(connection.cursor(cursor_factory=psycopg2.extras.DictCursor), original_table, record_db_id, "4", original_field)
                 cr1.execute("COMMIT;")
                 cr1.close()
             
