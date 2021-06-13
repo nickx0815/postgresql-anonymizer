@@ -22,7 +22,7 @@ class constants():
     
     
     DEANON_NUMBER_FIELD_PER_THREAD = 1000
-    ANON_NUMBER_FIELD_PER_THREAD = 1000
+    ANON_NUMBER_FIELD_PER_THREAD = 2500
     ANON_FETCH_RECORDS = 2500
     #TODO use other technique
     # available arg ['-v', '-l', '--dry-run']
