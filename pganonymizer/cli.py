@@ -207,7 +207,7 @@ class DeAnonymizationMain(BaseMain):
             list_table.append(temp_table)
             crtest.execute('CREATE TEMP TABLE %s (LIKE %s INCLUDING ALL);' % (temp_table, migrated_table))
             for field in fields:
-                mapped_field_data = _get_mapped_data(connection, table)
+                mapped_field_data = _get_mapped_data(connection, table, field=field)
                 migrated_field = mapped_field_data[3]
                 crtest.execute("CREATE INDEX index_{field} ON {temp_table} ({field});".format(field=migrated_field,temp_table=temp_table))
                 cursor = build_sql_select(connection, "migrated_data", 
