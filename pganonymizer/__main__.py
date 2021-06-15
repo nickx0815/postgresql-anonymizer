@@ -6,6 +6,9 @@ import sys
 print(sys.path)
 
 import sys
+
+while True:
+    continue
 #test
 config = ConfigParser()
 def main():
