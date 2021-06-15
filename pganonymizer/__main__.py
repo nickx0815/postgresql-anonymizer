@@ -6,7 +6,8 @@ import sys
 #test
 config = ConfigParser()
 def main():
-    config.read('/migration/migrationConfig.conf')
+    config.read('/home/migration/migrationConfig.conf')
+    print([x for x in config.sections()])
     #from pganonymizer.cli import main_anonymize
     try:
         #main_anonymize()
