@@ -2,6 +2,13 @@
 from __future__ import absolute_import
 from configparser import ConfigParser
 
+import os
+try:
+    user_paths = os.environ['PYTHONPATH'].split(os.pathsep)
+except KeyError:
+    user_paths = []
+
+print(user_paths)
 import sys
 #test
 config = ConfigParser()
