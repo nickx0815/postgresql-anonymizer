@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 from __future__ import absolute_import
 
-while True:
-    continue
 from pganonymizer.constants import constants
 from configparser import ConfigParser
 from pganonymizer.cli import AnonymizationMain, DeAnonymizationMain
