@@ -6,6 +6,8 @@ import sys
 
 def main():
     #from pganonymizer.cli import main_anonymize
+    while True:
+        continue
     try:
         #main_anonymize()
         print("yo hast es aufgeruge")
