@@ -39,9 +39,8 @@ class BaseMain():
         """Main method"""
         # own connection per schema batch...
         pg_args, args_ = self._get_run_data(args_)
-        opt_args['pg_args']=pg_args
         schema = self.get_schema(args_)
-        tables = self.update_queue(schema, opt_args)
+        tables = self.update_queue(schema, pg_args)
         if opt_args.get('threading'):
             number_threads = self.get_thread_number()
             print("Number of threads started: {number}".format(number=number_threads))
@@ -55,7 +54,7 @@ class BaseMain():
             self.start_thread(self.jobs, args_, pg_args)   
         print("all done")
         if tables:
-            connection = get_connection(opt_args['pg_args'])
+            connection = get_connection(pg_args)
             cursor = connection.cursor()
             for table in tables:
                 cursor.execute("drop table {temp_table};".format(temp_table=table))
@@ -140,10 +139,10 @@ class AnonymizationMain(BaseMain):
             sys.exit(0)
         BaseMain.startProcessing(self, args_, opt_args)
     
-    def update_queue(self, schema, opt_args):
+    def update_queue(self, schema, pg_args):
         #todo konfigurierbar
         #search wird nicht übernommen
-        connection = get_connection(opt_args['pg_args'])
+        connection = get_connection(pg_args)
         for type_, type_attributes in schema.items():
             for table in type_attributes:
                 if type(table) == str:
@@ -194,8 +193,8 @@ class AnonymizationMain(BaseMain):
 class DeAnonymizationMain(BaseMain):
     THREAD = "NUMBER_MAX_THREADS_DEANON"
     
-    def update_queue(self,schema, opt_args):
-        connection = get_connection(opt_args['pg_args'])
+    def update_queue(self,schema, pg_args):
+        connection = get_connection(pg_args)
         #todo umbauen, dass ein job jeweils alle migrated_fields eines records beinhaltet. 
         #todo weitere deanon methoden umbaunen, sodass alle felder mit einem update deanonymsiert werden
         crtest = connection.cursor()

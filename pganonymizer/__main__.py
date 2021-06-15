@@ -8,6 +8,7 @@ def main():
     #from pganonymizer.cli import main_anonymize
     try:
         #main_anonymize()
+        print("yo hast es aufgerufen")
         exit_status = 0
     except KeyboardInterrupt:
         exit_status = 1
