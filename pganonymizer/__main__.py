@@ -1,10 +1,15 @@
 #!/usr/bin/env python
+while True:
+    continue
+
 from __future__ import absolute_import
 from pganonymizer.constants import constants
 from configparser import ConfigParser
 from pganonymizer.cli import AnonymizationMain, DeAnonymizationMain
 
 import sys
+
+
 
 class Args():
     def __init__(self, dic):
