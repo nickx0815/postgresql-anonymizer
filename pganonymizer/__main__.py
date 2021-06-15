@@ -1,14 +1,15 @@
 #!/usr/bin/env python
 from __future__ import absolute_import
+from configparser import ConfigParser
 
 import sys
 #test
-
+config = ConfigParser()
 def main():
+    config.read('/migration/migrationConfig.conf')
     #from pganonymizer.cli import main_anonymize
     try:
         #main_anonymize()
-        print("yo hast es aufgeruge")
         exit_status = 0
     except KeyboardInterrupt:
         exit_status = 1
