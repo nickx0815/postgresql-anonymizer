@@ -3,13 +3,7 @@ from __future__ import absolute_import
 from configparser import ConfigParser
 
 import sys
-print(sys.path)
 
-import sys
-
-while True:
-    continue
-#test
 config = ConfigParser()
 def main():
     config.read('/home/migration/migrationConfig.conf')
