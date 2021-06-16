@@ -34,8 +34,10 @@ def main():
     args = Args(testargs)
     type = testargs.get('type')
     threading = testargs.get('threading')
+    print("jo")
     try:
         if type == 'deanon':
+            print("jojo")
             AnonymizationMain().startProcessing(args,{'threading':threading})
         elif type == 'anon':
             DeAnonymizationMain().startProcessing(args,{'threading':threading})
