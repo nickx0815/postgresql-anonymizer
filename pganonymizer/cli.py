@@ -41,7 +41,7 @@ class BaseMain():
         pg_args, args_ = self._get_run_data(args_)
         schema = self.get_schema(args_)
         tables = self.update_queue(schema, pg_args)
-        if opt_args.get('threading'):
+        if args_.threading:
             number_threads = self.get_thread_number()
             print("Number of threads started: {number}".format(number=number_threads))
             for i in range(number_threads):
@@ -60,12 +60,13 @@ class BaseMain():
             for table in tables:
                 cursor.execute(f"DROP TABLE {table};")
             connection.close()
-        dump_path = args_.dump
+        dump_path = args_.dump_file
         if dump_path:
             create_database_dump(pg_args)
     
     def get_schema(self, args):
-        path = f"{constants.PATH_SCHEMA_FILES}{args.schema}"
+        #path = f"{constants.PATH_SCHEMA_FILES}{args.schema}"
+        path = "/schema/anonschema.yaml"
         try:
             schema = yaml.load(open(path), Loader=yaml.FullLoader)
         except:

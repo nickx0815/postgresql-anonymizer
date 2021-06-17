@@ -20,6 +20,7 @@ class Args():
         self.port = dic.get("port")
         self.dry_run = dic.get("dryrun")
         self.dump_file = dic.get("dump")
+        self.threading = dic.get('threading')
         self.anon_table = dic.get("anon_table")
 
 config = ConfigParser()
@@ -33,12 +34,11 @@ def main():
     [testargs.update({x : config.get("Optional",x)})for x in constants.testarg_optional if x in config['Optional']]
     args = Args(testargs)
     type = testargs.get('type')
-    threading = testargs.get('threading')
     try:
         if type == 'anon':
-            AnonymizationMain().startProcessing(args,{'threading':threading})
+            AnonymizationMain().startProcessing(args)
         elif type == 'deanon':
-            DeAnonymizationMain().startProcessing(args,{'threading':threading})
+            DeAnonymizationMain().startProcessing(args)
         exit_status = 0
     except KeyboardInterrupt:
         exit_status = 1

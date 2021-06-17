@@ -21,7 +21,7 @@ class constants():
     
     section = ['Required','Optional']
     testarg = ['schema', 'dbname', 'user', 'password', 'host', 'port', 'anon_table', 'type', 'threading']
-    testarg_optional = ['dump', 'dry-run', 'l', 'v']
+    testarg_optional = ['dump', 'dry-run', 'l', 'v', 'schema']
     
     NUMBER_MAX_THREADS_ANON = 8
     NUMBER_MAX_THREADS_DEANON = 8
