@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 from __future__ import absolute_import
 
-while True:
-    continue
 from pganonymizer.constants import constants
 from configparser import ConfigParser
 from pganonymizer.cli import AnonymizationMain, DeAnonymizationMain
@@ -34,10 +32,8 @@ def main():
     args = Args(testargs)
     type = testargs.get('type')
     threading = testargs.get('threading')
-    print("jo")
     try:
         if type == 'deanon':
-            print("jojo")
             AnonymizationMain().startProcessing(args,{'threading':threading})
         elif type == 'anon':
             DeAnonymizationMain().startProcessing(args,{'threading':threading})
@@ -46,6 +42,5 @@ def main():
         exit_status = 1
     sys.exit(exit_status)
 
-print("JOJOJOJOJO")
 if __name__ == '__main__':
     main()
