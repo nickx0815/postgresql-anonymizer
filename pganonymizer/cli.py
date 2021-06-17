@@ -41,7 +41,7 @@ class BaseMain():
         pg_args, args_ = self._get_run_data(args_)
         schema = self.get_schema(args_)
         tables = self.update_queue(schema, pg_args)
-        if args_.threading:
+        if args_.threading == 'True':
             number_threads = self.get_thread_number()
             print("Number of threads started: {number}".format(number=number_threads))
             for i in range(number_threads):
