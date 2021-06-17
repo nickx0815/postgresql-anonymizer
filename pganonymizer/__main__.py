@@ -35,9 +35,9 @@ def main():
     type = testargs.get('type')
     threading = testargs.get('threading')
     try:
-        if type == 'deanon':
+        if type == 'anon':
             AnonymizationMain().startProcessing(args,{'threading':threading})
-        elif type == 'anon':
+        elif type == 'deanon':
             DeAnonymizationMain().startProcessing(args,{'threading':threading})
         exit_status = 0
     except KeyboardInterrupt:
