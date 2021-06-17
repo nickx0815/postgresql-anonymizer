@@ -35,7 +35,7 @@ class BaseMain():
     jobs = Queue()
     number_rec = {}
         
-    def startProcessing(self, args_, opt_args):
+    def startProcessing(self, args_):
         """Main method"""
         # own connection per schema batch...
         pg_args, args_ = self._get_run_data(args_)
@@ -133,7 +133,7 @@ class AnonymizationMain(BaseMain):
         return args
     
     
-    def startProcessing(self, args_, opt_args):
+    def startProcessing(self, args_):
         loglevel = logging.WARNING
         if args_.verbose:
             loglevel = logging.DEBUG
@@ -141,7 +141,7 @@ class AnonymizationMain(BaseMain):
         if args_.list_providers:
             self.list_provider_classes()
             sys.exit(0)
-        BaseMain.startProcessing(self, args_, opt_args)
+        BaseMain.startProcessing(self, args_)
     
     def update_queue(self, schema, pg_args):
         #todo konfigurierbar
