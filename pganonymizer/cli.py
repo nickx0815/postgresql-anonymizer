@@ -209,8 +209,11 @@ class DeAnonymizationMain(BaseMain):
             migrated_table = mapped_field_data[1]
             temp_table = "tmp_"+migrated_table
             list_table.append(temp_table)
-            fields = ",".join(fields+['id'])
-            crtest.execute(f'CREATE TABLE {temp_table} AS SELECT {fields} FROM {migrated_table};' )
+            fields_string = ",".join(fields+['id'])
+            try:
+                crtest.execute(f'CREATE TABLE {temp_table} AS SELECT {fields_string} FROM {migrated_table};' )
+            except:
+                crtest.execute("rollback;")
             crtest.execute(f"CREATE INDEX index_id ON {temp_table} (id);")
             for field in fields:
                 mapped_field_data = _get_mapped_data(connection, table, field=field)
