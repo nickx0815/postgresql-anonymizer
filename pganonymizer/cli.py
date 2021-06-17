@@ -143,6 +143,7 @@ class AnonymizationMain(BaseMain):
         #todo konfigurierbar
         #search wird nicht übernommen
         connection = get_connection(pg_args)
+        print("started the queue update")
         for type_, type_attributes in schema.items():
             for table in type_attributes:
                 if type(table) == str:

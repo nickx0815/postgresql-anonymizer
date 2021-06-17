@@ -107,6 +107,7 @@ def build_data(connection, table, columns, excludes, total_count, search,primary
             progress_bar.next()
     if verbose:
         progress_bar.finish()
+    print(f"{constants.ANON_FETCH_RECORDS} records anonymized")
     cursor.close()
     return number
 
