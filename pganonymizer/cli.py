@@ -15,7 +15,7 @@ from queue import Queue
 
 import yaml
 
-from pganonymizer.constants import constants
+from pganonymizer.constants import constants 
 from pganonymizer.providers import PROVIDERS
 from pganonymizer.utils import anonymize_tables, create_database_dump, get_connection, truncate_tables, build_sql_select
 from pganonymizer.revert import run_revert, _get_ids_sql_format, _get_mapped_data
@@ -58,14 +58,18 @@ class BaseMain():
             connection.autocommit = True
             cursor = connection.cursor()
             for table in tables:
-                cursor.execute("drop table {temp_table};".format(temp_table=table))
+                cursor.execute(f"DROP TABLE {table};")
             connection.close()
+        dump_path = args_.dump
+        if dump_path:
+            create_database_dump(pg_args)
     
     def get_schema(self, args):
+        path = f"{constants.PATH_SCHEMA_FILES}{args.schema}"
         try:
-            schema = yaml.load(open(args.schema), Loader=yaml.FullLoader)
+            schema = yaml.load(open(path), Loader=yaml.FullLoader)
         except:
-            schema = yaml.load(open(args.schema))
+            schema = yaml.load(open(path))
         return schema
         
     def list_provider_classes(self):
@@ -167,16 +171,16 @@ class AnonymizationMain(BaseMain):
                         self.number_rec[table_key] = (number, 0, time.time())
                         
     def print_info(self, table, total, anonymized, percent_anonymized):
-        print("Table {table} is {percent} % anonymized".format(table=table,
-                                                                percent="{:.2f}".format(percent_anonymized*100)))
+        percent="{:.2f}".format(percent_anonymized*100)
+        print(f"Table {table} is {percent} % anonymized")
         total_anonymized = percent_anonymized*total
-        print("Total Records anonymized {total}".format(total=total_anonymized-(total_anonymized%1)))
+        total=total_anonymized-(total_anonymized%1)
+        print(f"Total Records anonymized {total}")
         if percent_anonymized == 1:
             runtime = time.time()-self.number_rec[table][2]
             time_ = str(datetime.timedelta(seconds=runtime))
-            print("Table {table} is anonymized".format(table=table))
-            print("Anonymization of {table} took {time}".format(table=table,
-                                                                time = time_))
+            print(f"Table {table} is anonymized")
+            print(f"Anonymization of {table} took {time_}")
         self.number_rec[table] = (total, anonymized, self.number_rec[table][2])
     
     def _runSpecificTask(self, con, args, schema):
@@ -204,16 +208,17 @@ class DeAnonymizationMain(BaseMain):
             migrated_table = mapped_field_data[1]
             temp_table = "tmp_"+migrated_table
             list_table.append(temp_table)
-            crtest.execute('CREATE TABLE %s AS SELECT %s FROM %s;' % (temp_table, ",".join(fields+['id']), migrated_table))
-            crtest.execute("CREATE INDEX index_{field} ON {temp_table} ({field});".format(field="id",temp_table=temp_table))
+            fields = ",".join(fields+['id'])
+            crtest.execute(f'CREATE TABLE {temp_table} AS SELECT {fields} FROM {migrated_table};' )
+            crtest.execute(f"CREATE INDEX index_id ON {temp_table} ('id');")
             for field in fields:
                 mapped_field_data = _get_mapped_data(connection, table, field=field)
                 migrated_field = mapped_field_data[3]
                 try:
-                    crtest.execute("CREATE INDEX index_{field} ON {temp_table} ({field});".format(field=migrated_field,temp_table=temp_table))
+                    crtest.execute(f"CREATE INDEX index_{migrated_field} ON {temp_table} ({field});")
                 except:
                     crtest.execute("rollback;")
-                cursor = build_sql_select(connection, "migrated_data", 
+                cursor = build_sql_select(connection, constants.TABLE_MIGRATED_DATA, 
                                                                     ["model_id = '{model_id}'".format(model_id=table),
                                                                     "field_id = '{field_id}'".format(field_id=field)],
                                                                     select="record_id, value")

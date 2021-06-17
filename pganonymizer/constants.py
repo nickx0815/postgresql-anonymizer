@@ -13,6 +13,12 @@ class constants():
     # Filename of the default schema
     DEFAULT_SCHEMA_FILE = 'schema.yml'
     
+    PATH_SCHEMA_FILES =  "/home/migration/schema/"
+    PATH_CONFIG_FILE = '/home/migration/migrationConfig.conf'
+    TABLE_MIGRATED_DATA = 'migrated_data'
+    TABLE_MIGRATED_FIELDS = 'migrated_fields'
+    PATH_DUMP =  "/tmp/"
+    
     section = ['Required','Optional']
     testarg = ['schema', 'dbname', 'user', 'password', 'host', 'port', 'anon_table', 'type', 'threading']
     testarg_optional = ['dump', 'dry-run', 'l', 'v']

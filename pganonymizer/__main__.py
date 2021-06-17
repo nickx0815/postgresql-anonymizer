@@ -26,7 +26,7 @@ config = ConfigParser()
 def main():
     time.sleep(5)
     testargs = {}
-    config.read('/home/migration/migrationConfig.conf')
+    config.read(constants.PATH_CONFIG_FILE)
     if False in set([x in config.sections() for x in constants.section]):
         raise Exception("Section not found!")
     [testargs.update({x : config.get("Required",x)}) for x in constants.testarg]

@@ -7,6 +7,7 @@ import json
 import logging
 import re
 import subprocess
+import time
 
 import psycopg2
 import psycopg2.extras
@@ -180,10 +181,7 @@ def import_data(connection, field, source_table, row_id, primary_key, value):
     """
     primary_key = primary_key if primary_key else constants.DEFAULT_PRIMARY_KEY
     cursor = connection.cursor()
-    sql = "UPDATE {table} SET {field} = '{value}' WHERE ID = {id}".format(table=source_table,
-                                                                          field=field,
-                                                                          value=value,
-                                                                          id=row_id)
+    sql = f"UPDATE {source_table} SET {field} = '{value}' WHERE ID = {row_id}"
     cursor.execute(sql)
     cursor.close()
 
@@ -307,23 +305,23 @@ def truncate_tables(connection, tables):
     cursor = connection.cursor()
     table_names = ', '.join(tables)
     logging.info('Truncating tables "%s"', table_names)
-    cursor.execute('TRUNCATE TABLE {tables} CASCADE;'.format(tables=table_names))
+    cursor.execute(f'TRUNCATE TABLE {table_names} CASCADE;')
     # todo aufzeichungen
     #_run_query('truncate', connection, table_names)
     cursor.close()
 
 
-def create_database_dump(filename, db_args):
+def create_database_dump(db_args):
     """
     Create a dump file from the current database.
 
     :param str filename: Path to the dumpfile that should be created
     :param dict db_args: A dictionary with database related information
     """
-    arguments = '-d {dbname} -U {user} -h {host} -p {port}'.format(**db_args)
-    cmd = 'pg_dump -p -Fc -Z 9 {args} -f {filename}'.format(
-        args=arguments,
-        filename=filename
-    )
-    logging.info('Creating database dump file "%s"', filename)
+    cur_time = time.time()
+    dbname = db_args.get('dbname')
+    file = f"{constants.PATH_DUMP}{cur_time}_{dbname}"
+    args = '-d {dbname} -U {user} -h {host} -p {port}'.format(**db_args)
+    cmd = f'pg_dump -p -Fc -Z 9 {args} -f {file}'
+    logging.info('Creating database dump file "%s"', file)
     subprocess.run(cmd, shell=True)

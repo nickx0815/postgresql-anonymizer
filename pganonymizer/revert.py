@@ -1,6 +1,7 @@
 import psycopg2, logging, csv
 from pganonymizer.update_field_history import update_fields_history
 from docutils.nodes import row
+from pganonymizer.constants import constants
 
 
 def _run_query(type, con, data, ids, table_id):
@@ -22,8 +23,7 @@ def create_anon(con, data, ids, table_id):
         field = list(field_data.keys())[0]
         insert_migrated_fields_rec(cr, field, table)
         id = data.get(table).get(field)
-        sql_migrated_data_insert = "Insert into migrated_data (model_id, field_id, record_id, value) \
-            VALUES (%s, %s, %s, %s)"
+        sql_migrated_data_insert = "Insert into migrated_data (model_id, field_id, record_id, value) VALUES (%s, %s, %s, %s)"
         id = list(id.keys())[0]
         data = (table, field, id, data.get(table).get(field).get(id))
         cr.execute(sql_migrated_data_insert, data)
@@ -31,12 +31,11 @@ def create_anon(con, data, ids, table_id):
     cr.close()
 
 def insert_migrated_fields_rec(cr, field, table):
-    sql_insert = "INSERT INTO migrated_fields (model_id, field_id) \
-                   VALUES ('{table}', '{field}');".format(table=table, field=field)
-    sql_select = "SELECT id  from migrated_fields \
+    sql_insert = f"INSERT INTO {constants.TABLE_MIGRATED_FIELDS} (model_id, field_id) VALUES ('{table}', '{field}');"
+    sql_select = f"SELECT id  from {constants.TABLE_MIGRATED_FIELDS} \
                             WHERE model_id = '{table}' \
                                    AND field_id = '{field}' \
-                            LIMIT 1;".format(table=table, field=field)
+                            LIMIT 1;"
     cr.execute(sql_select)
     record = cr.fetchone()
     if not record:
@@ -54,18 +53,14 @@ def run_revert(connection, args, data):
             number = number + 1
             cr3 = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
             orig_value = original_table + "_" + original_field + "_" + str(id)
-            record_db_id_sql = "SELECT ID FROM {mapped_table} where {mapped_field} = '{value}';".format(
-                mapped_table="tmp_"+migrated_table,
-                mapped_field=migrated_field,
-                value=orig_value)
+            record_db_id_sql = f"SELECT ID FROM {'tmp_'+migrated_table} where {migrated_field} = '{orig_value}';"
             cr3.execute(record_db_id_sql)
             record_db = cr3.fetchone()
             cr3.close()
             if record_db:
                 cr1 = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
                 record_db_id = record_db[0]
-                get_migrated_field_sql = "UPDATE {migrated_table} SET {migrated_field} = %s WHERE id = %s;".format(migrated_table=migrated_table,
-                                                                                                                   migrated_field=migrated_field)
+                get_migrated_field_sql = f"UPDATE {migrated_table} SET {migrated_field} = %s WHERE id = %s;"
                 cr1.execute(get_migrated_field_sql, (value, record_db_id))
                 cr1.close()
                 update_fields_history(connection.cursor(cursor_factory=psycopg2.extras.DictCursor), original_table, record_db_id, "4", original_field)
@@ -74,9 +69,9 @@ def run_revert(connection, args, data):
 def _get_mapped_data(con, table, field=False):
     # todo function to determine which mapping (10,11,12...)
     cr = con.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    select_model_id_sql = "SELECT new_model_name, new_field_name FROM model_migration_mapping where old_model_name = '{old_table}'".format(old_table=table)
+    select_model_id_sql = f"SELECT new_model_name, new_field_name FROM model_migration_mapping where old_model_name = '{table}'"
     if field:
-        select_model_id_sql+=" and old_field_name = '{field}'".format(field=field)
+        select_model_id_sql+=f" and old_field_name = '{field}'"
     select_model_id_sql+=";"
     cr.execute(select_model_id_sql)
     record = cr.fetchone()
