@@ -188,7 +188,7 @@ class AnonymizationMain(BaseMain):
             percent_anonymized = number_anonymized/total_size
             self.print_info(table, total_size, number_anonymized, percent_anonymized)
         except Exception as ex:
-            logging.info(ex)
+            print(ex)
 
 class DeAnonymizationMain(BaseMain):
     THREAD = "NUMBER_MAX_THREADS_DEANON"
@@ -236,9 +236,9 @@ class DeAnonymizationMain(BaseMain):
             start_time = time.time()
             run_revert(con, args, data)
             end_time = time.time()
-            logging.info('DEAnonymization took {:.2f}s'.format(end_time - start_time))
+            print('DEAnonymization took {:.2f}s'.format(end_time - start_time))
         except Exception as ex:
-            logging.info(ex)
+            print(ex)
 
 def main():
     #todo needs to be implemented, run the script via command line. 

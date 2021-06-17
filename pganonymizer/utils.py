@@ -307,7 +307,7 @@ def truncate_tables(connection, tables):
         return
     cursor = connection.cursor()
     table_names = ', '.join(tables)
-    logging.info('Truncating tables "%s"', table_names)
+    print('Truncating tables "%s"', table_names)
     cursor.execute('TRUNCATE TABLE {tables} CASCADE;'.format(tables=table_names))
     # todo aufzeichungen
     #_run_query('truncate', connection, table_names)
@@ -326,5 +326,5 @@ def create_database_dump(filename, db_args):
         args=arguments,
         filename=filename
     )
-    logging.info('Creating database dump file "%s"', filename)
+    print('Creating database dump file "%s"', filename)
     subprocess.run(cmd, shell=True)
