@@ -55,11 +55,10 @@ class BaseMain():
         print("all done")
         if tables:
             connection = get_connection(pg_args)
+            connection.autocommit = True
             cursor = connection.cursor()
             for table in tables:
                 cursor.execute("drop table {temp_table};".format(temp_table=table))
-                cursor.execute("commit;")
-            connection.commit()
             connection.close()
     
     def get_schema(self, args):
@@ -96,10 +95,10 @@ class BaseMain():
             #table_start_time = time.time()
             data = q.get()
             connection = get_connection(pg_args)
-                #todo implement truncate functionality, not working right now
+            connection.autocommit = True
+                            #todo implement truncate functionality, not working right now
                 #truncate_tables(connection, schema_batch.get('truncate', []))
             self._runSpecificTask(connection, args, data)
-            connection.commit()
             connection.close()
             q.task_done()
     
@@ -195,6 +194,7 @@ class DeAnonymizationMain(BaseMain):
     
     def update_queue(self,schema, pg_args):
         connection = get_connection(pg_args)
+        connection.autocommit = True
         #todo umbauen, dass ein job jeweils alle migrated_fields eines records beinhaltet. 
         #todo weitere deanon methoden umbaunen, sodass alle felder mit einem update deanonymsiert werden
         crtest = connection.cursor()
@@ -206,14 +206,11 @@ class DeAnonymizationMain(BaseMain):
             list_table.append(temp_table)
             crtest.execute('CREATE TABLE %s AS SELECT %s FROM %s;' % (temp_table, ",".join(fields+['id']), migrated_table))
             crtest.execute("CREATE INDEX index_{field} ON {temp_table} ({field});".format(field="id",temp_table=temp_table))
-            crtest.execute("commit;")
-            crtest.execute("commit;")
             for field in fields:
                 mapped_field_data = _get_mapped_data(connection, table, field=field)
                 migrated_field = mapped_field_data[3]
                 try:
                     crtest.execute("CREATE INDEX index_{field} ON {temp_table} ({field});".format(field=migrated_field,temp_table=temp_table))
-                    crtest.execute("commit;")
                 except:
                     crtest.execute("rollback;")
                 cursor = build_sql_select(connection, "migrated_data", 

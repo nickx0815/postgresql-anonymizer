@@ -185,7 +185,6 @@ def import_data(connection, field, source_table, row_id, primary_key, value):
                                                                           value=value,
                                                                           id=row_id)
     cursor.execute(sql)
-    cursor.execute("Commit;")
     cursor.close()
 
 
@@ -307,7 +306,7 @@ def truncate_tables(connection, tables):
         return
     cursor = connection.cursor()
     table_names = ', '.join(tables)
-    print('Truncating tables "%s"', table_names)
+    logging.info('Truncating tables "%s"', table_names)
     cursor.execute('TRUNCATE TABLE {tables} CASCADE;'.format(tables=table_names))
     # todo aufzeichungen
     #_run_query('truncate', connection, table_names)
@@ -326,5 +325,5 @@ def create_database_dump(filename, db_args):
         args=arguments,
         filename=filename
     )
-    print('Creating database dump file "%s"', filename)
+    logging.info('Creating database dump file "%s"', filename)
     subprocess.run(cmd, shell=True)
