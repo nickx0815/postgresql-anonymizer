@@ -321,7 +321,7 @@ def create_database_dump(db_args):
     cur_time = time.time()
     dbname = db_args.get('dbname')
     file = f"{constants.PATH_DUMP}{cur_time}_{dbname}"
-    args = '-d {dbname} -U {user} -h {host} -p {port}'.format(**db_args)
-    cmd = f'pg_dump -p -Fc -Z 9 {args} -f {file}'
+    args = '{dbname}'.format(**db_args)
+    cmd = f'psql -U odoo {args} > {file}'
     logging.info('Creating database dump file "%s"', file)
     subprocess.run(cmd, shell=True)

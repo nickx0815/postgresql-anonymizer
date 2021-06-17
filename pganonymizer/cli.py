@@ -60,9 +60,9 @@ class BaseMain():
             for table in tables:
                 cursor.execute(f"DROP TABLE {table};")
             connection.close()
-        dump_path = args_.dump_file
-        if dump_path:
-            create_database_dump(pg_args)
+#        dump_path = args_.dump_file
+#         if dump_path:
+#             create_database_dump(pg_args)
     
     def get_schema(self, args):
         path = f"{constants.PATH_SCHEMA_FILES}{args.schema}"
@@ -211,7 +211,7 @@ class DeAnonymizationMain(BaseMain):
             list_table.append(temp_table)
             fields = ",".join(fields+['id'])
             crtest.execute(f'CREATE TABLE {temp_table} AS SELECT {fields} FROM {migrated_table};' )
-            crtest.execute(f"CREATE INDEX index_id ON {temp_table} ('id');")
+            crtest.execute(f"CREATE INDEX index_id ON {temp_table} (id);")
             for field in fields:
                 mapped_field_data = _get_mapped_data(connection, table, field=field)
                 migrated_field = mapped_field_data[3]
