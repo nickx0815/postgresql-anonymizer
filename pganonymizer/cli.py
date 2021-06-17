@@ -65,8 +65,8 @@ class BaseMain():
             create_database_dump(pg_args)
     
     def get_schema(self, args):
-        #path = f"{constants.PATH_SCHEMA_FILES}{args.schema}"
-        path = "./schema/anonschema.yaml"
+        path = f"{constants.PATH_SCHEMA_FILES}{args.schema}"
+        #path = "./schema/anonschema.yaml"
         try:
             schema = yaml.load(open(path), Loader=yaml.FullLoader)
         except:
