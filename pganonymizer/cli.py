@@ -66,7 +66,7 @@ class BaseMain():
     
     def get_schema(self, args):
         #path = f"{constants.PATH_SCHEMA_FILES}{args.schema}"
-        path = "/schema/anonschema.yaml"
+        path = "./schema/anonschema.yaml"
         try:
             schema = yaml.load(open(path), Loader=yaml.FullLoader)
         except:
