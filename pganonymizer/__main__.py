@@ -4,6 +4,7 @@ from __future__ import absolute_import
 from pganonymizer.constants import constants
 from configparser import ConfigParser
 from pganonymizer.cli import AnonymizationMain, DeAnonymizationMain
+import time
 
 import sys
 
@@ -23,6 +24,7 @@ class Args():
 
 config = ConfigParser()
 def main():
+    time.sleep(5)
     testargs = {}
     config.read('/home/migration/migrationConfig.conf')
     if False in set([x in config.sections() for x in constants.section]):
