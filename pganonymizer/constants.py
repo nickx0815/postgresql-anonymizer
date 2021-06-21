@@ -20,8 +20,8 @@ class constants():
     PATH_DUMP =  "/tmp/"
     
     section = ['Required','Optional']
-    testarg = ['schema', 'dbname', 'user', 'password', 'host', 'port', 'anon_table', 'type', 'threading']
-    testarg_optional = ['dump', 'dry-run', 'l', 'v', 'schema']
+    testarg = ['schema', 'dbname', 'user', 'password', 'host', 'port', 'type']
+    testarg_optional = ['dump', 'dry_run', 'l', 'v', 'schema', 'threading']
     
     NUMBER_MAX_THREADS_ANON = 8
     NUMBER_MAX_THREADS_DEANON = 8

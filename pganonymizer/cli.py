@@ -41,17 +41,17 @@ class BaseMain():
         pg_args, args_ = self._get_run_data(args_)
         schema = self.get_schema(args_)
         tables = self.update_queue(schema, pg_args)
-        if args_.threading == 'True':
+        if args_.threading == 'False':
+            self.start_thread(self.jobs, args_, pg_args)  
+        else:
             number_threads = self.get_thread_number()
-            print("Number of threads started: {number}".format(number=number_threads))
+            print(f"Number of threads started: {number_threads}")
             for i in range(number_threads):
                 worker = threading.Thread(target=self.start_thread, args=(self.jobs,args_, pg_args))
                 worker.start()
             
             print("waiting for queue to complete tasks")
             self.jobs.join()
-        else:
-            self.start_thread(self.jobs, args_, pg_args)   
         print("all done")
         if tables:
             connection = get_connection(pg_args)

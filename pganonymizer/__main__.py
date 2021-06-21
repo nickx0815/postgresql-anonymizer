@@ -18,10 +18,9 @@ class Args():
         self.password = dic.get("password")
         self.host = dic.get("host")
         self.port = dic.get("port")
-        self.dry_run = dic.get("dryrun")
+        self.dry_run = dic.get("dry_run")
         self.dump_file = dic.get("dump")
         self.threading = dic.get('threading')
-        self.anon_table = dic.get("anon_table")
 
 config = ConfigParser()
 def main():
