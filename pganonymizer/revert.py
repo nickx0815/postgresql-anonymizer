@@ -1,5 +1,5 @@
 import psycopg2, logging, csv
-from pganonymizer.update_field_history import update_fields_history
+from pganonymizer.update_field_history import update_fields_history, update_migrated_data_history
 from docutils.nodes import row
 from pganonymizer.constants import constants
 
@@ -23,7 +23,7 @@ def create_anon(con, data, ids, table_id):
         field = list(field_data.keys())[0]
         insert_migrated_fields_rec(cr, field, table)
         id = data.get(table).get(field)
-        sql_migrated_data_insert = "Insert into migrated_data (model_id, field_id, record_id, value) VALUES (%s, %s, %s, %s)"
+        sql_migrated_data_insert = f"Insert into {constants.TABLE_MIGRATED_DATA} (model_id, field_id, record_id, value) VALUES (%s, %s, %s, %s)"
         id = list(id.keys())[0]
         data = (table, field, id, data.get(table).get(field).get(id))
         cr.execute(sql_migrated_data_insert, data)
@@ -49,7 +49,7 @@ def run_revert(connection, args, data):
         migrated_table = mapped_field_data[1]
         original_field = mapped_field_data[2]
         migrated_field = mapped_field_data[3]
-        for id, value in data[1]:
+        for id, value, record_id in data[1]:
             number = number + 1
             cr3 = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
             orig_value = original_table + "_" + original_field + "_" + str(id)
@@ -64,6 +64,7 @@ def run_revert(connection, args, data):
                 cr1.execute(get_migrated_field_sql, (value, record_db_id))
                 cr1.close()
                 update_fields_history(connection.cursor(cursor_factory=psycopg2.extras.DictCursor), original_table, record_db_id, "4", original_field)
+                update_migrated_data_history(connection.cursor(), record_id)
     print(str(number) + " records deanonymized!")
 
 def _get_mapped_data(con, table, field=False):

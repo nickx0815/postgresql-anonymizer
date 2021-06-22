@@ -224,15 +224,16 @@ class DeAnonymizationMain(BaseMain):
                     crtest.execute("rollback;")
                 cursor = build_sql_select(connection, constants.TABLE_MIGRATED_DATA, 
                                                                     ["model_id = '{model_id}'".format(model_id=table),
-                                                                    "field_id = '{field_id}'".format(field_id=field)],
-                                                                    select="record_id, value")
+                                                                    "field_id = '{field_id}'".format(field_id=field),
+                                                                    "state = 0"],
+                                                                    select="id, record_id, value")
                 while True:
                     list = []
                     records = cursor.fetchmany(size=constants.DEANON_NUMBER_FIELD_PER_THREAD)
                     if not records:
                         break
                     for rec in records:
-                        list.append((rec.get('record_id'), rec.get('value')))
+                        list.append((rec.get('record_id'), rec.get('value'), rec.get('id')))
                     self.jobs.put({table: (field, list)})
         crtest.close()
         return list_table
