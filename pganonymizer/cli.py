@@ -224,7 +224,7 @@ class DeAnonymizationMain(BaseMain):
                 try:
                     crtest.execute(f"CREATE INDEX index_{migrated_field} ON {temp_table} ({field});")
                 except:
-                    crtest.execute("rollback;")
+                    pass
                 cursor = build_sql_select(connection, constants.TABLE_MIGRATED_DATA, 
                                                                     ["model_id = '{model_id}'".format(model_id=table),
                                                                     "field_id = '{field_id}'".format(field_id=field),
