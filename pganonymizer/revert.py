@@ -78,6 +78,8 @@ def _get_mapped_data(con, table, field=False):
     record = cr.fetchone()
     if not record:
         return (table, table, field, field)
+    if field:
+        return (table, record.get('new_model_name'))
     return (table, record.get('new_model_name'), field, record.get('new_field_name'))
 
 def create_truncate(con, data):
