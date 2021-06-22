@@ -46,7 +46,7 @@ class BaseMain():
             try:
                 tables = self.update_queue(schema, pg_args)
                 break
-            except OperationalError:
+            except OperationalError as oe:
                 continue
         if args_.threading == 'False':
             self.start_thread(self.jobs, args_, pg_args)  
