@@ -19,6 +19,7 @@ from pganonymizer.constants import constants
 from pganonymizer.providers import PROVIDERS
 from pganonymizer.utils import anonymize_tables, create_database_dump, get_connection, truncate_tables, build_sql_select
 from pganonymizer.revert import run_revert, _get_ids_sql_format, _get_mapped_data
+from symbol import except_clause
 
 def get_pg_args(args):
         """
@@ -217,7 +218,10 @@ class DeAnonymizationMain(BaseMain):
                 crtest.execute(f'CREATE TABLE {temp_table} AS SELECT {fields_string} FROM {migrated_table};' )
             except:
                 pass
-            crtest.execute(f"CREATE INDEX index_id ON {temp_table} (id);")
+            try:
+                crtest.execute(f"CREATE INDEX index_id ON {temp_table} (id);")
+            except:
+                pass
             for field in fields:
                 mapped_field_data = _get_mapped_data(connection, table, field=field)
                 migrated_field = mapped_field_data[3]
