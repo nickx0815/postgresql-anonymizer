@@ -101,9 +101,9 @@ def build_data(connection, table, columns, excludes, total_count, search,primary
                         continue
                     anon_field_id = anon_fields[key]
                     original_data[key] = {row.get('id'): row[key]}
-                    row[key] = value
                     import_data(connection, key, table, row.get('id'), primary_key, value)
-                    _run_query('anon', connection, {table:original_data}, [anon_field_id], table_id)
+                    if table+"_"+key+"_" in value:
+                        _run_query('anon', connection, {table:original_data}, [anon_field_id], table_id)
         if verbose:
             progress_bar.next()
     if verbose:
