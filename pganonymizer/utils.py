@@ -83,7 +83,6 @@ def build_data(connection, table, columns, excludes, total_count, search,primary
     cursor.close()
     cursor = build_sql_select(connection, table, search)
     number=0
-    anon_fields = _get_anon_field_id(columns)
     while True:
         rows = cursor.fetchmany(size=constants.ANON_FETCH_RECORDS)
         if not rows:
@@ -96,14 +95,12 @@ def build_data(connection, table, columns, excludes, total_count, search,primary
                 row_column_dict = get_column_values(row, columns, {'id':row.get('id'), 'table':table})
                 for key, value in row_column_dict.items():
                     original_data = {}
-                    migrated_data = table.replace(".", "_")+"_"+key+"_"+str(row.get('id'))
-                    if row[key] == migrated_data:
+                    if row[key] == value:
                         continue
-                    anon_field_id = anon_fields[key]
                     original_data[key] = {row.get('id'): row[key]}
                     import_data(connection, key, table, row.get('id'), primary_key, value)
-                    if table+"_"+key+"_" in value:
-                        _run_query('anon', connection, {table:original_data}, [anon_field_id], table_id)
+                    if all(x1 in value for x1 in [table,key]):
+                        _run_query('anon', connection, {table:original_data},  table_id)
         if verbose:
             progress_bar.next()
     if verbose:

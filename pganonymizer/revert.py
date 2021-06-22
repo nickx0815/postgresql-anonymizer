@@ -4,9 +4,9 @@ from docutils.nodes import row
 from pganonymizer.constants import constants
 
 
-def _run_query(type, con, data, ids, table_id):
+def _run_query(type, con, data, table_id):
     if type == 'anon':
-        create_anon(con , data, ids, table_id)
+        create_anon(con , data, table_id)
     elif type == 'truncate':
         create_truncate(con, data)
 
@@ -16,7 +16,7 @@ def _get_ids_sql_format(ids):
         return str(set([x for x in ids])).replace("{", "(").replace("}", ")")
     return False
 
-def create_anon(con, data, ids, table_id):
+def create_anon(con, data, table_id):
     cr = con.cursor()
     for table, field_data in data.items():
         # ids_sql_format = _get_ids_sql_format(ids)
