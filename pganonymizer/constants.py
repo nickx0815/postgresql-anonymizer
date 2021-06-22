@@ -13,6 +13,8 @@ class constants():
     # Filename of the default schema
     DEFAULT_SCHEMA_FILE = 'schema.yml'
     
+    STARTINGUPERROR = "the database system is starting up"
+    
     PATH_SCHEMA_FILES =  "/home/migration/schema/"
     PATH_CONFIG_FILE = '/home/migration/migrationConfig.conf'
     TABLE_MIGRATED_DATA = 'migrated_data'

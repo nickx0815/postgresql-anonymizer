@@ -25,7 +25,6 @@ class Args():
 
 config = ConfigParser()
 def main():
-    time.sleep(5)
     testargs = {}
     config.read(constants.PATH_CONFIG_FILE)
     if False in set([x in config.sections() for x in constants.section]):

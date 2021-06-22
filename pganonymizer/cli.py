@@ -36,6 +36,11 @@ def get_pg_args(args):
 class BaseMain():
     jobs = Queue()
     number_rec = {}
+    
+    def isStartingUpError(self, oe):
+        if constants.STARTINGUPERROR in oe:
+            return True
+        return False
         
     def startProcessing(self, args_):
         """Main method"""
@@ -47,7 +52,9 @@ class BaseMain():
                 tables = self.update_queue(schema, pg_args)
                 break
             except OperationalError as oe:
-                continue
+                if self.isStartingUpError(oe):
+                    continue
+                print(oe)
         if args_.threading == 'False':
             self.start_thread(self.jobs, args_, pg_args)  
         else:
