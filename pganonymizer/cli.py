@@ -64,9 +64,9 @@ class BaseMain():
 #         if dump_path:
 #             create_database_dump(pg_args)
     
-    def get_schema(self, args, force_path=False):
-        if force_path:
-            path=force_path
+    def get_schema(self, args):
+        if args.force_path:
+            path=args.force_path
         else:
             path = f"{constants.PATH_SCHEMA_FILES}{args.schema}"
         #path = "./schema/anonschema.yaml"
