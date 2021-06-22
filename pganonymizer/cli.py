@@ -9,6 +9,7 @@ import copy
 import time
 import datetime
 import psycopg2
+from psycopg2 import OperationalError
 from time import sleep
 import threading, time
 from queue import Queue
@@ -41,7 +42,12 @@ class BaseMain():
         # own connection per schema batch...
         pg_args, args_ = self._get_run_data(args_)
         schema = self.get_schema(args_)
-        tables = self.update_queue(schema, pg_args)
+        while True:
+            try:
+                tables = self.update_queue(schema, pg_args)
+                break
+            except OperationalError:
+                continue
         if args_.threading == 'False':
             self.start_thread(self.jobs, args_, pg_args)  
         else:
