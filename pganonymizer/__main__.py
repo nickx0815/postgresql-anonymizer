@@ -14,13 +14,13 @@ class Args():
         self.list_providers = dic.get("l")
         self.schema = dic.get("schema")
         self.dbname = dic.get("dbname")
-        self.user = dic.get("user")
-        self.password = dic.get("password")
-        self.host = dic.get("host")
-        self.port = dic.get("port")
+        self.user = dic.get("user", "odoo")
+        self.password = dic.get("password", "odoo")
+        self.host = dic.get("host", "postgres")
+        self.port = dic.get("port", 5432)
         self.dry_run = dic.get("dry_run")
         self.dump_file = dic.get("dump")
-        self.threading = dic.get('threading')
+        self.threading = dic.get('threading', True)
 
 config = ConfigParser()
 def main():
