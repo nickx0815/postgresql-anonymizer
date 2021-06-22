@@ -243,7 +243,7 @@ class DeAnonymizationMain(BaseMain):
             start_time = time.time()
             run_revert(con, args, data)
             end_time = time.time()
-            print('DEAnonymization took {:.2f}s'.format(end_time - start_time))
+            print('Deanonymization took {:.2f}s'.format(end_time - start_time))
         except Exception as ex:
             print(ex)
 

@@ -23,9 +23,9 @@ def create_anon(con, data, ids, table_id):
         field = list(field_data.keys())[0]
         insert_migrated_fields_rec(cr, field, table)
         id = data.get(table).get(field)
-        sql_migrated_data_insert = f"Insert into {constants.TABLE_MIGRATED_DATA} (model_id, field_id, record_id, value) VALUES (%s, %s, %s, %s)"
+        sql_migrated_data_insert = f"Insert into {constants.TABLE_MIGRATED_DATA} (model_id, field_id, record_id, value, state) VALUES (%s, %s, %s, %s, %s)"
         id = list(id.keys())[0]
-        data = (table, field, id, data.get(table).get(field).get(id))
+        data = (table, field, id, data.get(table).get(field).get(id), 0)
         cr.execute(sql_migrated_data_insert, data)
         update_fields_history(cr, table, id, "2", field)
     cr.close()
