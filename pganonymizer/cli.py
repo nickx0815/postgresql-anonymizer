@@ -45,7 +45,7 @@ class BaseMain():
             self.start_thread(self.jobs, args_, pg_args)  
         else:
             number_threads = self.get_thread_number()
-            print(f"Number of threads started: {number_threads}")
+            #print(f"Number of threads started: {number_threads}")
             for i in range(number_threads):
                 worker = threading.Thread(target=self.start_thread, args=(self.jobs,args_, pg_args))
                 worker.start()
