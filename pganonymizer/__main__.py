@@ -21,6 +21,7 @@ class Args():
         self.dry_run = dic.get("dry_run")
         self.dump_file = dic.get("dump")
         self.threading = dic.get('threading', True)
+        self.force_path = dic.get('force_path')
 
 config = ConfigParser()
 def main():
