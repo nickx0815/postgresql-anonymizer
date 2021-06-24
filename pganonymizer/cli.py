@@ -151,7 +151,7 @@ class AnonymizationMain(BaseMain):
         return args
     
     
-    def startProcessing(self, args_):
+    def startprocessing(self, args_):
         loglevel = logging.WARNING
         if args_.verbose:
             loglevel = logging.DEBUG
@@ -159,7 +159,7 @@ class AnonymizationMain(BaseMain):
         if args_.list_providers:
             self.list_provider_classes()
             sys.exit(0)
-        BaseMain.startProcessing(self, args_)
+        BaseMain.startprocessing(self, args_)
     
     def update_queue(self):
         #todo konfigurierbar
@@ -286,8 +286,8 @@ class DeAnonymizationMain(BaseMain):
         except Exception as ex:
             print(ex)
     
-    def startProcessing(self, args_):
-        BaseMain.startProcessing(self, args_)
+    def startprocessing(self, args_):
+        BaseMain.startprocessing(self, args_)
         self.TMPconnection.close()
             
 def main():
