@@ -19,6 +19,7 @@ class constants():
     PATH_CONFIG_FILE = '/home/migration/migrationConfig.conf'
     TABLE_MIGRATED_DATA = 'migrated_data'
     TABLE_MIGRATED_FIELDS = 'migrated_fields'
+    TABLE_MIGRATED_DATA_MAPPING = "model_migration_mapping"
     PATH_DUMP =  "/tmp/"
     
     section = ['Required','Optional']

@@ -34,7 +34,7 @@ def update_migrated_data_history(cr, id):
 def _get_mapped_data(con, table, field=False):
     # todo function to determine which mapping (10,11,12...)
     cr = con.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    select_model_id_sql = f"SELECT new_model_name, new_field_name FROM model_migration_mapping where old_model_name = '{table}'"
+    select_model_id_sql = f"SELECT new_model_name, new_field_name FROM {constants.TABLE_MIGRATED_DATA_MAPPING} where old_model_name = '{table}'"
     if field:
         select_model_id_sql+=f" and old_field_name = '{field}'"
     select_model_id_sql+=";"

@@ -219,6 +219,7 @@ class DeAnonymizationMain(BaseMain):
     THREAD = "NUMBER_MAX_THREADS_DEANON"
     
     tables = []
+    TMPconnection = False
     
     def createTmpTables(self):
         pg_args = self.pg_args
@@ -235,25 +236,15 @@ class DeAnonymizationMain(BaseMain):
             temp_table = "tmp_"+migrated_table
             list_table.append(temp_table)
             fields_string = ",".join(fields+['id'])
-            try:
-                crtest.execute(f'CREATE TABLE {temp_table} AS SELECT {fields_string} FROM {migrated_table};' )
-            except:
-                pass
-            try:
-                crtest.execute(f"CREATE INDEX index_id ON {temp_table} (id);")
-            except:
-                pass
+            crtest.execute(f'CREATE TEMPORARY TABLE {temp_table} AS SELECT {fields_string} FROM {migrated_table};' )
+            crtest.execute(f"CREATE INDEX index_id ON {temp_table} (id);")
             for field in fields:
                 mapped_field_data = _get_mapped_data(connection, table, field=field)
                 migrated_field = mapped_field_data[3]
-                try:
-                    crtest.execute(f"CREATE INDEX index_{migrated_field} ON {temp_table} ({field});")
-                except:
-                    pass
+                crtest.execute(f"CREATE INDEX index_{migrated_field} ON {temp_table} ({field});")
         self.tables = list_table
         crtest.close()
-        connection.close()
-        
+        self.TMPconnection = connection
     
     def update_queue(self):
         self.createTmpTables()
@@ -297,18 +288,8 @@ class DeAnonymizationMain(BaseMain):
     
     def startProcessing(self, args_):
         BaseMain.startProcessing(self, args_)
-        tables = self.tables
-        if tables:
-            connection = get_connection(self.pg_args)
-            connection.autocommit = True
-            cursor = connection.cursor()
-            for table in tables:
-                cursor.execute(f"DROP TABLE {table};")
-            connection.close()
+        self.TMPconnection.close()
             
-            
-
-
 def main():
     #todo needs to be implemented, run the script via command line. 
     # the args need to be analysed here, if anonymization or
