@@ -35,9 +35,9 @@ def main():
     type = testargs.get('type')
     try:
         if type == 'anon':
-            AnonymizationMain().startProcessing(args)
+            AnonymizationMain().startprocessing(args)
         elif type == 'deanon':
-            DeAnonymizationMain().startProcessing(args)
+            DeAnonymizationMain().startprocessing(args)
         exit_status = 0
     except KeyboardInterrupt:
         exit_status = 1

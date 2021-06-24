@@ -55,7 +55,7 @@ class BaseMain():
                     continue
                 print(exc)
         
-    def startrocessing(self, args_):
+    def startprocessing(self, args_):
         """Main method"""
         # own connection per schema batch...
         args_ = self._get_run_data(args_)
