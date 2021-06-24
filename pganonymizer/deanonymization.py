@@ -2,7 +2,7 @@ import psycopg2
 from pganonymizer.utils import update_fields_history
 from pganonymizer.constants import constants
 
-def run_revert(connection, args, data):
+def run_revert(connection, args, data, tmpcon):
     for table, data in data.items():
         number = 0
         mapped_field_data = _get_mapped_data(connection, table, field=data[0])
@@ -12,7 +12,7 @@ def run_revert(connection, args, data):
         migrated_field = mapped_field_data[3]
         for id, value, record_id in data[1]:
             number = number + 1
-            cr3 = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
+            cr3 = tmpcon.cursor(cursor_factory=psycopg2.extras.DictCursor)
             orig_value = original_table + "_" + original_field + "_" + str(id)
             record_db_id_sql = f"SELECT ID FROM {'tmp_'+migrated_table} where {migrated_field} = '{orig_value}';"
             cr3.execute(record_db_id_sql)

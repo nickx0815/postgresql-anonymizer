@@ -22,6 +22,17 @@ from pganonymizer.providers import get_provider
 def _(t):
     return t.replace("_", ".")
 
+def get_pg_args(args):
+        """
+        Map all commandline arguments with database keys.
+    
+        :param argparse.Namespace args: The commandline arguments
+        :return: A dictionary with database arguments
+        :rtype: dict
+        """
+        return ({name: value for name, value in
+                 zip(constants.DATABASE_ARGS, (args.dbname, args.user, args.password, args.host, args.port))})
+
 def update_fields_history(cr, model_id, record, state, field_id):
     now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     cr.execute(f"Insert into ir_model_fields_anonymization_history ( \

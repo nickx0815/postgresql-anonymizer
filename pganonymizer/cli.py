@@ -19,20 +19,10 @@ import yaml
 from pganonymizer.constants import constants 
 from pganonymizer.providers import PROVIDERS
 from pganonymizer.anonymization import anonymize_tables
-from pganonymizer.utils import create_database_dump, get_connection, build_sql_select, _get_ids_sql_format
+from pganonymizer.utils import create_database_dump, get_connection, build_sql_select, _get_ids_sql_format,get_pg_args
 from pganonymizer.deanonymization import run_revert, _get_mapped_data
 from symbol import except_clause
 
-def get_pg_args(args):
-        """
-        Map all commandline arguments with database keys.
-    
-        :param argparse.Namespace args: The commandline arguments
-        :return: A dictionary with database arguments
-        :rtype: dict
-        """
-        return ({name: value for name, value in
-                 zip(constants.DATABASE_ARGS, (args.dbname, args.user, args.password, args.host, args.port))})
 
 class BaseMain():
     jobs = Queue()
@@ -113,16 +103,9 @@ class BaseMain():
         return parser
     
     def start_thread(self, q, args):
-        pg_args = self.pg_args
         while not q.empty():
-            #table_start_time = time.time()
             data = q.get()
-            connection = get_connection(pg_args)
-            connection.autocommit = True
-                            #todo implement truncate functionality, not working right now
-                #truncate_tables(connection, schema_batch.get('truncate', []))
-            self._runSpecificTask(connection, args, data)
-            connection.close()
+            self._runSpecificTask(args, data)
             q.task_done()
     
     def _get_run_data(self, args):
@@ -179,7 +162,6 @@ class AnonymizationMain(BaseMain):
                             list = []
                             records = cursor.fetchmany(size=constants.ANON_NUMBER_FIELD_PER_THREAD)
                             number = number + len(records)
-                            
                             if not records:
                                 break
                             for row in records:
@@ -205,21 +187,26 @@ class AnonymizationMain(BaseMain):
             print(f"Anonymization of {table} took {time_}")
         self.number_rec[table] = (total, anonymized, self.number_rec[table][2])
     
-    def _runSpecificTask(self, con, args, schema):
+    def _runSpecificTask(self, args, schema):
+        pg_args = self.pg_args
+        connection = get_connection(pg_args)
+        connection.autocommit = True
         try:
-            res, table = anonymize_tables(con, schema.get('tables', []), verbose=args.verbose)
+            res, table = anonymize_tables(connection, schema.get('tables', []), verbose=args.verbose)
             total_size = self.number_rec[table][0]
             number_anonymized = self.number_rec[table][1]+res
             percent_anonymized = number_anonymized/total_size
             self.print_info(table, total_size, number_anonymized, percent_anonymized)
         except Exception as ex:
             print(ex)
+        finally:
+            connection.close()
 
 class DeAnonymizationMain(BaseMain):
     THREAD = "NUMBER_MAX_THREADS_DEANON"
     
     tables = []
-    TMPconnection = False
+    TMPconnection = {}
     
     def createTmpTables(self):
         pg_args = self.pg_args
@@ -277,14 +264,19 @@ class DeAnonymizationMain(BaseMain):
         connection.close()
         
 
-    def _runSpecificTask(self, con, args, data):
+    def _runSpecificTask(self, args, data):
+        pg_args = self.pg_args
+        connection = get_connection(pg_args)
+        connection.autocommit = True
         try:
             start_time = time.time()
-            run_revert(con, args, data)
+            run_revert(connection, args, data, self.TMPconnection)
             end_time = time.time()
             print('Deanonymization took {:.2f}s'.format(end_time - start_time))
         except Exception as ex:
             print(ex)
+        finally:
+            connection.close()
     
     def startprocessing(self, args_):
         BaseMain.startprocessing(self, args_)
