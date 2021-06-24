@@ -40,7 +40,7 @@ class BaseMain():
     pg_args = False
     
     def isStartingUpError(self, oe):
-        if constants.STARTINGUPERROR in oe:
+        if constants.STARTINGUPERROR in oe.args[0]:
             return True
         return False
     
