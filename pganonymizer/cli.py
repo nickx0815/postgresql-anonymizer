@@ -36,47 +36,46 @@ def get_pg_args(args):
 class BaseMain():
     jobs = Queue()
     number_rec = {}
+    schema = False
+    pg_args = False
     
     def isStartingUpError(self, oe):
         if constants.STARTINGUPERROR in oe:
             return True
         return False
-        
-    def startProcessing(self, args_):
-        """Main method"""
-        # own connection per schema batch...
-        pg_args, args_ = self._get_run_data(args_)
-        schema = self.get_schema(args_)
+    
+    def test_connection(self):
+        args = self.pg_args
         while True:
             try:
-                tables = self.update_queue(schema, pg_args)
+                get_connection(args)
                 break
-            except OperationalError as oe:
-                if self.isStartingUpError(oe):
+            except Exception as exc:
+                if self.isStartingUpError(exc):
                     continue
-                print(oe)
+                print(exc)
+        
+    def startrocessing(self, args_):
+        """Main method"""
+        # own connection per schema batch...
+        args_ = self._get_run_data(args_)
+        self.test_connection()
+        self.get_schema(args_)
+        self.update_queue()
         if args_.threading == 'False':
-            self.start_thread(self.jobs, args_, pg_args)  
+            self.start_thread(self.jobs, args_)  
         else:
             number_threads = self.get_thread_number()
             #print(f"Number of threads started: {number_threads}")
             for i in range(number_threads):
-                worker = threading.Thread(target=self.start_thread, args=(self.jobs,args_, pg_args))
+                worker = threading.Thread(target=self.start_thread, args=(self.jobs,args_))
                 worker.start()
-            
             print("waiting for queue to complete tasks")
             self.jobs.join()
         print("all done")
-        if tables:
-            connection = get_connection(pg_args)
-            connection.autocommit = True
-            cursor = connection.cursor()
-            for table in tables:
-                cursor.execute(f"DROP TABLE {table};")
-            connection.close()
-#        dump_path = args_.dump_file
-#         if dump_path:
-#             create_database_dump(pg_args)
+        dump_path = args_.dump_file
+        if dump_path:
+            create_database_dump(self.pg_args)
     
     def get_schema(self, args):
         if args.force_path:
@@ -88,7 +87,7 @@ class BaseMain():
             schema = yaml.load(open(path), Loader=yaml.FullLoader)
         except:
             schema = yaml.load(open(path))
-        return schema
+        self.schema = schema
         
     def list_provider_classes(self):
         """List all available provider classes."""
@@ -112,7 +111,8 @@ class BaseMain():
             return args
         return parser
     
-    def start_thread(self, q, args, pg_args):
+    def start_thread(self, q, args):
+        pg_args = self.pg_args
         while not q.empty():
             #table_start_time = time.time()
             data = q.get()
@@ -127,8 +127,8 @@ class BaseMain():
     def _get_run_data(self, args):
         if not args:
             args = self.get_args()
-        pg_args = get_pg_args(args)
-        return pg_args, args
+        self.pg_args = get_pg_args(args)
+        return args
     
     def get_thread_number(self):
         queue_size = self.jobs.qsize()
@@ -160,10 +160,12 @@ class AnonymizationMain(BaseMain):
             sys.exit(0)
         BaseMain.startProcessing(self, args_)
     
-    def update_queue(self, schema, pg_args):
+    def update_queue(self):
         #todo konfigurierbar
         #search wird nicht übernommen
+        pg_args = self.pg_args
         connection = get_connection(pg_args)
+        schema = self.schema
         for type_, type_attributes in schema.items():
             for table in type_attributes:
                 if type(table) == str:
@@ -187,6 +189,7 @@ class AnonymizationMain(BaseMain):
                             cur['search'] = search_list
                             self.jobs.put({type_: [{table_key:cur}]})
                         self.number_rec[table_key] = (number, 0, time.time())
+        connection.close()
                         
     def print_info(self, table, total, anonymized, percent_anonymized):
         percent="{:.2f}".format(percent_anonymized*100)
@@ -214,8 +217,12 @@ class AnonymizationMain(BaseMain):
 class DeAnonymizationMain(BaseMain):
     THREAD = "NUMBER_MAX_THREADS_DEANON"
     
-    def update_queue(self,schema, pg_args):
+    tables = []
+    
+    def createTmpTables(self):
+        pg_args = self.pg_args
         connection = get_connection(pg_args)
+        schema = self.schema
         connection.autocommit = True
         #todo umbauen, dass ein job jeweils alle migrated_fields eines records beinhaltet. 
         #todo weitere deanon methoden umbaunen, sodass alle felder mit einem update deanonymsiert werden
@@ -242,6 +249,25 @@ class DeAnonymizationMain(BaseMain):
                     crtest.execute(f"CREATE INDEX index_{migrated_field} ON {temp_table} ({field});")
                 except:
                     pass
+        self.tables = list_table
+        crtest.close()
+        connection.close()
+        
+    
+    def update_queue(self):
+        self.createTmpTables()
+        self.__update_queue()
+    
+    def __update_queue(self):
+        pg_args = self.pg_args
+        connection = get_connection(pg_args)
+        schema = self.schema
+        connection.autocommit = True
+        #todo umbauen, dass ein job jeweils alle migrated_fields eines records beinhaltet. 
+        #todo weitere deanon methoden umbaunen, sodass alle felder mit einem update deanonymsiert werden
+        crtest = connection.cursor()
+        for table, fields in schema.items():
+            for field in fields:
                 cursor = build_sql_select(connection, constants.TABLE_MIGRATED_DATA, 
                                                                     ["model_id = '{model_id}'".format(model_id=table),
                                                                     "field_id = '{field_id}'".format(field_id=field),
@@ -255,8 +281,9 @@ class DeAnonymizationMain(BaseMain):
                     for rec in records:
                         list.append((rec.get('record_id'), rec.get('value'), rec.get('id')))
                     self.jobs.put({table: (field, list)})
-        crtest.close()
-        return list_table
+                crtest.close()
+        connection.close()
+        
 
     def _runSpecificTask(self, con, args, data):
         try:
@@ -266,6 +293,20 @@ class DeAnonymizationMain(BaseMain):
             print('Deanonymization took {:.2f}s'.format(end_time - start_time))
         except Exception as ex:
             print(ex)
+    
+    def startProcessing(self, args_):
+        BaseMain.startProcessing(self, args_)
+        tables = self.tables
+        if tables:
+            connection = get_connection(self.pg_args)
+            connection.autocommit = True
+            cursor = connection.cursor()
+            for table in tables:
+                cursor.execute(f"DROP TABLE {table};")
+            connection.close()
+            
+            
+
 
 def main():
     #todo needs to be implemented, run the script via command line. 
