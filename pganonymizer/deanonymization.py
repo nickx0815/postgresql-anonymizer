@@ -24,7 +24,7 @@ def run_revert(connection, args, data, tmpcon):
                 get_migrated_field_sql = f"UPDATE {migrated_table} SET {migrated_field} = %s WHERE id = %s;"
                 cr1.execute(get_migrated_field_sql, (value, record_db_id))
                 cr1.close()
-                update_fields_history(connection.cursor(cursor_factory=psycopg2.extras.DictCursor), original_table, record_db_id, "4", original_field)
+                #update_fields_history(connection.cursor(cursor_factory=psycopg2.extras.DictCursor), original_table, record_db_id, "4", original_field)
                 update_migrated_data_history(connection.cursor(), record_id)
     print(str(number) + " records deanonymized!")
 

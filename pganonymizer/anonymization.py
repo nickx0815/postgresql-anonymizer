@@ -245,7 +245,7 @@ def create_anon(con, data, table_id):
         id = list(id.keys())[0]
         data = (table, field, id, data.get(table).get(field).get(id), 0)
         cr.execute(sql_migrated_data_insert, data)
-        update_fields_history(cr, table, id, "2", field)
+        #update_fields_history(cr, table, id, "2", field)
     cr.close()
 
 def run_anon(type, con, data, table_id):
