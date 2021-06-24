@@ -319,6 +319,6 @@ def create_database_dump(db_args):
     dbname = db_args.get('dbname')
     file = f"{constants.PATH_DUMP}{cur_time}_{dbname}"
     args = '{dbname}'.format(**db_args)
-    cmd = f'psql -U odoo {args} > {file}'
+    cmd = f'docker exec -i migration_postgres_1 psql -U odoo {args} > {file}'
     logging.info('Creating database dump file "%s"', file)
     subprocess.run(cmd, shell=True)
