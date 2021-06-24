@@ -1,46 +1,7 @@
-import psycopg2, logging, csv
-from pganonymizer.update_field_history import update_fields_history, update_migrated_data_history
-from docutils.nodes import row
+import psycopg2
+from pganonymizer.utils import update_fields_history
 from pganonymizer.constants import constants
 
-
-def _run_query(type, con, data, table_id):
-    if type == 'anon':
-        create_anon(con , data, table_id)
-    elif type == 'truncate':
-        create_truncate(con, data)
-
-
-def _get_ids_sql_format(ids):
-    if ids:
-        return str(set([x for x in ids])).replace("{", "(").replace("}", ")")
-    return False
-
-def create_anon(con, data, table_id):
-    cr = con.cursor()
-    for table, field_data in data.items():
-        # ids_sql_format = _get_ids_sql_format(ids)
-        field = list(field_data.keys())[0]
-        insert_migrated_fields_rec(cr, field, table)
-        id = data.get(table).get(field)
-        sql_migrated_data_insert = f"Insert into {constants.TABLE_MIGRATED_DATA} (model_id, field_id, record_id, value, state) VALUES (%s, %s, %s, %s, %s)"
-        id = list(id.keys())[0]
-        data = (table, field, id, data.get(table).get(field).get(id), 0)
-        cr.execute(sql_migrated_data_insert, data)
-        update_fields_history(cr, table, id, "2", field)
-    cr.close()
-
-def insert_migrated_fields_rec(cr, field, table):
-    sql_insert = f"INSERT INTO {constants.TABLE_MIGRATED_FIELDS} (model_id, field_id) VALUES ('{table}', '{field}');"
-    sql_select = f"SELECT id  from {constants.TABLE_MIGRATED_FIELDS} \
-                            WHERE model_id = '{table}' \
-                                   AND field_id = '{field}' \
-                            LIMIT 1;"
-    cr.execute(sql_select)
-    record = cr.fetchone()
-    if not record:
-        cr.execute(sql_insert)
-        
 def run_revert(connection, args, data):
     for table, data in data.items():
         number = 0
@@ -67,6 +28,9 @@ def run_revert(connection, args, data):
                 update_migrated_data_history(connection.cursor(), record_id)
     print(str(number) + " records deanonymized!")
 
+def update_migrated_data_history(cr, id):
+    cr.execute(f"UPDATE {constants.TABLE_MIGRATED_DATA} SET STATE = 1 WHERE ID = {id}")
+
 def _get_mapped_data(con, table, field=False):
     # todo function to determine which mapping (10,11,12...)
     cr = con.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -81,11 +45,3 @@ def _get_mapped_data(con, table, field=False):
     if not field:
         return (table, record.get('new_model_name'))
     return (table, record.get('new_model_name'), field, record.get('new_field_name'))
-
-def create_truncate(con, data):
-    cr = con.cursor()
-    cr.close()
-    
-def _(t):
-    return t.replace("_", ".")
-    
