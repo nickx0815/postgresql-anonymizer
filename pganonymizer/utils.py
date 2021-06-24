@@ -89,18 +89,22 @@ def build_data(connection, table, columns, excludes, total_count, search,primary
             print(str(constants.ANON_FETCH_RECORDS)+" more records anonymized!")
             break
         for row in rows:
-            number=number+1
-            row_column_dict = {}
-            if not row_matches_excludes(row, excludes):
-                row_column_dict = get_column_values(row, columns, {'id':row.get('id'), 'table':table})
-                for key, value in row_column_dict.items():
-                    original_data = {}
-                    if row[key] == value:
-                        continue
-                    original_data[key] = {row.get('id'): row[key]}
-                    import_data(connection, key, table, row.get('id'), primary_key, value)
-                    if all(x1 in value for x1 in [table,key]):
-                        _run_query('anon', connection, {table:original_data},  table_id)
+            try:
+                number=number+1
+                row_column_dict = {}
+                if not row_matches_excludes(row, excludes):
+                    row_column_dict = get_column_values(row, columns, {'id':row.get('id'), 'table':table})
+                    for key, value in row_column_dict.items():
+                        original_data = {}
+                        if row[key] == value:
+                            continue
+                        original_data[key] = {row.get('id'): row[key]}
+                        import_data(connection, key, table, row.get('id'), primary_key, value)
+                        if all(x1 in value for x1 in [table,key]):
+                            _run_query('anon', connection, {table:original_data},  table_id)
+            except Exception as ex:
+                print(ex)
+                
         if verbose:
             progress_bar.next()
     if verbose:
