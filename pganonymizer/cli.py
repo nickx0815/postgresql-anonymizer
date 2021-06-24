@@ -53,7 +53,7 @@ class BaseMain():
             except Exception as exc:
                 if self.isStartingUpError(exc):
                     continue
-                print(exc)
+                raise exc
         
     def startprocessing(self, args_):
         """Main method"""
