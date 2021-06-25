@@ -49,8 +49,8 @@ class AnonymizationMain(BaseMain):
                 else:
                     for table_key, table_attributes in table.items():
                         number = 0
-                        table_attributes = self.update_anon_search(table_key, table_attributes)
-                        cursor = build_sql_select(connection, table_key, table_attributes.get('search', False), select="id")
+                        test = self.update_anon_search(table_key, table_attributes)
+                        cursor = build_sql_select(connection, table_key, test.get('search', False), select="id")
                         while True:
                             list = []
                             records = cursor.fetchmany(size=constants.ANON_NUMBER_FIELD_PER_THREAD)
