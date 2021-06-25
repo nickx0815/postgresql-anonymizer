@@ -82,7 +82,7 @@ class AnonymizationMain(BaseMain):
             searchlist = []
             fieldlist = [list(x.keys())[0] for x in fielddic]
             for field in fieldlist:
-                searchlist.append(f"{field} not like '{table}_{field}_'")
+                searchlist.append(f"{field} not like '{table}_{field}_ OR {field} = NULL ")
             search.append("("+" OR ".join(searchlist)+")")
         table_attributes['search'] = search
         return table_attributes
