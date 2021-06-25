@@ -237,8 +237,7 @@ def exclude_eval(exclude, column, row):
 def createDataTable(table, con):
     cr = con.cursor()
     try:
-        cr.execute(f'CREATE TABLE {constants.TABLE_MIGRATED_DATA}_{table} ( model_id CHAR(50),\
-                                                                            field_id CHAR(50),\
+        cr.execute(f'CREATE TABLE {constants.TABLE_MIGRATED_DATA}_{table} ( field_id CHAR(50),\
                                                                             record_id INTEGER,\
                                                                             value CHAR(200),\
                                                                             state INTEGER\
@@ -254,9 +253,9 @@ def create_anon(con, data, table_id):
         field = list(field_data.keys())[0]
         insert_migrated_fields_rec(cr, field, table)
         id = data.get(table).get(field)
-        sql_migrated_data_insert = f"Insert into {constants.TABLE_MIGRATED_DATA}_{table} (model_id, field_id, record_id, value, state) VALUES (%s, %s, %s, %s, %s)"
+        sql_migrated_data_insert = f"Insert into {constants.TABLE_MIGRATED_DATA}_{table} (field_id, record_id, value, state) VALUES (%s, %s, %s, %s)"
         id = list(id.keys())[0]
-        data = (table, field, id, data.get(table).get(field).get(id), 0)
+        data = (field, id, data.get(table).get(field).get(id), 0)
         cr.execute(sql_migrated_data_insert, data)
         #update_fields_history(cr, table, id, "2", field)
     cr.close()

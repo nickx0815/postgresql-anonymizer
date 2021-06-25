@@ -56,8 +56,7 @@ class DeAnonymizationMain(BaseMain):
         for table, fields in schema.items():
             for field in fields:
                 cursor = build_sql_select(connection, constants.TABLE_MIGRATED_DATA+"_"+table, 
-                                                                    ["model_id = '{model_id}'".format(model_id=table),
-                                                                    "field_id = '{field_id}'".format(field_id=field),
+                                                                    ["field_id = '{field_id}'".format(field_id=field),
                                                                     "state = 0"],
                                                                     select="id, record_id, value")
                 while True:
