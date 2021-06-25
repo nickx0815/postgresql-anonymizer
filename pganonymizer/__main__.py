@@ -3,7 +3,8 @@ from __future__ import absolute_import
 
 from pganonymizer.constants import constants
 from configparser import ConfigParser
-from pganonymizer.cli import AnonymizationMain, DeAnonymizationMain
+from pganonymizer.AnonJob import AnonymizationMain
+from pganonymizer.DeanonJob import DeAnonymizationMain
 import time
 
 import sys
