@@ -167,21 +167,30 @@ class AnonymizationMain(BaseMain):
                                 break
                             for row in records:
                                 list.append(row.get('id'))
-                            cur = copy.deepcopy(table_attributes)    
-                            search_list = cur.get('search', [])
-                            search_list.append("id in "+_get_ids_sql_format(list))
-                            cur['search'] = search_list
-                            self.jobs.put({type_: [{table_key:cur}]})
-                        self.number_rec[table_key] = (number, 0, time.time())
+                            table_attributes = self.addJobRecordIds(table_attributes, list)
+                            self.jobs.put({type_: [{table_key:table_attributes}]})
+                        self.setstartTime(table_key)
         connection.close()
     
+    def setstartTime(self, table):
+        self.number_rec[table] = (number, 0, time.time())
+    
+    def addJobRecordIds(self, table_attributes, ids):
+        cur = copy.deepcopy(table_attributes)    
+        search_list = cur.get('search', [])
+        search_list.append("id in "+_get_ids_sql_format(ids))
+        cur['search'] = search_list
+        return cur
+    
     def update_anon_search(self, table, table_attributes):
-        searchList = table_attributes.get('search')
-        if searchList:
-            searchList.append('')
+        fieldDic = table_attributes.get('fields')
+        searchList = table_attributes.get('search', [])
+        if fieldDic:
+            fieldList = [list(x.keys())[0] for x in fieldDic]
+            for field in fieldList:
+                searchList.append(f"{field} not like '{table}_{field}_'")
         return table_attributes
         
-                        
     def print_info(self, table, total, anonymized, percent_anonymized):
         percent="{:.2f}".format(percent_anonymized*100)
         print(f"Table {table} is {percent} % anonymized")
