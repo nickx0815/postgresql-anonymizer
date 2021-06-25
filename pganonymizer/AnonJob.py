@@ -75,6 +75,7 @@ class AnonymizationMain(BaseMain):
         return cur
     
     def update_anon_search(self, table, table_attributes):
+        table_attributes = copy.deepcopy(table_attributes)   
         fielddic = table_attributes.get('fields')
         search = table_attributes.get('search', [])
         if fielddic:
