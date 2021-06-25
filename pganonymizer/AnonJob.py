@@ -76,11 +76,14 @@ class AnonymizationMain(BaseMain):
     
     def update_anon_search(self, table, table_attributes):
         fielddic = table_attributes.get('fields')
-        searchlist = table_attributes.get('search', [])
+        search = table_attributes.get('search', [])
         if fielddic:
+            searchlist = []
             fieldlist = [list(x.keys())[0] for x in fielddic]
             for field in fieldlist:
                 searchlist.append(f"{field} not like '{table}_{field}_'")
+            search.append("or".join(searchlist))
+        table_attributes['search'] = search
         return table_attributes
         
     def print_info(self, table, total, anonymized, percent_anonymized):
