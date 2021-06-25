@@ -157,6 +157,7 @@ class AnonymizationMain(BaseMain):
                 else:
                     for table_key, table_attributes in table.items():
                         number = 0
+                        table_attributes = self.update_anon_search(table_key, table_attributes)
                         cursor = build_sql_select(connection, table_key, table_attributes.get('search', False), select="id")
                         while True:
                             list = []
@@ -173,6 +174,13 @@ class AnonymizationMain(BaseMain):
                             self.jobs.put({type_: [{table_key:cur}]})
                         self.number_rec[table_key] = (number, 0, time.time())
         connection.close()
+    
+    def update_anon_search(self, table, table_attributes):
+        searchList = table_attributes.get('search')
+        if searchList:
+            searchList.append('')
+        return table_attributes
+        
                         
     def print_info(self, table, total, anonymized, percent_anonymized):
         percent="{:.2f}".format(percent_anonymized*100)
