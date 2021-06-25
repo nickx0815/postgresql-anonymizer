@@ -87,8 +87,8 @@ class AnonymizationMain(BaseMain):
         percent="{:.2f}".format(percent_anonymized*100)
         print(f"Table {table} is {percent} % anonymized")
         total_anonymized = percent_anonymized*total
-        total=total_anonymized-(total_anonymized%1)
-        print(f"Total Records anonymized {total}")
+        total_anonymized=total_anonymized-(total_anonymized%1)
+        print(f"Total Records anonymized {total_anonymized}")
         if percent_anonymized == 1:
             runtime = time.time()-self.number_rec[table][2]
             time_ = str(datetime.timedelta(seconds=runtime))
