@@ -59,8 +59,8 @@ class AnonymizationMain(BaseMain):
                                 break
                             for row in records:
                                 list.append(row.get('id'))
-                            table_attributes = self.addJobRecordIds(table_attributes, list)
-                            self.jobs.put({type_: [{table_key:table_attributes}]})
+                            table_attributes_job = self.addJobRecordIds(table_attributes, list)
+                            self.jobs.put({type_: [{table_key:table_attributes_job}]})
                         self.setstartTime(number, table_key)
         connection.close()
     
