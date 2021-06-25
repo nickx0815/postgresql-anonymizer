@@ -105,7 +105,8 @@ class AnonymizationMain(BaseMain):
             total_size = self.number_rec[table][0]
             number_anonymized = self.number_rec[table][1]+res
             percent_anonymized = number_anonymized/total_size
-            self.print_info(table, total_size, number_anonymized, percent_anonymized)
+            if total_size:
+                self.print_info(table, total_size, number_anonymized, percent_anonymized)
         except Exception as ex:
             print(ex)
         finally:
