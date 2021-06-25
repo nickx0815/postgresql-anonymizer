@@ -100,16 +100,26 @@ class AnonymizationMain(BaseMain):
             print(f"Anonymization of {table} took {time_}")
         self.number_rec[table] = (total, anonymized, self.number_rec[table][2])
     
+    def anonyzation_type_tables(self, connection, schema, args):
+        res, table = anonymize_tables(connection, schema, verbose=args.verbose)
+        total_size = self.number_rec[table][0]
+        number_anonymized = self.number_rec[table][1]+res
+        percent_anonymized = number_anonymized/total_size
+        self.print_info(table, total_size, number_anonymized, percent_anonymized)
+    
+    def anonyzation_type_truncate(self, connection, schema):
+        self.truncate_tables(connection, schema)
+    
     def _runSpecificTask(self, args, schema):
         pg_args = self.pg_args
         connection = get_connection(pg_args)
         connection.autocommit = True
         try:
-            res, table = anonymize_tables(connection, schema.get('tables', []), verbose=args.verbose)
-            total_size = self.number_rec[table][0]
-            number_anonymized = self.number_rec[table][1]+res
-            percent_anonymized = number_anonymized/total_size
-            self.print_info(table, total_size, number_anonymized, percent_anonymized)
+            type = list(schema.keys())[0]
+            if type == 'tables':
+                self.anonyzation_type_tables(connection, schema.get(type), args)
+            elif type == 'truncate':
+                self.anonyzation_type_truncate(connection, schema.get(type))
         except Exception as ex:
             print(ex)
         finally:

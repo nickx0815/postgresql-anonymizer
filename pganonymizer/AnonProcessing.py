@@ -85,11 +85,12 @@ def build_data(connection, table, columns, excludes, total_count, search,primary
                     for key, value in row_column_dict.items():
                         original_data = {}
                         if row[key] == value:
+                            #the case for already anonymized (migration) records
                             continue
                         original_data[key] = {row.get('id'): row[key]}
                         import_data(connection, key, table, row.get('id'), primary_key, value)
                         if all(x1 in value for x1 in [table,key]):
-                            create_anon(connection, {table:original_data},  table_id)
+                            create_anon(connection, table, original_data,  table_id)
             except Exception as ex:
                 print(ex)
                 
@@ -160,9 +161,9 @@ def truncate_tables(connection, tables):
     if not tables:
         return
     cursor = connection.cursor()
-    table_names = ', '.join(tables)
-    logging.info('Truncating tables "%s"', table_names)
-    cursor.execute(f'TRUNCATE TABLE {table_names} CASCADE;')
+    for table in tables:
+        logging.info('delete table "%s"', table)
+        cursor.execute(f'DELETE FROM {table};')
     # todo aufzeichungen
     #_run_query('truncate', connection, table_names)
     cursor.close()
@@ -244,18 +245,17 @@ def createDataTable(table, con):
     except Exception:
         pass
 
-def create_anon(con, data, table_id):
+def create_anon(con, table, data):
     cr = con.cursor()
-    for table, field_data in data.items():
-        field = list(field_data.keys())[0]
-        insert_migrated_fields_rec(cr, field, table)
-        id = data.get(table).get(field)
-        sql_migrated_data_insert = f"Insert into {constants.TABLE_MIGRATED_DATA}_{table} \
-                                        (field_id, record_id, value, state)\
-                                         VALUES (%s, %s, %s, %s)"
-        id = list(id.keys())[0]
-        data = (field, id, data.get(table).get(field).get(id), 0)
-        cr.execute(sql_migrated_data_insert, data)
+    field = list(data.keys())[0]
+    insert_migrated_fields_rec(cr, field, table)
+    id = data.get(field)
+    sql_migrated_data_insert = f"Insert into {constants.TABLE_MIGRATED_DATA}_{table} \
+                                    (field_id, record_id, value, state)\
+                                     VALUES (%s, %s, %s, %s)"
+    id = list(id.keys())[0]
+    data = (field, id, data.get(table).get(field).get(id), 0)
+    cr.execute(sql_migrated_data_insert, data)
     cr.close()
 
 def create_truncate(con, data):
