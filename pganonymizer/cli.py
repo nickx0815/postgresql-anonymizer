@@ -169,10 +169,10 @@ class AnonymizationMain(BaseMain):
                                 list.append(row.get('id'))
                             table_attributes = self.addJobRecordIds(table_attributes, list)
                             self.jobs.put({type_: [{table_key:table_attributes}]})
-                        self.setstartTime(table_key)
+                        self.setstartTime(number, table_key)
         connection.close()
     
-    def setstartTime(self, table):
+    def setstartTime(self, number, table):
         self.number_rec[table] = (number, 0, time.time())
     
     def addJobRecordIds(self, table_attributes, ids):
@@ -183,12 +183,12 @@ class AnonymizationMain(BaseMain):
         return cur
     
     def update_anon_search(self, table, table_attributes):
-        fieldDic = table_attributes.get('fields')
-        searchList = table_attributes.get('search', [])
-        if fieldDic:
-            fieldList = [list(x.keys())[0] for x in fieldDic]
-            for field in fieldList:
-                searchList.append(f"{field} not like '{table}_{field}_'")
+        fielddic = table_attributes.get('fields')
+        searchlist = table_attributes.get('search', [])
+        if fielddic:
+            fieldlist = [list(x.keys())[0] for x in fielddic]
+            for field in fieldlist:
+                searchlist.append(f"{field} not like '{table}_{field}_'")
         return table_attributes
         
     def print_info(self, table, total, anonymized, percent_anonymized):
@@ -264,7 +264,7 @@ class DeAnonymizationMain(BaseMain):
         crtest = connection.cursor()
         for table, fields in schema.items():
             for field in fields:
-                cursor = build_sql_select(connection, constants.TABLE_MIGRATED_DATA, 
+                cursor = build_sql_select(connection, constants.TABLE_MIGRATED_DATA+"_"+table, 
                                                                     ["model_id = '{model_id}'".format(model_id=table),
                                                                     "field_id = '{field_id}'".format(field_id=field),
                                                                     "state = 0"],

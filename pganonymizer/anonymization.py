@@ -234,14 +234,27 @@ def exclude_eval(exclude, column, row):
         if row[column] is not None and pattern.match(row[column]):
             return True
 
+def createDataTable(table, con):
+    cr = con.cursor()
+    try:
+        cr.execute(f'CREATE TABLE {constants.TABLE_MIGRATED_DATA}_{table} ( model_id CHAR(20),\
+                                                                            field_id CHAR(20),\
+                                                                            record_id INTEGER,\
+                                                                            value CHAR(20),\
+                                                                            state CHAR(20)\
+                                                                            );')
+    except:
+        pass
+
 def create_anon(con, data, table_id):
     cr = con.cursor()
     for table, field_data in data.items():
+        createDataTable(table, con)
         # ids_sql_format = _get_ids_sql_format(ids)
         field = list(field_data.keys())[0]
         insert_migrated_fields_rec(cr, field, table)
         id = data.get(table).get(field)
-        sql_migrated_data_insert = f"Insert into {constants.TABLE_MIGRATED_DATA} (model_id, field_id, record_id, value, state) VALUES (%s, %s, %s, %s, %s)"
+        sql_migrated_data_insert = f"Insert into {constants.TABLE_MIGRATED_DATA}_{table} (model_id, field_id, record_id, value, state) VALUES (%s, %s, %s, %s, %s)"
         id = list(id.keys())[0]
         data = (table, field, id, data.get(table).get(field).get(id), 0)
         cr.execute(sql_migrated_data_insert, data)

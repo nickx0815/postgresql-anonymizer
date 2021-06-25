@@ -25,11 +25,11 @@ def run_revert(connection, args, data, tmpcon):
                 cr1.execute(get_migrated_field_sql, (value, record_db_id))
                 cr1.close()
                 #update_fields_history(connection.cursor(cursor_factory=psycopg2.extras.DictCursor), original_table, record_db_id, "4", original_field)
-                update_migrated_data_history(connection.cursor(), record_id)
+                update_migrated_data_history(connection.cursor(), record_id, table)
     print(str(number) + " records deanonymized!")
 
-def update_migrated_data_history(cr, id):
-    cr.execute(f"UPDATE {constants.TABLE_MIGRATED_DATA} SET STATE = 1 WHERE ID = {id}")
+def update_migrated_data_history(cr, id, table):
+    cr.execute(f"UPDATE {constants.TABLE_MIGRATED_DATA}_{table} SET STATE = 1 WHERE ID = {id}")
 
 def _get_mapped_data(con, table, field=False):
     # todo function to determine which mapping (10,11,12...)
