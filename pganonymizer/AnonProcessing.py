@@ -237,11 +237,11 @@ def exclude_eval(exclude, column, row):
 def createDataTable(table, con):
     cr = con.cursor()
     try:
-        cr.execute(f'CREATE TABLE {constants.TABLE_MIGRATED_DATA}_{table} ( model_id CHAR(20),\
-                                                                            field_id CHAR(20),\
+        cr.execute(f'CREATE TABLE {constants.TABLE_MIGRATED_DATA}_{table} ( model_id CHAR(50),\
+                                                                            field_id CHAR(50),\
                                                                             record_id INTEGER,\
-                                                                            value CHAR(20),\
-                                                                            state CHAR(20)\
+                                                                            value CHAR(200),\
+                                                                            state INTEGER\
                                                                             );')
     except:
         pass
