@@ -31,6 +31,7 @@ def anonymize_tables(connection, definitions, verbose=False):
     """
     for definition in definitions:
         table_name = list(definition.keys())[0]
+        createDataTable(table_name, connection)
         table_definition = definition[table_name]
         columns = table_definition.get('fields', [])
         excludes = table_definition.get('excludes', [])
@@ -240,13 +241,12 @@ def createDataTable(table, con):
                                                                             value CHAR(200),\
                                                                             state INTEGER\
                                                                             );')
-    except:
+    except Exception:
         pass
 
 def create_anon(con, data, table_id):
     cr = con.cursor()
     for table, field_data in data.items():
-        createDataTable(table, con)
         field = list(field_data.keys())[0]
         insert_migrated_fields_rec(cr, field, table)
         id = data.get(table).get(field)
