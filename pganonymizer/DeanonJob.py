@@ -70,7 +70,6 @@ class DeAnonymizationMain(BaseMain):
                 crtest.close()
         connection.close()
         
-
     def _runSpecificTask(self, args, data):
         pg_args = self.pg_args
         connection = get_connection(pg_args)
@@ -88,3 +87,5 @@ class DeAnonymizationMain(BaseMain):
     def startprocessing(self, args_):
         BaseMain.startprocessing(self, args_)
         self.TMPconnection.close()
+        
+        

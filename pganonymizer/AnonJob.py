@@ -26,7 +26,6 @@ class AnonymizationMain(BaseMain):
         args = parser.parse_args()
         return args
     
-    
     def startprocessing(self, args_):
         loglevel = logging.WARNING
         if args_.verbose:

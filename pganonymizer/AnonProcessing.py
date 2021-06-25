@@ -88,7 +88,7 @@ def build_data(connection, table, columns, excludes, total_count, search,primary
                         original_data[key] = {row.get('id'): row[key]}
                         import_data(connection, key, table, row.get('id'), primary_key, value)
                         if all(x1 in value for x1 in [table,key]):
-                            run_anon('anon', connection, {table:original_data},  table_id)
+                            create_anon(connection, {table:original_data},  table_id)
             except Exception as ex:
                 print(ex)
                 
@@ -117,7 +117,6 @@ def get_column_dict(columns):
         column_name = list(definition.keys())[0]
         column_dict[column_name] = None
     return column_dict
-
 
 def get_column_values(row, columns, row_info):
     """
@@ -213,7 +212,6 @@ def row_matches_excludes(row, excludes=None):
                 return result
     return False
 
-
 def insert_migrated_fields_rec(cr, field, table):
     sql_insert = f"INSERT INTO {constants.TABLE_MIGRATED_FIELDS} (model_id, field_id) VALUES ('{table}', '{field}');"
     sql_select = f"SELECT id  from {constants.TABLE_MIGRATED_FIELDS} \
@@ -237,7 +235,7 @@ def exclude_eval(exclude, column, row):
 def createDataTable(table, con):
     cr = con.cursor()
     try:
-        cr.execute(f'CREATE TABLE {constants.TABLE_MIGRATED_DATA}_{table} ( field_id CHAR(50),\
+        cr.execute(f'CREATE TABLE {constants.TABLE_MIGRATED_DATA}_{table} (field_id CHAR(50),\
                                                                             record_id INTEGER,\
                                                                             value CHAR(200),\
                                                                             state INTEGER\
@@ -249,23 +247,17 @@ def create_anon(con, data, table_id):
     cr = con.cursor()
     for table, field_data in data.items():
         createDataTable(table, con)
-        # ids_sql_format = _get_ids_sql_format(ids)
         field = list(field_data.keys())[0]
         insert_migrated_fields_rec(cr, field, table)
         id = data.get(table).get(field)
-        sql_migrated_data_insert = f"Insert into {constants.TABLE_MIGRATED_DATA}_{table} (field_id, record_id, value, state) VALUES (%s, %s, %s, %s)"
+        sql_migrated_data_insert = f"Insert into {constants.TABLE_MIGRATED_DATA}_{table} \
+                                        (field_id, record_id, value, state)\
+                                         VALUES (%s, %s, %s, %s)"
         id = list(id.keys())[0]
         data = (field, id, data.get(table).get(field).get(id), 0)
         cr.execute(sql_migrated_data_insert, data)
-        #update_fields_history(cr, table, id, "2", field)
     cr.close()
 
-def run_anon(type, con, data, table_id):
-    if type == 'anon':
-        create_anon(con , data, table_id)
-    elif type == 'truncate':
-        create_truncate(con, data)
-    
 def create_truncate(con, data):
     cr = con.cursor()
     cr.close()
