@@ -31,7 +31,7 @@ class BaseMain():
         while True:
             try:
                 get_connection(args)
-                break
+                return True
             except Exception as exc:
                 if self.isStartingUpError(exc):
                     continue
