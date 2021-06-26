@@ -298,7 +298,7 @@ class AnonProcessing():
                                         (field_id, record_id, value, state)\
                                          VALUES (%s, %s, %s, %s)"
         id = list(id.keys())[0]
-        data = (field, id, data.get(table).get(field).get(id), 0)
+        data = (field, id, data.get(field).get(id), 0)
         cr.execute(sql_migrated_data_insert, data)
         cr.close()
         
