@@ -2,9 +2,9 @@ import psycopg2
 from pganonymizer.utils import update_fields_history, _get_mapped_data
 from pganonymizer.constants import constants
 
-from pganonymizer.MainProccessing import MainProccessing
+from pganonymizer.MainProcessing import MainProcessing
 
-class DeanonProcessing(MainProccessing):
+class DeanonProcessing(MainProcessing):
     type = "deanonymization"
     
     def __init__(self, tmpconnection, totalrecords, schema, table, pg_args):
