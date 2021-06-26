@@ -4,6 +4,7 @@ from __future__ import absolute_import, print_function
 
 import argparse
 import threading
+import logging
 from queue import Queue
 
 import yaml
@@ -11,7 +12,8 @@ import yaml
 from pganonymizer.constants import constants 
 from pganonymizer.providers import PROVIDERS
 from pganonymizer.utils import create_database_dump, get_connection, get_pg_args
-
+from pganonymizer.logging import logger
+logger = logger()
 
 class BaseMain():
     jobs = Queue()
@@ -23,6 +25,7 @@ class BaseMain():
             return True
         return False
     
+    @logger.TEST_CONNECTION()
     def test_connection(self):
         args = self.pg_args
         while True:
@@ -39,6 +42,7 @@ class BaseMain():
         # own connection per schema batch...
         args_ = self._get_run_data(args_)
         self.test_connection()
+        self.setLogLevel(args_)
         self.get_schema(args_)
         self.update_queue()
         if args_.threading == 'False':
