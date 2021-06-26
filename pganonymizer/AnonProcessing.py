@@ -253,8 +253,7 @@ class AnonProcessing(MainProcessing):
                                                                                 field_id CHAR(50),\
                                                                                 record_id INTEGER,\
                                                                                 value CHAR(200),\
-                                                                                state INTEGER,\
-                                                                                PRIMARY KEY (id)\
+                                                                                state INTEGER\
                                                                                 );')
         except Exception:
             pass
