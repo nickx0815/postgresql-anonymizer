@@ -12,6 +12,7 @@ from pganonymizer.constants import constants
 from pganonymizer.AnonProcessing import anonymize_tables
 from pganonymizer.utils import get_connection, build_sql_select, _get_ids_sql_format
 from pganonymizer.MainJob import BaseMain
+from pganonymizer import AnonProcessing
 
 class AnonymizationMain(BaseMain):
     
@@ -45,27 +46,22 @@ class AnonymizationMain(BaseMain):
         for type_, type_attributes in schema.items():
             for table in type_attributes:
                 if type(table) == str:
-                    self.jobs.put({type_: [table]})
+                    self.jobs.put(AnonProcessing(type_, 1, [table], table, pg_args))
                 else:
                     for table_key, table_attributes in table.items():
-                        number = 0
                         test = self.update_anon_search(table_key, table_attributes)
                         cursor = build_sql_select(connection, table_key, test.get('search', False), select="id")
                         while True:
                             list = []
                             records = cursor.fetchmany(size=constants.ANON_NUMBER_FIELD_PER_THREAD)
-                            number = number + len(records)
+                            totalrecords = len(records)
                             if not records:
                                 break
                             for row in records:
                                 list.append(row.get('id'))
                             table_attributes_job = self.addJobRecordIds(table_attributes, list)
-                            self.jobs.put({type_: [{table_key:table_attributes_job}]})
-                        self.setstartTime(number, table_key)
+                            self.jobs.put(AnonProcessing(type_, table_attributes_job, totalrecords, table, pg_args))
         connection.close()
-    
-    def setstartTime(self, number, table):
-        self.number_rec[table] = (number, 0, time.time())
     
     def addJobRecordIds(self, table_attributes, ids):
         cur = copy.deepcopy(table_attributes)    
@@ -87,40 +83,24 @@ class AnonymizationMain(BaseMain):
         table_attributes['search'] = search
         return table_attributes
         
-    def print_info(self, table, total, anonymized, percent_anonymized):
-        percent="{:.2f}".format(percent_anonymized*100)
-        print(f"Table {table} is {percent} % anonymized")
-        total_anonymized = percent_anonymized*total
-        total_anonymized=total_anonymized-(total_anonymized%1)
-        print(f"Total Records anonymized {total_anonymized}")
-        if percent_anonymized == 1:
-            runtime = time.time()-self.number_rec[table][2]
-            time_ = str(datetime.timedelta(seconds=runtime))
-            print(f"Table {table} is anonymized")
-            print(f"Anonymization of {table} took {time_}")
-        self.number_rec[table] = (total, anonymized, self.number_rec[table][2])
+#     def print_info(self, table, total, anonymized, percent_anonymized):
+#         percent="{:.2f}".format(percent_anonymized*100)
+#         print(f"Table {table} is {percent} % anonymized")
+#         total_anonymized = percent_anonymized*total
+#         total_anonymized=total_anonymized-(total_anonymized%1)
+#         print(f"Total Records anonymized {total_anonymized}")
+#         if percent_anonymized == 1:
+#             runtime = time.time()-self.number_rec[table][2]
+#             time_ = str(datetime.timedelta(seconds=runtime))
+#             print(f"Table {table} is anonymized")
+#             print(f"Anonymization of {table} took {time_}")
+#         self.number_rec[table] = (total, anonymized, self.number_rec[table][2])
     
     def anonyzation_type_tables(self, connection, schema, args):
-        res, table = anonymize_tables(connection, schema, verbose=args.verbose)
-        total_size = self.number_rec[table][0]
-        number_anonymized = self.number_rec[table][1]+res
-        percent_anonymized = number_anonymized/total_size
-        self.print_info(table, total_size, number_anonymized, percent_anonymized)
+        anonymize_tables(connection, schema, verbose=args.verbose)
     
     def anonyzation_type_truncate(self, connection, schema):
         self.truncate_tables(connection, schema)
     
-    def _runSpecificTask(self, args, schema):
-        pg_args = self.pg_args
-        connection = get_connection(pg_args)
-        connection.autocommit = True
-        try:
-            type = list(schema.keys())[0]
-            if type == 'tables':
-                self.anonyzation_type_tables(connection, schema.get(type), args)
-            elif type == 'truncate':
-                self.anonyzation_type_truncate(connection, schema.get(type))
-        except Exception as ex:
-            print(ex)
-        finally:
-            connection.close()
+    def _runSpecificTask(self, args, job):
+        job.start()

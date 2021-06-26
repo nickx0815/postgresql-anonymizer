@@ -15,7 +15,6 @@ from pganonymizer.utils import create_database_dump, get_connection, get_pg_args
 
 class BaseMain():
     jobs = Queue()
-    number_rec = {}
     schema = False
     pg_args = False
     
