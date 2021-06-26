@@ -25,7 +25,7 @@ class BaseMain():
             return True
         return False
     
-    @logger.TEST_CONNECTION()
+    @logger.TEST_CONNECTION
     def test_connection(self):
         args = self.pg_args
         while True:
