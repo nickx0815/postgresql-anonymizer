@@ -59,8 +59,6 @@ class AnonProcessing():
         print(main, additionalrecordsinfo, additionalfieldsinfo)
     
     def anonymize_tables(self, connection):
-        definitions = self.schema
-        verbose = self.verbose
         """
         Anonymize a list of tables according to the schema definition.
     
@@ -68,16 +66,17 @@ class AnonProcessing():
         :param list definitions: A list of table definitions from the YAML schema.
         :param bool verbose: Display logging information and a progress bar.
         """
-        for definition in definitions:
-            table_name = list(definition.keys())[0]
-            self.createDataTable(table_name, connection)
-            table_definition = definition[table_name]
-            columns = table_definition.get('fields', [])
-            excludes = table_definition.get('excludes', [])
-            search = table_definition.get('search')
-            primary_key = table_definition.get('primary_key', constants.DEFAULT_PRIMARY_KEY)
-            total_count = get_table_count(connection, table_name)
-            self.build_data(connection, table_name, columns, excludes, total_count,search, primary_key, verbose)
+        definition = self.schema
+        verbose = self.verbose
+        table_name = list(definition.keys())[0]
+        self.createDataTable(table_name, connection)
+        table_definition = definition[table_name]
+        columns = table_definition.get('fields', [])
+        excludes = table_definition.get('excludes', [])
+        search = table_definition.get('search')
+        primary_key = table_definition.get('primary_key', constants.DEFAULT_PRIMARY_KEY)
+        total_count = get_table_count(connection, table_name)
+        self.build_data(connection, table_name, columns, excludes, total_count,search, primary_key, verbose)
     
     def build_data(self, connection, table, columns, excludes, total_count, search,primary_key, verbose=False):
         """
