@@ -36,7 +36,7 @@ class AnonProcessing():
         self.pgargs = pg_args
         
     def start(self):
-        connection = get_connection(self.pg_args)
+        connection = get_connection(self.pgargs)
         connection.autocommit = True
         if self.type == 'tables':
             method = "anonymize_tables"
