@@ -20,43 +20,20 @@ from pganonymizer.constants import constants
 from pganonymizer.exceptions import BadDataFormat
 from pganonymizer.providers import get_provider
 from pganonymizer.utils import _get_ids_sql_format, _, get_table_count, build_sql_select, update_fields_history, get_connection
+from pganonymizer.MainProccessing import MainProccessing
 
-class AnonProcessing():
-    endtime = False
-    verbose=False
-    successfullrecords = 0
-    successfullfields = 0
+class AnonProcessing(MainProccessing):
     
     def __init__(self, type, totalrecords, schema, table, pg_args):
+        super(AnonProcessing, self).__init__(totalrecords, schema, table, pg_args)
         self.type=type
-        self.table=table
-        self.schema=schema
-        self.starttime = time.time()
-        self.totalrecords = totalrecords
-        self.pgargs = pg_args
+        self.verbose=False
         
-    def start(self):
-        connection = get_connection(self.pgargs)
-        connection.autocommit = True
+    def _get_rel_method(self):
         if self.type == 'tables':
-            method = "anonymize_tables"
+            return  "anonymize_tables"
         elif self.type == 'truncate':
-            method = "truncate_tables"
-        try:
-            getattr(self, method)(connection)
-        except Exception as exp:
-            print(exp)
-        finally:
-            connection.close()
-            self.endtime = time.time()
-            self.print_info()
-    
-    def print_info(self):
-        runtime = str(datetime.timedelta(seconds=self.endtime-self.starttime))
-        main = f"the {self.type} of {self.table} took {runtime}\n"
-        additionalrecordsinfo = f"successfull processed {self.successfullrecords} (total records {self.totalrecords})\n"
-        additionalfieldsinfo = f"successfull processed {self.successfullfields} fields\n"
-        print(main, additionalrecordsinfo, additionalfieldsinfo)
+            return "truncate_tables"
     
     def anonymize_tables(self, connection):
         """
@@ -101,9 +78,6 @@ class AnonProcessing():
         # dann die daten ermittelt. Nach bearbeitung eines records wird dann eine history angelegt. 
         if verbose:
             progress_bar = IncrementalBar('Anonymizing', max=total_count)
-    
-        cursor = build_sql_select(connection, 'ir_model', ["model = '{model_data}'".format(model_data=_(table))], select="id")
-        cursor.close()
         cursor = build_sql_select(connection, table, search)
         number=0
         while True:
@@ -136,12 +110,6 @@ class AnonProcessing():
         if verbose:
             progress_bar.finish()
         cursor.close()
-    
-    def updatesuccessfullrecords(self):
-        self.successfullrecords = self.successfullrecords+1
-        
-    def updatesuccessfullfields(self):
-        self.successfullfields = self.successfullfields+1
     
     def get_column_dict(self, columns):
         """

@@ -6,8 +6,8 @@ import time
 
 
 from pganonymizer.constants import constants 
-from pganonymizer.utils import  get_connection, build_sql_select
-from pganonymizer.DeanonProcessing import run_revert, _get_mapped_data
+from pganonymizer.utils import  get_connection, build_sql_select, _get_mapped_data
+from pganonymizer.DeanonProcessing import DeanonProcessing
 from pganonymizer.MainJob import BaseMain
 
 class DeAnonymizationMain(BaseMain):
@@ -62,27 +62,17 @@ class DeAnonymizationMain(BaseMain):
                 while True:
                     list = []
                     records = cursor.fetchmany(size=constants.DEANON_NUMBER_FIELD_PER_THREAD)
+                    totalrecords = len(records)
                     if not records:
                         break
                     for rec in records:
                         list.append((rec.get('record_id'), rec.get('value'), rec.get('id')))
-                    self.jobs.put({table: (field, list)})
+                    self.jobs.put(DeanonProcessing(self.TMPconnection, totalrecords, (field, list), table, pg_args))
                 crtest.close()
         connection.close()
         
-    def _runSpecificTask(self, args, data):
-        pg_args = self.pg_args
-        connection = get_connection(pg_args)
-        connection.autocommit = True
-        try:
-            start_time = time.time()
-            run_revert(connection, args, data, self.TMPconnection)
-            end_time = time.time()
-            print('Deanonymization took {:.2f}s'.format(end_time - start_time))
-        except Exception as ex:
-            print(ex)
-        finally:
-            connection.close()
+    def _runSpecificTask(self, args, job):
+        job.start()
     
     def startprocessing(self, args_):
         BaseMain.startprocessing(self, args_)

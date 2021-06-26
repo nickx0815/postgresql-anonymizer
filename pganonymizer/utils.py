@@ -22,6 +22,21 @@ from pganonymizer.providers import get_provider
 def _(t):
     return t.replace("_", ".")
 
+def _get_mapped_data(con, table, field=False):
+    # todo function to determine which mapping (10,11,12...)
+    cr = con.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    select_model_id_sql = f"SELECT new_model_name, new_field_name FROM {constants.TABLE_MIGRATED_DATA_MAPPING} where old_model_name = '{table}'"
+    if field:
+        select_model_id_sql+=f" and old_field_name = '{field}'"
+    select_model_id_sql+=";"
+    cr.execute(select_model_id_sql)
+    record = cr.fetchone()
+    if not record:
+        return (table, table, field, field)
+    if not field:
+        return (table, record.get('new_model_name'))
+    return (table, record.get('new_model_name'), field, record.get('new_field_name'))
+
 def get_pg_args(args):
         """
         Map all commandline arguments with database keys.
