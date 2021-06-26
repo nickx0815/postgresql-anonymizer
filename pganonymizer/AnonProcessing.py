@@ -249,7 +249,7 @@ class AnonProcessing(MainProcessing):
     def createDataTable(self, table, con):
         cr = con.cursor()
         try:
-            cr.execute(f'CREATE TABLE {constants.TABLE_MIGRATED_DATA}_{table} (  id int NOT NULL AUTO_INCREMENT,\
+            cr.execute(f'CREATE TABLE {constants.TABLE_MIGRATED_DATA}_{table} (  id  SERIAL NOT NULL primary key,\
                                                                                 field_id CHAR(50),\
                                                                                 record_id INTEGER,\
                                                                                 value CHAR(200),\
