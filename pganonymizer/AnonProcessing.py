@@ -20,9 +20,9 @@ from pganonymizer.constants import constants
 from pganonymizer.exceptions import BadDataFormat
 from pganonymizer.providers import get_provider
 from pganonymizer.utils import _get_ids_sql_format, _, get_table_count, build_sql_select, update_fields_history, get_connection
-from pganonymizer.MainProccessing import MainProccessing
+from pganonymizer.MainProcessing import MainProcessing
 
-class AnonProcessing(MainProccessing):
+class AnonProcessing(MainProcessing):
     
     def __init__(self, type, totalrecords, schema, table, pg_args):
         super(AnonProcessing, self).__init__(totalrecords, schema, table, pg_args)
