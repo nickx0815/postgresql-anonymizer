@@ -68,7 +68,7 @@ class AnonProcessing():
         """
         definition = self.schema
         verbose = self.verbose
-        table_name = list(definition.keys())[0]
+        table_name = self.table
         self.createDataTable(table_name, connection)
         table_definition = definition[table_name]
         columns = table_definition.get('fields', [])
