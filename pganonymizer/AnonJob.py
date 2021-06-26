@@ -9,7 +9,7 @@ import datetime
 import time
 
 from pganonymizer.constants import constants 
-from pganonymizer.AnonProcessing import anonymize_tables
+from pganonymizer.AnonProcessing import AnonProcessing
 from pganonymizer.utils import get_connection, build_sql_select, _get_ids_sql_format
 from pganonymizer.MainJob import BaseMain
 from pganonymizer import AnonProcessing
@@ -96,11 +96,6 @@ class AnonymizationMain(BaseMain):
 #             print(f"Anonymization of {table} took {time_}")
 #         self.number_rec[table] = (total, anonymized, self.number_rec[table][2])
     
-    def anonyzation_type_tables(self, connection, schema, args):
-        anonymize_tables(connection, schema, verbose=args.verbose)
-    
-    def anonyzation_type_truncate(self, connection, schema):
-        self.truncate_tables(connection, schema)
     
     def _runSpecificTask(self, args, job):
         job.start()
