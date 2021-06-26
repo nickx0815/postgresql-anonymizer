@@ -13,6 +13,6 @@ class logger():
         self.logger_.setLevel(level)
     
     def TEST_CONNECTION(self, function):
-        def test():
+        def test(self):
             print("jo")
         return test
