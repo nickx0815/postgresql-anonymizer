@@ -249,10 +249,12 @@ class AnonProcessing(MainProcessing):
     def createDataTable(self, table, con):
         cr = con.cursor()
         try:
-            cr.execute(f'CREATE TABLE {constants.TABLE_MIGRATED_DATA}_{table} (field_id CHAR(50),\
+            cr.execute(f'CREATE TABLE {constants.TABLE_MIGRATED_DATA}_{table} (  id int NOT NULL AUTO_INCREMENT,\
+                                                                                field_id CHAR(50),\
                                                                                 record_id INTEGER,\
                                                                                 value CHAR(200),\
-                                                                                state INTEGER\
+                                                                                state INTEGER,\
+                                                                                PRIMARY KEY (id)\
                                                                                 );')
         except Exception:
             pass
