@@ -5,7 +5,7 @@ class logger():
     
     def __init__(self):
         logger = logging.getLogger(__name__)
-        logger.setLevel(logging.warning)
+        logger.setLevel(logging.WARNING)
         self.logger_ = logger
         
     def setLogLevel(self, args):
