@@ -28,7 +28,7 @@ class DeAnonymizationMain(BaseMain):
         for table, fields in schema.items():
             mapped_field_data = _get_mapped_data(connection, table)
             migrated_table = mapped_field_data[1]
-            temp_table = "tmp_"+migrated_table
+            temp_table = constants.TABLE_MIGRATED_DATA+"_"+migrated_table
             list_table.append(temp_table)
             fields_string = ",".join(fields+['id'])
             crtest.execute(f'CREATE TEMPORARY TABLE {temp_table} AS SELECT {fields_string} FROM {migrated_table};' )
