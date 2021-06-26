@@ -14,5 +14,8 @@ class logger():
     
     def TEST_CONNECTION(self, function):
         def test(self):
-            print("jo")
+            result = function()
+            logging.info(f'the connection was set up successfully')
+            logging.debug(f'connection data {args}')
+            return result
         return test
