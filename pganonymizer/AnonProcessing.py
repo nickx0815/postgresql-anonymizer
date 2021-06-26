@@ -70,11 +70,10 @@ class AnonProcessing():
         verbose = self.verbose
         table_name = self.table
         self.createDataTable(table_name, connection)
-        table_definition = definition[table_name]
-        columns = table_definition.get('fields', [])
-        excludes = table_definition.get('excludes', [])
-        search = table_definition.get('search')
-        primary_key = table_definition.get('primary_key', constants.DEFAULT_PRIMARY_KEY)
+        columns = definition.get('fields', [])
+        excludes = definition.get('excludes', [])
+        search = definition.get('search')
+        primary_key = definition.get('primary_key', constants.DEFAULT_PRIMARY_KEY)
         total_count = get_table_count(connection, table_name)
         self.build_data(connection, table_name, columns, excludes, total_count,search, primary_key, verbose)
     
