@@ -60,7 +60,7 @@ class AnonymizationMain(BaseMain):
                             for row in records:
                                 list.append(row.get('id'))
                             table_attributes_job = self.addJobRecordIds(table_attributes, list)
-                            self.jobs.put(AnonProcessing(type_, totalrecords, table_attributes_job, table, pg_args))
+                            self.jobs.put(AnonProcessing(type_, totalrecords, table_attributes_job, table_key, pg_args))
         connection.close()
     
     def addJobRecordIds(self, table_attributes, ids):
