@@ -25,6 +25,9 @@ class constants():
     section = ['Required','Optional']
     testarg = ['schema', 'dbname', 'user', 'password', 'host', 'port', 'type']
     testarg_optional = ['dump', 'dry_run', 'l', 'v', 'schema', 'threading', 'force_path']
+    PROCESS_METHOD_MAPPING = {'tables': 'anonymize_tables',
+                              'truncate':'truncate_tables'}
+    
     
     
     NUMBER_MAX_THREADS_ANON = 8

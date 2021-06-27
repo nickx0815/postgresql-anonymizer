@@ -67,13 +67,10 @@ class DeAnonymizationMain(BaseMain):
                         break
                     for rec in records:
                         list.append((rec.get('record_id'), rec.get('value'), rec.get('id')))
-                    self.jobs.put(DeanonProcessing(self.TMPconnection, totalrecords, (field, list), table, pg_args))
+                    self.jobs.put(DeanonProcessing(self.TMPconnection, totalrecords, (field, list), table, pg_args, self.logger))
                 crtest.close()
         connection.close()
         
-    def _runSpecificTask(self, args, job):
-        job.start()
-    
     def startprocessing(self, args_):
         BaseMain.startprocessing(self, args_)
         self.TMPconnection.close()

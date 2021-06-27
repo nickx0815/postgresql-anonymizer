@@ -20,12 +20,14 @@ from pganonymizer.constants import constants
 from pganonymizer.exceptions import BadDataFormat
 from pganonymizer.providers import get_provider
 from pganonymizer.utils import _get_ids_sql_format, _, get_table_count, build_sql_select, update_fields_history, get_connection
-from pganonymizer.logging import logger
 
-class MainProcessing(logger):
+class MainProcessing():
     endtime = False
     successfullrecords = 0
     successfullfields = 0
+    
+    typemethodmapper = {'tables': 'Anonymization',
+                        'truncate': 'Deletion'}
     
     def updatesuccessfullrecords(self):
         self.successfullrecords = self.successfullrecords+1
@@ -33,7 +35,8 @@ class MainProcessing(logger):
     def updatesuccessfullfields(self):
         self.successfullfields = self.successfullfields+1
     
-    def __init__(self, totalrecords, schema, table, pg_args):
+    def __init__(self, totalrecords, schema, table, pg_args, logger):
+        self.logger=logger
         self.starttime = time.time()
         self.totalrecords = totalrecords
         self.schema=schema
@@ -42,7 +45,7 @@ class MainProcessing(logger):
         self.totalrecords = totalrecords
         self.pgargs = pg_args
     
-    def start(self):
+    def start(self, logger):
         self.connection = get_connection(self.pgargs)
         self.connection.autocommit = True
         method = self._get_rel_method()
@@ -55,9 +58,15 @@ class MainProcessing(logger):
             self.endtime = time.time()
             self.print_info()
     
+    def _get_rel_method(self):
+        raise Exception("needs to be implemented!")
+    
+    def type_to_method_mapper(self, type):
+        return self.typemethodmapper.get(type, 'Deanonymization')
+    
     def print_info(self):
         runtime = str(datetime.timedelta(seconds=self.endtime-self.starttime))
-        main = f"the {self.type} of {self.table} took {runtime}\n"
+        main = f"the {self.type} of {self.typemethodmapper(self.type)} took {runtime}\n"
         additionalrecordsinfo = f"successfull processed {self.successfullrecords} (total records {self.totalrecords})\n"
         additionalfieldsinfo = f"successfull processed {self.successfullfields} fields\n"
         print(main, additionalrecordsinfo, additionalfieldsinfo)

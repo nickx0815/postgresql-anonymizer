@@ -13,9 +13,10 @@ from pganonymizer.constants import constants
 from pganonymizer.providers import PROVIDERS
 from pganonymizer.utils import create_database_dump, get_connection, get_pg_args
 from pganonymizer.logging import logger
-logger = logger()
+
 
 class BaseMain():
+    logger = logger()
     jobs = Queue()
     schema = False
     pg_args = False
@@ -25,7 +26,7 @@ class BaseMain():
             return True
         return False
     
-    @logger.TEST_CONNECTION
+    @self.logger.TEST_CONNECTION
     def test_connection(self):
         args = self.pg_args
         while True:
@@ -46,12 +47,12 @@ class BaseMain():
         self.get_schema(args_)
         self.update_queue()
         if args_.threading == 'False':
-            self.start_thread(self.jobs, args_)  
+            self.start_thread(self.jobs)  
         else:
             number_threads = self.get_thread_number()
             #print(f"Number of threads started: {number_threads}")
             for i in range(number_threads):
-                worker = threading.Thread(target=self.start_thread, args=(self.jobs,args_))
+                worker = threading.Thread(target=self.start_thread, args=(self.jobs))
                 worker.start()
             print("waiting for queue to complete tasks")
             self.jobs.join()
@@ -60,12 +61,12 @@ class BaseMain():
         if dump_path:
             create_database_dump(self.pg_args)
     
+    @self.logger.GET_SCHEMA
     def get_schema(self, args):
         if args.force_path:
             path=args.force_path
         else:
             path = f"{constants.PATH_SCHEMA_FILES}{args.schema}"
-        #path = "./schema/anonschema.yaml"
         try:
             schema = yaml.load(open(path), Loader=yaml.FullLoader)
         except:
@@ -94,10 +95,10 @@ class BaseMain():
             return args
         return parser
     
-    def start_thread(self, q, args):
+    def start_thread(self, q,):
         while not q.empty():
             data = q.get()
-            self._runSpecificTask(args, data)
+            self._runSpecificTask(data)
             q.task_done()
     
     def _get_run_data(self, args):
@@ -106,6 +107,10 @@ class BaseMain():
         self.pg_args = get_pg_args(args)
         return args
     
+    def _runSpecificTask(self, job):
+        job.start()
+    
+    @self.logger.NUMBER_THREAD
     def get_thread_number(self):
         queue_size = self.jobs.qsize()
         thread = getattr(constants, self.THREAD)

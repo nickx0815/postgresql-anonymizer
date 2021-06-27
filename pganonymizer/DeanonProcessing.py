@@ -7,8 +7,8 @@ from pganonymizer.MainProcessing import MainProcessing
 class DeanonProcessing(MainProcessing):
     type = "deanonymization"
     
-    def __init__(self, tmpconnection, totalrecords, schema, table, pg_args):
-        super(DeanonProcessing, self).__init__(totalrecords, schema, table, pg_args)
+    def __init__(self, tmpconnection, totalrecords, schema, table, pg_args, logger):
+        super(DeanonProcessing, self).__init__(totalrecords, schema, table, pg_args, logger)
         self.tmpcon = tmpconnection
         
     def _get_rel_method(self):

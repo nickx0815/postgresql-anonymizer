@@ -24,16 +24,13 @@ from pganonymizer.MainProcessing import MainProcessing
 
 class AnonProcessing(MainProcessing):
     
-    def __init__(self, type, totalrecords, schema, table, pg_args):
-        super(AnonProcessing, self).__init__(totalrecords, schema, table, pg_args)
+    def __init__(self, type, totalrecords, schema, table, pg_args, logger):
+        super(AnonProcessing, self).__init__(totalrecords, schema, table, pg_args, logger)
         self.type=type
         self.verbose=False
         
     def _get_rel_method(self):
-        if self.type == 'tables':
-            return  "anonymize_tables"
-        elif self.type == 'truncate':
-            return "truncate_tables"
+        return constants.PROCESS_METHOD_MAPPING[self.type]
     
     def anonymize_tables(self, connection):
         """

@@ -78,20 +78,3 @@ class AnonymizationMain(BaseMain):
             search.append("("+" OR ".join(searchlist)+")")
         table_attributes['search'] = search
         return table_attributes
-        
-#     def print_info(self, table, total, anonymized, percent_anonymized):
-#         percent="{:.2f}".format(percent_anonymized*100)
-#         print(f"Table {table} is {percent} % anonymized")
-#         total_anonymized = percent_anonymized*total
-#         total_anonymized=total_anonymized-(total_anonymized%1)
-#         print(f"Total Records anonymized {total_anonymized}")
-#         if percent_anonymized == 1:
-#             runtime = time.time()-self.number_rec[table][2]
-#             time_ = str(datetime.timedelta(seconds=runtime))
-#             print(f"Table {table} is anonymized")
-#             print(f"Anonymization of {table} took {time_}")
-#         self.number_rec[table] = (total, anonymized, self.number_rec[table][2])
-    
-    
-    def _runSpecificTask(self, args, job):
-        job.start()
