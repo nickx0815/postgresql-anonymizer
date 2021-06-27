@@ -40,7 +40,6 @@ class BaseMain():
         
     def startprocessing(self, args_):
         """Main method"""
-        # own connection per schema batch...
         self.logger.setLogLevel(args_)
         args_ = self._get_run_data(args_)
         self.test_connection()
@@ -51,13 +50,12 @@ class BaseMain():
             self.start_thread(self.jobs)  
         else:
             number_threads = self.get_thread_number()
-            #print(f"Number of threads started: {number_threads}")
             for i in range(number_threads):
                 worker = threading.Thread(target=self.start_thread, args=(self.jobs))
                 worker.start()
-            print("waiting for queue to complete tasks")
+            #print("waiting for queue to complete tasks")
             self.jobs.join()
-        print("all done")
+        #print("all done")
         dump_path = args_.dump_file
         if dump_path:
             create_database_dump(self.pg_args)
@@ -76,8 +74,9 @@ class BaseMain():
         
     def list_provider_classes(self):
         """List all available provider classes."""
-        print('Available provider classes:\n')
+        #print('Available provider classes:\n')
         for provider_cls in PROVIDERS:
+            #todo use logger
             print('{:<10} {}'.format(provider_cls.id, provider_cls.__doc__))
     
     def get_args(self, parseargs=True):
@@ -96,7 +95,8 @@ class BaseMain():
             return args
         return parser
     
-    def start_thread(self, q,):
+    
+    def start_thread(self, q):
         while not q.empty():
             data = q.get()
             self._runSpecificTask(data)
@@ -108,6 +108,7 @@ class BaseMain():
         self.pg_args = get_pg_args(args)
         return args
     
+    @logger.THREAD_STARTED
     def _runSpecificTask(self, job):
         job.start()
     
@@ -117,3 +118,5 @@ class BaseMain():
         thread = getattr(constants, self.THREAD)
         number_threads = queue_size if queue_size < thread else thread
         return number_threads
+    
+    

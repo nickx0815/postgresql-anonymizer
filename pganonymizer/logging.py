@@ -1,4 +1,5 @@
-import logging
+import logging, datetime
+from pganonymizer.constants import constants
 
 class logger():
     
@@ -35,18 +36,98 @@ class logger():
     def GET_SCHEMA(self, function):
         def get_schema(self, args):
             if args.force_path:
-                logging.debug(f"the default schema path was forced to {args.force_path}")
+                self.logger.logger_.debug(f"the default schema path was forced to {args.force_path}")
             result = function(self, args)
-            logging.info(f'the schema was loaded successfullly')
-            logging.debug(f'schema data {self.schema}')
+            self.logger.logger_.info(f'the schema was loaded successfully')
+            self.logger.logger_.debug(f'schema data {self.schema}')
             return result
         return get_schema
     
     def NUMBER_THREAD(self, function):
         def get_thread_number(self):
             result = function(self)
-            logging.info(f"Number of threads created: {result}")
+            self.logger.logger_.info(f"Number of threads created: {result}")
             return result
         return get_thread_number
+    
+    def THREAD_STARTED(self, function):
+        def start_thread(self, job):
+            self.logger.logger_.info(f"Thread started")
+            self.logger.logger_.debug(f'job\'s data {job}')
+            result = function(self, job)
+            self.logger.logger_.info(f"Thread finished")
+            return result
+        return start_thread
+    
+    def RESULTS(self, function):
+        def start(self):
+            result = function(self)
+            runtime = str(datetime.timedelta(seconds=self.endtime-self.starttime))
+            main = f"the {self.type_to_method_mapper(self.type)} of {self.table} took {runtime}\n"
+            additionalrecordsinfo = f"successfull processed {self.successfullrecords} (total records {self.totalrecords})\n"
+            additionalfieldsinfo = f"successfull processed {self.successfullfields} fields\n"
+            self.logger.logger_.info(main)
+            self.logger.logger_.debug(additionalrecordsinfo)
+            self.logger.logger_.debug(additionalfieldsinfo)
+            return result
+        return start
+    
+    def ANONYMIZATION_RECORD(self, function):
+        def import_data(self, connection, field, source_table, row_id, primary_key, value):
+            result = function(self, connection, field, source_table, row_id, primary_key, value)
+            self.logger.logger_.debug(f'[{source_table}-{row_id}] {field} anonymized to {value}')
+            return result
+        return import_data
+    
+    def EXCLUDE_RECORD(self, function):
+        def row_matches_excludes(self, row, excludes=None):
+            result = function(self, row, excludes=None)
+            if result:
+                self.logger.logger_.debug(f'[{self.table}-{row.get("id")}] was excluded')
+            return result
+        return row_matches_excludes
+    
+    def TRUNCATE_TABLES(self, function):
+        def truncate_tables(self, connection):
+            result = function(self, connection)
+            self.logger.logger_.debug(f'[{self.schema}] data deleted')
+            return result
+        return truncate_tables
+    
+    def INSERT_MIGRATED_FIELD(self, function):
+        def insert_migrated_fields_rec(self, cr, field, table):
+            result = function(self, cr, field, table)
+            self.logger.logger_.debug(f'INSERT INTO {table} ({field})')
+            return result
+        return insert_migrated_fields_rec
+    
+    def INSERT_MIGRATED_DATA(self, function):
+        def create_anon(self, con, table, data):
+            result = function(self, con, table, data)
+            migrated_table = constants.TABLE_MIGRATED_DATA+"_"+table
+            field = list(data.keys())[0]
+            id = data.get(field)
+            data.get(field).get(id)
+            self.logger.logger_.debug(f'INSERT INTO {migrated_table} ({field}, {id}, {data})')
+            return result
+        return create_anon
+    
+    def UPDATE_MIGRATED_DATA(self, function):
+        def update_migrated_data_history(self, cr, id, table):
+            result = function(self, cr, id, table)
+            migrated_table = constants.TABLE_MIGRATED_DATA+"_"+table
+            self.logger.logger_.debug(f'UPDATE {migrated_table} (state:1, id:{id})')
+            return result
+        return update_migrated_data_history
+    
+    def DEANONYMIZATION_RECORD(self, function):
+        def revert_anonymization(self, connection, record, table, field, value):
+            result = function(self, connection, record, table, field, value)
+            self.logger.logger_.debug(f'[{table}-{record[0]}] {field} deanonymized to {value}')
+            return result
+        return revert_anonymization
+    
+    
+        
 
             

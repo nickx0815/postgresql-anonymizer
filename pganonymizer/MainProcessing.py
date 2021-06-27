@@ -27,7 +27,8 @@ class MainProcessing():
     successfullfields = 0
     
     typemethodmapper = {'tables': 'Anonymization',
-                        'truncate': 'Deletion'}
+                        'truncate': 'Deletion',
+                        'deanon': 'Deanonymization'}
     
     def updatesuccessfullrecords(self):
         self.successfullrecords = self.successfullrecords+1
@@ -35,7 +36,8 @@ class MainProcessing():
     def updatesuccessfullfields(self):
         self.successfullfields = self.successfullfields+1
     
-    def __init__(self, totalrecords, schema, table, pg_args, logger):
+    def __init__(self, totalrecords, schema, table, pg_args, logger, type):
+        self.type=type
         self.logger=logger
         self.starttime = time.time()
         self.totalrecords = totalrecords
@@ -45,18 +47,19 @@ class MainProcessing():
         self.totalrecords = totalrecords
         self.pgargs = pg_args
     
-    def start(self, logger):
+    @logger.RESULTS
+    def start(self):
         self.connection = get_connection(self.pgargs)
         self.connection.autocommit = True
         method = self._get_rel_method()
         try:
             getattr(self, method)(self.connection)
         except Exception as exp:
+            #todo use logger
             print(exp)
         finally:
             self.connection.close()
             self.endtime = time.time()
-            self.print_info()
     
     def _get_rel_method(self):
         raise Exception("needs to be implemented!")
@@ -64,12 +67,4 @@ class MainProcessing():
     def type_to_method_mapper(self, type):
         return self.typemethodmapper.get(type, 'Deanonymization')
     
-    def print_info(self):
-        runtime = str(datetime.timedelta(seconds=self.endtime-self.starttime))
-        main = f"the {self.type} of {self.typemethodmapper(self.type)} took {runtime}\n"
-        additionalrecordsinfo = f"successfull processed {self.successfullrecords} (total records {self.totalrecords})\n"
-        additionalfieldsinfo = f"successfull processed {self.successfullfields} fields\n"
-        print(main, additionalrecordsinfo, additionalfieldsinfo)
-        
-        
         

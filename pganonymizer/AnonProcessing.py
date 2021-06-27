@@ -25,8 +25,7 @@ from pganonymizer.MainProcessing import MainProcessing
 class AnonProcessing(MainProcessing):
     
     def __init__(self, type, totalrecords, schema, table, pg_args, logger):
-        super(AnonProcessing, self).__init__(totalrecords, schema, table, pg_args, logger)
-        self.type=type
+        super(AnonProcessing, self).__init__(totalrecords, schema, table, pg_args, logger, type)
         self.verbose=False
         
     def _get_rel_method(self):
@@ -80,7 +79,7 @@ class AnonProcessing(MainProcessing):
         while True:
             rows = cursor.fetchmany(size=constants.ANON_FETCH_RECORDS)
             if not rows:
-                print(str(constants.ANON_FETCH_RECORDS)+" more records anonymized!")
+                #print(str(constants.ANON_FETCH_RECORDS)+" more records anonymized!")
                 break
             for row in rows:
                 try:
@@ -100,8 +99,8 @@ class AnonProcessing(MainProcessing):
                                 self.create_anon(connection, table, original_data)
                         self.updatesuccessfullrecords()
                 except Exception as ex:
+                    #todo use logger
                     print(ex)
-                    
             if verbose:
                 progress_bar.next()
         if verbose:
@@ -158,6 +157,7 @@ class AnonProcessing(MainProcessing):
             column_dict[column_name] = value
         return column_dict
     
+    @logger.TRUNCATE_TABLES
     def truncate_tables(self, connection):
         """
         Truncate a list of tables.
@@ -184,6 +184,7 @@ class AnonProcessing(MainProcessing):
                 dic[key] = value.get('provider').get('field_anon_id')
         return dic
     
+    @logger.ANONYMIZATION_RECORD
     def import_data(self, connection, field, source_table, row_id, primary_key, value):
         """
         Import the temporary and anonymized data to a temporary table and write the changes back.
@@ -201,7 +202,8 @@ class AnonProcessing(MainProcessing):
         sql = f"UPDATE {source_table} SET {field} = '{value}' WHERE ID = {row_id}"
         cursor.execute(sql)
         cursor.close()
-        
+    
+    @logger.EXCLUDE_RECORD 
     def row_matches_excludes(self, row, excludes=None):
         """
         Check whether a row matches a list of field exclusion patterns.
@@ -223,6 +225,7 @@ class AnonProcessing(MainProcessing):
                     return result
         return False
     
+    @logger.INSERT_MIGRATED_FIELD
     def insert_migrated_fields_rec(self, cr, field, table):
         sql_insert = f"INSERT INTO {constants.TABLE_MIGRATED_FIELDS} (model_id, field_id) VALUES ('{table}', '{field}');"
         sql_select = f"SELECT id  from {constants.TABLE_MIGRATED_FIELDS} \
@@ -255,6 +258,7 @@ class AnonProcessing(MainProcessing):
         except Exception:
             pass
     
+    @logger.INSERT_MIGRATED_DATA
     def create_anon(self, con, table, data):
         cr = con.cursor()
         field = list(data.keys())[0]

@@ -7,8 +7,8 @@ from pganonymizer.MainProcessing import MainProcessing
 class DeanonProcessing(MainProcessing):
     type = "deanonymization"
     
-    def __init__(self, tmpconnection, totalrecords, schema, table, pg_args, logger):
-        super(DeanonProcessing, self).__init__(totalrecords, schema, table, pg_args, logger)
+    def __init__(self, tmpconnection, totalrecords, schema, table, pg_args, logger, type):
+        super(DeanonProcessing, self).__init__(totalrecords, schema, table, pg_args, logger, type)
         self.tmpcon = tmpconnection
         
     def _get_rel_method(self):
@@ -32,16 +32,21 @@ class DeanonProcessing(MainProcessing):
             record_db = cr3.fetchone()
             cr3.close()
             if record_db:
-                cr1 = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
-                record_db_id = record_db[0]
-                get_migrated_field_sql = f"UPDATE {migrated_table} SET {migrated_field} = %s WHERE id = %s;"
-                cr1.execute(get_migrated_field_sql, (value, record_db_id))
-                cr1.close()
+                self.revert_anonymization(connection, record_db, migrated_table, migrated_field, value)
                 self.update_migrated_data_history(connection.cursor(), record_id, table)
                 self.updatesuccessfullfields()
                 self.updatesuccessfullrecords()
-        print(str(number) + " records deanonymized!")
+        #print(str(number) + " records deanonymized!")
     
+    @logger.UPDATE_MIGRATED_DATA
     def update_migrated_data_history(self, cr, id, table):
         cr.execute(f"UPDATE {constants.TABLE_MIGRATED_DATA}_{table} SET STATE = 1 WHERE ID = {id}")
+    
+    @logger.DEANONYMIZATION_RECORD
+    def revert_anonymization(self, connection, record, table, field, value):
+        cr1 = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        record_db_id = record[0]
+        get_migrated_field_sql = f"UPDATE {table} SET {field} = %s WHERE id = %s;"
+        cr1.execute(get_migrated_field_sql, (value, record_db_id))
+        cr1.close()
     
