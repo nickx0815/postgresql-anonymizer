@@ -61,7 +61,7 @@ class BaseMain():
         if dump_path:
             create_database_dump(self.pg_args)
     
-    @self.logger.GET_SCHEMA
+    @logger.GET_SCHEMA
     def get_schema(self, args):
         if args.force_path:
             path=args.force_path
@@ -110,7 +110,7 @@ class BaseMain():
     def _runSpecificTask(self, job):
         job.start()
     
-    @self.logger.NUMBER_THREAD
+    @logger.NUMBER_THREAD
     def get_thread_number(self):
         queue_size = self.jobs.qsize()
         thread = getattr(constants, self.THREAD)
