@@ -41,9 +41,10 @@ class BaseMain():
     def startprocessing(self, args_):
         """Main method"""
         # own connection per schema batch...
+        self.logger.setLogLevel(args_)
         args_ = self._get_run_data(args_)
         self.test_connection()
-        self.setLogLevel(args_)
+        
         self.get_schema(args_)
         self.update_queue()
         if args_.threading == 'False':
