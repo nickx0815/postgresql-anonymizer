@@ -17,8 +17,8 @@ class logger():
     def TEST_CONNECTION(self, function):
         def test_connection(self):
             result = function(self)
-            logging.info(f'the connection was set up successfully')
-            logging.debug(f'connection data {self.pg_args}')
+            logger.logger_.info(f'the connection was set up successfully')
+            logger.logger_.debug(f'connection data {self.pg_args}')
             return result
         return test_connection
     
@@ -38,4 +38,5 @@ class logger():
             logging.info(f"Number of threads created: {result}")
             return result
         return get_thread_number
+
             
