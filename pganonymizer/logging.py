@@ -17,8 +17,8 @@ class logger():
     def TEST_CONNECTION(self, function):
         def test_connection(self):
             result = function(self)
-            logger.logger_.info(f'the connection was set up successfully')
-            logger.logger_.debug(f'connection data {self.pg_args}')
+            self.logger.logger_.info(f'the connection was set up successfully')
+            self.logger.logger_.debug(f'connection data {self.pg_args}')
             return result
         return test_connection
     
