@@ -5,8 +5,15 @@ class logger():
     def get_default_log_level(self):
         return logging.DEBUG
     
+    def get_config_parameter(self):
+        args = {'format':'%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
+                    'datefmt':'%m-%d %H:%M',
+                    'filename':'/temp/myapp.log',
+                    'filemode':'w'}
+        return args
+    
     def __init__(self):
-        logging.basicConfig()
+        logging.basicConfig(self.get_config_parameter())
         logger = logging.getLogger(__name__)
         logger.setLevel(self.get_default_log_level())
         self.logger_ = logger
