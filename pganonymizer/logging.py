@@ -13,7 +13,7 @@ class logger():
         return args
     
     def __init__(self):
-        logging.basicConfig(self.get_config_parameter())
+        logging.basicConfig(**self.get_config_parameter())
         logger = logging.getLogger(__name__)
         logger.setLevel(self.get_default_log_level())
         self.logger_ = logger
