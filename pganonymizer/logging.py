@@ -3,7 +3,7 @@ import logging
 class logger():
     
     def get_default_log_level(self):
-        return logging.WARNING
+        return logging.DEBUG
     
     def __init__(self):
         logger = logging.getLogger(__name__)
