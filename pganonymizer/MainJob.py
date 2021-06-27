@@ -13,9 +13,10 @@ from pganonymizer.constants import constants
 from pganonymizer.providers import PROVIDERS
 from pganonymizer.utils import create_database_dump, get_connection, get_pg_args
 from pganonymizer.logging import logger
-logger = logger()
+
 
 class BaseMain():
+    logger = logger()
     jobs = Queue()
     schema = False
     pg_args = False
@@ -40,7 +41,7 @@ class BaseMain():
     def startprocessing(self, args_):
         """Main method"""
         # own connection per schema batch...
-        logger.setLogLevel(args_)
+        self.logger.setLogLevel(args_)
         args_ = self._get_run_data(args_)
         self.test_connection()
         
