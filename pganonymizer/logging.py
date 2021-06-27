@@ -6,6 +6,7 @@ class logger():
         return logging.DEBUG
     
     def __init__(self):
+        logging.basicConfig()
         logger = logging.getLogger(__name__)
         logger.setLevel(self.get_default_log_level())
         self.logger_ = logger
