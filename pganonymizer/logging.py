@@ -7,7 +7,7 @@ class logger():
     
     def get_config_parameter(self):
         args = {'format':'%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
-                    'datefmt':'%m-%d %H:%M'}
+                    'datefmt':'%d-%m-%y %H:%M:%S'}
         #{'format':'%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
         #            'datefmt':'%m-%d %H:%M',
         #            'filename':'/temp/myapp.log',
