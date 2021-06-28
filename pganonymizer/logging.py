@@ -104,9 +104,9 @@ class logger():
             result = function(self, con, table, data)
             migrated_table = constants.TABLE_MIGRATED_DATA+"_"+table
             field = list(data.keys())[0]
-            id = data.get(field)
-            data.get(field).get(id)
-            self.logger.logger_.debug(f'INSERT INTO {migrated_table} ({field}, {id}, {data})')
+            id = list(data.get(field).keys())[0]
+            value = data.get(field).get(id)
+            self.logger.logger_.debug(f'INSERT INTO {migrated_table} ({field}, {id}, {value})')
             return result
         return create_anon
     

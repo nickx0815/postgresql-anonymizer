@@ -99,6 +99,7 @@ class AnonProcessing(MainProcessing):
                             self.updatesuccessfullfields()
                             if all(x1 in value for x1 in [table,key]):
                                 self.create_anon(connection, table, original_data)
+                        #todo nur updaten wenn auhc irgendein feld bearbeitet wurde
                         self.updatesuccessfullrecords()
                 except Exception as ex:
                     #todo use logger
