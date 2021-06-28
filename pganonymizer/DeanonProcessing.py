@@ -1,7 +1,7 @@
 import psycopg2
 from pganonymizer.utils import update_fields_history, _get_mapped_data
 from pganonymizer.constants import constants
-
+from pganonymizer.logging import logger
 from pganonymizer.MainProcessing import MainProcessing
 
 class DeanonProcessing(MainProcessing):
