@@ -252,7 +252,7 @@ class AnonProcessing(MainProcessing):
     
     def createDataTable(self, table, con):
         cr = con.cursor()
-        table_name = constants.TABLE_MIGRATED_DATA_table
+        table_name = constants.TABLE_MIGRATED_DATA+"_"+table
         cr.execute(f"select exists ( select from information_schema.tables where table_name = '{table_name}');")
         if not cr.fetchone():
             cr.execute(f'CREATE TABLE {table_name} (  id  SERIAL NOT NULL primary key,\
