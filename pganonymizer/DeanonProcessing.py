@@ -5,6 +5,7 @@ from pganonymizer.constants import constants
 from pganonymizer.MainProcessing import MainProcessing
 
 class DeanonProcessing(MainProcessing):
+    logger = logger()
     type = "deanonymization"
     
     def __init__(self, tmpconnection, totalrecords, schema, table, pg_args, logger, type):

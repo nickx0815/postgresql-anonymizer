@@ -23,6 +23,7 @@ from pganonymizer.utils import _get_ids_sql_format, _, get_table_count, build_sq
 from pganonymizer.MainProcessing import MainProcessing
 
 class AnonProcessing(MainProcessing):
+    logger = logger()
     
     def __init__(self, type, totalrecords, schema, table, pg_args, logger):
         super(AnonProcessing, self).__init__(totalrecords, schema, table, pg_args, logger, type)
