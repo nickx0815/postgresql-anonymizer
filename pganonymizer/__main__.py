@@ -23,6 +23,7 @@ class Args():
         self.dump_file = dic.get("dump")
         self.threading = dic.get('threading', True)
         self.force_path = dic.get('force_path')
+        self.logging = dic.get('logging', 'INFO')
 
 config = ConfigParser()
 def main():
