@@ -67,6 +67,7 @@ class AnonProcessing(MainProcessing):
         :return: A tuple containing the data list and a complete list of all table columns.
         :rtype: (list, list)
         """
+        #todo update und history (migrated_data) in einer transaktion, wegen möglich eines abbruches
         
         #todo 
         # umbauen der funktion
@@ -251,16 +252,15 @@ class AnonProcessing(MainProcessing):
     
     def createDataTable(self, table, con):
         cr = con.cursor()
-        try:
-            cr.execute(f'CREATE TABLE {constants.TABLE_MIGRATED_DATA}_{table} (  id  SERIAL NOT NULL primary key,\
+        table_name = constants.TABLE_MIGRATED_DATA_table
+        cr.execute(f"select exists ( select from information_schema.tables where table_name = '{table_name}');")
+        if not cr.fetchone():
+            cr.execute(f'CREATE TABLE {table_name} (  id  SERIAL NOT NULL primary key,\
                                                                                 field_id CHAR(50),\
                                                                                 record_id INTEGER,\
                                                                                 value CHAR(200),\
                                                                                 state INTEGER\
                                                                                 );')
-        except Exception:
-            pass
-    
     @logger.INSERT_MIGRATED_DATA
     def create_anon(self, con, table, data):
         cr = con.cursor()
