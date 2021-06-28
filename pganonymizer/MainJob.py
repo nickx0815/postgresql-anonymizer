@@ -51,7 +51,7 @@ class BaseMain():
         else:
             number_threads = self.get_thread_number()
             for i in range(number_threads):
-                worker = threading.Thread(target=self.start_thread, args=(self.jobs))
+                worker = threading.Thread(target=self.start_thread, args=(self.jobs,))
                 worker.start()
             #print("waiting for queue to complete tasks")
             self.jobs.join()
