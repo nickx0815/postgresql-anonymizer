@@ -1,5 +1,6 @@
-import logging, datetime
+import logging
 from pganonymizer.constants import constants
+
 
 class logger():
     
@@ -7,9 +8,10 @@ class logger():
         return logging.DEBUG
     
     def get_config_parameter(self):
+        
         args = {'format':'%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
                     'datefmt':'%d-%m-%y %H:%M:%S',
-                    'filename':'/home/inter/Schreibtisch/app.log',
+                    'filename': constants.PATH_LOG_FILES,
                    'filemode':'w'}
         return args
     

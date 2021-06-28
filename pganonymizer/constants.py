@@ -1,4 +1,7 @@
 # Database arguments used for the CLI
+from datetime import datetime
+
+date = datetime.now().strftime("%d_%m_%Y %H:%M:%S")
 
 class constants():
 
@@ -16,6 +19,7 @@ class constants():
     STARTINGUPERROR = "the database system is starting up"
     
     PATH_SCHEMA_FILES =  "/home/migration/schema/"
+    PATH_LOG_FILES = f"/home/migration/{date}.log"
     PATH_CONFIG_FILE = '/home/migration/migrationConfig.conf'
     TABLE_MIGRATED_DATA = 'migrated_data'
     TABLE_MIGRATED_FIELDS = 'migrated_fields'
@@ -39,3 +43,4 @@ class constants():
     ANON_FETCH_RECORDS = 2500
     #TODO use other technique
     # available arg ['-v', '-l', '--dry-run']
+
