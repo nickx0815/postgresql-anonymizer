@@ -22,7 +22,6 @@ from pganonymizer.providers import get_provider
 from pganonymizer.utils import _get_ids_sql_format, _, get_table_count, build_sql_select, update_fields_history, get_connection
 
 class MainProcessing():
-    logger = False
     endtime = False
     successfullrecords = 0
     successfullfields = 0
