@@ -52,10 +52,10 @@ class logger():
     
     def THREAD_STARTED(self, function):
         def start_thread(self, job):
-            self.logger.logger_.info(f"Thread started")
+            self.logger.logger_.debug(f"Thread started")
             self.logger.logger_.debug(f'job\'s data {job}')
             result = function(self, job)
-            self.logger.logger_.info(f"Thread finished")
+            self.logger.logger_.debug(f"Thread finished")
             return result
         return start_thread
     
@@ -66,7 +66,7 @@ class logger():
             main = f"the {self.type_to_method_mapper(self.type)} of {self.table} took {runtime}\n"
             additionalrecordsinfo = f"successfull processed {self.successfullrecords} (total records {self.totalrecords})\n"
             additionalfieldsinfo = f"successfull processed {self.successfullfields} fields\n"
-            self.logger.logger_.info(main)
+            self.logger.logger_.debug(main)
             self.logger.logger_.debug(additionalrecordsinfo)
             self.logger.logger_.debug(additionalfieldsinfo)
             return result
@@ -75,7 +75,7 @@ class logger():
     def ANONYMIZATION_RECORD(self, function):
         def import_data(self, connection, field, source_table, row_id, primary_key, value):
             result = function(self, connection, field, source_table, row_id, primary_key, value)
-            self.logger.logger_.debug(f'[{source_table}-{row_id}] {field} anonymized to {value}')
+            self.logger.logger_.info(f'[{source_table}-{row_id}] {field} anonymized to {value}')
             return result
         return import_data
     
@@ -90,7 +90,7 @@ class logger():
     def TRUNCATE_TABLES(self, function):
         def truncate_tables(self, connection):
             result = function(self, connection)
-            self.logger.logger_.debug(f'[{self.schema}] data deleted')
+            self.logger.logger_.info(f'[{self.schema}] data deleted')
             return result
         return truncate_tables
     
@@ -108,7 +108,7 @@ class logger():
             field = list(data.keys())[0]
             id = list(data.get(field).keys())[0]
             value = data.get(field).get(id)
-            self.logger.logger_.debug(f'INSERT INTO {migrated_table} ({field}, {id}, {value})')
+            self.logger.logger_.info(f'INSERT INTO {migrated_table} ({field}, {id}, {value})')
             return result
         return create_anon
     
@@ -123,7 +123,7 @@ class logger():
     def DEANONYMIZATION_RECORD(self, function):
         def revert_anonymization(self, connection, record, table, field, value):
             result = function(self, connection, record, table, field, value)
-            self.logger.logger_.debug(f'[{table}-{record[0]}] {field} deanonymized to {value}')
+            self.logger.logger_.info(f'[{table}-{record[0]}] {field} deanonymized to {value}')
             return result
         return revert_anonymization
     
