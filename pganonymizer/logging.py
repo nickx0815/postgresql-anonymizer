@@ -28,7 +28,7 @@ class logger():
     def TEST_CONNECTION(self, function):
         def test_connection(self):
             result = function(self)
-            self.logger.logger_.info(f'the connection was set up successfully')
+            self.logger.logger_.debug(f'the connection was set up successfully')
             self.logger.logger_.debug(f'connection data {self.pg_args}')
             return result
         return test_connection
@@ -38,7 +38,7 @@ class logger():
             if args.force_path:
                 self.logger.logger_.debug(f"the default schema path was forced to {args.force_path}")
             result = function(self, args)
-            self.logger.logger_.info(f'the schema was loaded successfully')
+            self.logger.logger_.debug(f'the schema was loaded successfully')
             self.logger.logger_.debug(f'schema data {self.schema}')
             return result
         return get_schema
@@ -46,7 +46,7 @@ class logger():
     def NUMBER_THREAD(self, function):
         def get_thread_number(self):
             result = function(self)
-            self.logger.logger_.info(f"Number of threads created: {result}")
+            self.logger.logger_.debug(f"Number of threads created: {result}")
             return result
         return get_thread_number
     
@@ -75,7 +75,7 @@ class logger():
     def ANONYMIZATION_RECORD(self, function):
         def import_data(self, connection, field, source_table, row_id, primary_key, value):
             result = function(self, connection, field, source_table, row_id, primary_key, value)
-            self.logger.logger_.info(f'[{source_table}-{row_id}] {field} anonymized to {value}')
+            self.logger.logger_.info(f'{source_table} {row_id} {field} anonymized -> {value}')
             return result
         return import_data
     
@@ -83,14 +83,14 @@ class logger():
         def row_matches_excludes(self, row, excludes=None):
             result = function(self, row, excludes=None)
             if result:
-                self.logger.logger_.debug(f'[{self.table}-{row.get("id")}] was excluded')
+                self.logger.logger_.debug(f'{self.table} {row.get("id")} excluded')
             return result
         return row_matches_excludes
     
     def TRUNCATE_TABLES(self, function):
         def truncate_tables(self, connection):
             result = function(self, connection)
-            self.logger.logger_.info(f'[{self.schema}] data deleted')
+            self.logger.logger_.info(f'{self.schema} deleted')
             return result
         return truncate_tables
     
@@ -108,7 +108,7 @@ class logger():
             field = list(data.keys())[0]
             id = list(data.get(field).keys())[0]
             value = data.get(field).get(id)
-            self.logger.logger_.info(f'INSERT INTO {migrated_table} ({field}, {id}, {value})')
+            self.logger.logger_.info(f'{migrated_table} new({field} {id} {value})')
             return result
         return create_anon
     
@@ -123,7 +123,7 @@ class logger():
     def DEANONYMIZATION_RECORD(self, function):
         def revert_anonymization(self, connection, record, table, field, value):
             result = function(self, connection, record, table, field, value)
-            self.logger.logger_.info(f'[{table}-{record[0]}] {field} deanonymized to {value}')
+            self.logger.logger_.info(f'{table} {record[0]} {field} deanonymized -> {value}')
             return result
         return revert_anonymization
     
