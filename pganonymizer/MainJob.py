@@ -20,6 +20,19 @@ class BaseMain():
     jobs = Queue()
     schema = False
     pg_args = False
+    migration = False
+    
+    def __init__(self, args):
+        self.args = args
+        self.logger.setLogLevel(args)
+        self.pg_args = get_pg_args(args)
+        self.test_connection()
+        self.get_schema(args)
+        self.update_queue()
+    
+    def set_migration(self, args):
+        migration = args.get('migration')
+        self.migration = migration
     
     def isStartingUpError(self, oe):
         if constants.STARTINGUPERROR in oe.args[0]:
@@ -38,27 +51,23 @@ class BaseMain():
                     continue
                 raise exc
         
-    def startprocessing(self, args_):
+    def startprocessing(self):
         """Main method"""
-        self.logger.setLogLevel(args_)
-        args_ = self._get_run_data(args_)
-        self.test_connection()
-        
-        self.get_schema(args_)
-        self.update_queue()
-        if args_.threading == 'False':
+
+        self.start(self.args)
+        dump_path = self.args.dump_file
+        if dump_path:
+            create_database_dump(self.pg_args)
+    
+    def start(self, args):
+        if args.threading == 'False':
             self.start_thread(self.jobs)  
         else:
             number_threads = self.get_thread_number()
             for i in range(number_threads):
                 worker = threading.Thread(target=self.start_thread, args=(self.jobs,))
                 worker.start()
-            #print("waiting for queue to complete tasks")
             self.jobs.join()
-        #print("all done")
-        dump_path = args_.dump_file
-        if dump_path:
-            create_database_dump(self.pg_args)
     
     @logger.GET_SCHEMA
     def get_schema(self, args):
@@ -79,34 +88,11 @@ class BaseMain():
             #todo use logger
             print('{:<10} {}'.format(provider_cls.id, provider_cls.__doc__))
     
-    def get_args(self, parseargs=True):
-        parser = argparse.ArgumentParser(description='Anonymize data of a PostgreSQL database')
-        parser.add_argument('--schema', help='A YAML schema file that contains the anonymization rules',
-                            default=constants.DEFAULT_SCHEMA_FILE)
-        parser.add_argument('--dbname', help='Name of the database')
-        parser.add_argument('--user', help='Name of the database user')
-        parser.add_argument('--password', default='', help='Password for the database user')
-        parser.add_argument('--host', help='Database hostname', default='localhost')
-        parser.add_argument('--port', help='Port of the database', default='5432')
-        parser.add_argument('--dry-run', action='store_true', help='Don\'t commit changes made on the database',
-                            default=False)
-        if parseargs:
-            args = parser.parse_args()
-            return args
-        return parser
-    
-    
     def start_thread(self, q):
         while not q.empty():
             data = q.get()
             self._runSpecificTask(data)
             q.task_done()
-    
-    def _get_run_data(self, args):
-        if not args:
-            args = self.get_args()
-        self.pg_args = get_pg_args(args)
-        return args
     
     @logger.THREAD_STARTED
     def _runSpecificTask(self, job):

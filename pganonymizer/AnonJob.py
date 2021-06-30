@@ -42,7 +42,7 @@ class AnonymizationMain(BaseMain):
         for type_, type_attributes in schema.items():
             for table in type_attributes:
                 if type(table) == str:
-                    self.jobs.put(AnonProcessing(type_, 1, [table], table, pg_args, self.logger))
+                    self.jobs.put(AnonProcessing(self, type_, 1, [table], table, pg_args,self.logger))
                 else:
                     for table_key, table_attributes in table.items():
                         test = self.update_anon_search(table_key, table_attributes)
@@ -56,7 +56,7 @@ class AnonymizationMain(BaseMain):
                             for row in records:
                                 list.append(row.get('id'))
                             table_attributes_job = self.addJobRecordIds(table_attributes, list)
-                            self.jobs.put(AnonProcessing(type_, totalrecords, table_attributes_job, table_key, pg_args, self.logger))
+                            self.jobs.put(AnonProcessing(self, type_, totalrecords, table_attributes_job, table_key, pg_args, self.logger))
         connection.close()
     
     def addJobRecordIds(self, table_attributes, ids):

@@ -25,10 +25,12 @@ from pganonymizer.logging import logger
 
 class AnonProcessing(MainProcessing):
     logger = logger()
+    #todo verschlüsselung einbauen
     
-    def __init__(self, type, totalrecords, schema, table, pg_args, logger):
+    def __init__(self, main_job, type, totalrecords, schema, table, pg_args, logger):
         super(AnonProcessing, self).__init__(totalrecords, schema, table, pg_args, logger, type)
         self.verbose=False
+        self.main_job = main_job
         
     def _get_rel_method(self):
         return constants.PROCESS_METHOD_MAPPING[self.type]
@@ -177,8 +179,6 @@ class AnonProcessing(MainProcessing):
             logging.info('delete tables "%s"', table)
             cursor.execute(f'DELETE FROM {table};')
             self.totalrecords = self.totalrecords+1
-        # todo aufzeichungen
-        #_run_query('truncate', connection, table_names)
         cursor.close()
     
     def _get_anon_field_id(self, columns):

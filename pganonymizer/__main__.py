@@ -24,6 +24,8 @@ class Args():
         self.threading = dic.get('threading', True)
         self.force_path = dic.get('force_path')
         self.logging = dic.get('logging', 'INFO')
+        self.migration = dic.get('migration')
+        self.type = dic.get('type')
 
 config = ConfigParser()
 def main():
@@ -34,12 +36,14 @@ def main():
     [testargs.update({x : config.get("Required",x)}) for x in constants.testarg]
     [testargs.update({x : config.get("Optional",x)})for x in constants.testarg_optional if x in config['Optional']]
     args = Args(testargs)
-    type = testargs.get('type')
+    type = args.get('type')
     try:
         if type == 'anon':
-            AnonymizationMain().startprocessing(args)
+            AnonymizationMain(args).startprocessing()
         elif type == 'deanon':
-            DeAnonymizationMain().startprocessing(args)
+            DeAnonymizationMain(args).startprocessing()
+        else:
+            raise Exception("the type has to be anon or deanon")
         exit_status = 0
     except KeyboardInterrupt:
         exit_status = 1
