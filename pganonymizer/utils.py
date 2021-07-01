@@ -73,7 +73,7 @@ def _get_ids_sql_format(ids):
         return str(set([x for x in ids])).replace("{", "(").replace("}", ")").replace("'", "")
     return False
 
-def create_basic_tables(self, con, tables=constants.BASIC_TABLES, suffix=""):
+def create_basic_tables(con, tables=constants.BASIC_TABLES, suffix=""):
     cr = con.cursor()
     for basic_table in tables:
         if suffix:
