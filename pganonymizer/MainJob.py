@@ -72,8 +72,8 @@ class BaseMain():
     
     @logger.GET_SCHEMA
     def get_schema(self, args):
-        if args.force_path:
-            path=args.force_path
+        if args.force_path_schema:
+            path=args.force_path_schema
         else:
             path = f"{constants.PATH_SCHEMA_FILES}{args.schema}"
         try:

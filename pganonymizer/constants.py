@@ -19,7 +19,8 @@ class constants():
     STARTINGUPERROR = "the database system is starting up"
     
     PATH_SCHEMA_FILES =  "/home/migration/schema/"
-    PATH_LOG_FILES = f"/home/migration/log/{date}.log"
+    #PATH_LOG_FILES = f"/home/migration/log/{date}.log"
+    PATH_LOG_FILES = f"/home/inter/Schreibtisch/heute.log"
     PATH_CONFIG_FILE = '/home/migration/migrationConfig.conf'
     TABLE_MIGRATED_DATA = 'migrated_data_'
     TABLE_MIGRATED_FIELDS = 'migrated_fields'
@@ -45,7 +46,7 @@ class constants():
     
     section = ['Required','Optional']
     testarg = ['schema', 'dbname', 'user', 'password', 'host', 'port', 'type']
-    testarg_optional = ['dump', 'dry_run', 'l', 'v', 'schema', 'threading', 'force_path']
+    testarg_optional = ['dump', 'dry_run', 'l', 'v', 'schema', 'threading', 'force_path_schema']
     PROCESS_METHOD_MAPPING = {'tables': 'anonymize_tables',
                               'truncate':'truncate_tables'}
     
