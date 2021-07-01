@@ -27,11 +27,11 @@ class AnonymizationMain(BaseMain):
         args = parser.parse_args()
         return args
     
-    def startprocessing(self, args_):
-        if args_.list_providers:
+    def __init__(self, args):
+        if args.list_providers:
             self.list_provider_classes()
             sys.exit(0)
-        BaseMain.startprocessing(self, args_)
+        BaseMain.__init__(self, args)
     
     def update_queue(self):
         #todo konfigurierbar

@@ -71,8 +71,8 @@ class DeAnonymizationMain(BaseMain):
                 crtest.close()
         connection.close()
         
-    def startprocessing(self, args_):
-        BaseMain.startprocessing(self, args_)
+    def startprocessing(self):
+        BaseMain.startprocessing(self)
         self.TMPconnection.close()
         
         
