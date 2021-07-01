@@ -78,7 +78,8 @@ def create_basic_tables(con, tables=constants.BASIC_TABLES, suffix=""):
     for basic_table in tables:
         basic_table_with_suffix = f'{basic_table}{suffix}'
         cr.execute(f"select exists ( select from information_schema.tables where table_name = '{basic_table_with_suffix}');")
-        if not cr.fetchone():
+        table = cr.fetchone()
+        if not table:
             fields = constants.TABLE_MIGRATED_DEFINITON.get(basic_table)
             if fields:
                 cr.execute(f'CREATE TABLE {basic_table_with_suffix} {_get_ids_sql_format(fields)};')
