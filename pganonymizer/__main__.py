@@ -26,6 +26,7 @@ class Args():
         self.logging = dic.get('logging', 'INFO')
         self.migration = dic.get('migration')
         self.type = dic.get('type')
+        self.force_thread_number = dic.get('force_thread_number')
 
 config = ConfigParser()
 def main():

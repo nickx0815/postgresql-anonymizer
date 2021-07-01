@@ -46,7 +46,7 @@ class constants():
     
     section = ['Required','Optional']
     testarg = ['schema', 'dbname', 'user', 'password', 'host', 'port', 'type']
-    testarg_optional = ['dump', 'dry_run', 'l', 'v', 'schema', 'threading', 'force_path_schema']
+    testarg_optional = ['dump', 'dry_run', 'l', 'v', 'schema', 'threading', 'force_path_schema', 'force_thread_number']
     PROCESS_METHOD_MAPPING = {'tables': 'anonymize_tables',
                               'truncate':'truncate_tables'}
     
