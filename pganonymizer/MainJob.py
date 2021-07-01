@@ -11,7 +11,7 @@ import yaml
 
 from pganonymizer.constants import constants 
 from pganonymizer.providers import PROVIDERS
-from pganonymizer.utils import create_database_dump, get_connection, get_pg_args
+from pganonymizer.utils import create_database_dump, get_connection, get_pg_args, create_basic_tables
 from pganonymizer.logging import logger
 
 
@@ -27,6 +27,7 @@ class BaseMain():
         self.logger.setLogLevel(args)
         self.pg_args = get_pg_args(args)
         self.test_connection()
+        create_basic_tables(get_connection(self.pg_args))
         self.get_schema(args)
         self.update_queue()
     

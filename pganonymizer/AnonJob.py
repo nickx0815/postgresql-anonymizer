@@ -10,7 +10,7 @@ import time
 
 from pganonymizer.constants import constants 
 from pganonymizer.AnonProcessing import AnonProcessing
-from pganonymizer.utils import get_connection, build_sql_select, _get_ids_sql_format
+from pganonymizer.utils import get_connection, build_sql_select, _get_ids_sql_format, create_basic_tables
 from pganonymizer.MainJob import BaseMain
 from pganonymizer.AnonProcessing import AnonProcessing
 
@@ -56,6 +56,7 @@ class AnonymizationMain(BaseMain):
                             for row in records:
                                 list.append(row.get('id'))
                             table_attributes_job = self.addJobRecordIds(table_attributes, list)
+                            create_basic_tables(get_connection(self.pg_args), tables=[constants.TABLE_MIGRATED_DATA], suffix=table_key)
                             self.jobs.put(AnonProcessing(self, type_, totalrecords, table_attributes_job, table_key, pg_args, self.logger))
         connection.close()
     

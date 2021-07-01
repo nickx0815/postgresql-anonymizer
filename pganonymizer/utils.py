@@ -67,6 +67,25 @@ def build_sql_select(connection, table, search, select="*"):
         sql = "{select};".format(select=sql_select)
     cursor.execute(sql)
     return cursor
+
+def _get_ids_sql_format(ids):
+    if ids:
+        return str(set([x for x in ids])).replace("{", "(").replace("}", ")").replace("'", "")
+    return False
+
+def create_basic_tables(self, con, tables=constants.BASIC_TABLES, suffix=""):
+    cr = con.cursor()
+    for basic_table in tables:
+        if suffix:
+            basic_table = f'basic_table{suffix}'
+        cr.execute(f"select exists ( select from information_schema.tables where table_name = '{basic_table}');")
+        if not cr.fetchone():
+            fields = constants.TABLE_MIGRATED_DEFINITON.get(basic_table)
+            if fields:
+                cr.execute(f'CREATE TABLE {basic_table} {_get_ids_sql_format(fields)};')
+    cr.execute('COMMIT;')
+    cr.close()
+    con.close()
      
 def copy_from(connection, data, table, columns):
     """
@@ -86,10 +105,6 @@ def copy_from(connection, data, table, columns):
         raise BadDataFormat(exc)
     cursor.close()
 
-def _get_ids_sql_format(ids):
-    if ids:
-        return str(set([x for x in ids])).replace("{", "(").replace("}", ")")
-    return False
 
 def get_connection(pg_args):
     """

@@ -21,10 +21,27 @@ class constants():
     PATH_SCHEMA_FILES =  "/home/migration/schema/"
     PATH_LOG_FILES = f"/home/migration/log/{date}.log"
     PATH_CONFIG_FILE = '/home/migration/migrationConfig.conf'
-    TABLE_MIGRATED_DATA = 'migrated_data'
+    TABLE_MIGRATED_DATA = 'migrated_data_'
     TABLE_MIGRATED_FIELDS = 'migrated_fields'
     TABLE_MIGRATED_DATA_MAPPING = "model_migration_mapping"
     PATH_DUMP =  "/tmp/"
+    
+    BASIC_TABLES = [TABLE_MIGRATED_FIELDS,TABLE_MIGRATED_DATA_MAPPING]
+    
+    TABLE_MIGRATED_DEFINITON = {TABLE_MIGRATED_DATA: ["id  SERIAL NOT NULL primary key",
+                                                      "field_id CHAR(50)",
+                                                      "record_id INTEGER",
+                                                      "value CHAR(200)",
+                                                      "state INTEGER"],
+                                TABLE_MIGRATED_FIELDS: ["id  SERIAL NOT NULL primary key",
+                                                      "model_id CHAR(50)",
+                                                      "field_id CHAR(50)"],
+                                TABLE_MIGRATED_DATA_MAPPING: ["id  SERIAL NOT NULL primary key",
+                                                      "old_model_name CHAR(50)",
+                                                      "new_model_name CHAR(50)",
+                                                      "old_field_name CHAR(50)",
+                                                      "new_field_name CHAR(50)"],
+                                }
     
     section = ['Required','Optional']
     testarg = ['schema', 'dbname', 'user', 'password', 'host', 'port', 'type']
