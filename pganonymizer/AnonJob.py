@@ -45,6 +45,7 @@ class AnonymizationMain(BaseMain):
                     self.jobs.put(AnonProcessing(self, type_, 1, [table], table, pg_args,self.logger))
                 else:
                     for table_key, table_attributes in table.items():
+                        create_basic_tables(get_connection(self.pg_args), tables=[constants.TABLE_MIGRATED_DATA], suffix=table_key)
                         test = self.update_anon_search(table_key, table_attributes)
                         cursor = build_sql_select(connection, table_key, test.get('search', False), select="id")
                         while True:
@@ -56,7 +57,6 @@ class AnonymizationMain(BaseMain):
                             for row in records:
                                 list.append(row.get('id'))
                             table_attributes_job = self.addJobRecordIds(table_attributes, list)
-                            create_basic_tables(get_connection(self.pg_args), tables=[constants.TABLE_MIGRATED_DATA], suffix=table_key)
                             self.jobs.put(AnonProcessing(self, type_, totalrecords, table_attributes_job, table_key, pg_args, self.logger))
         connection.close()
     
