@@ -255,7 +255,7 @@ class AnonProcessing(MainProcessing):
         field = list(data.keys())[0]
         self.insert_migrated_fields_rec(cr, field, table)
         id = data.get(field)
-        sql_migrated_data_insert = f"Insert into {constants.TABLE_MIGRATED_DATA}_{table} \
+        sql_migrated_data_insert = f"Insert into {constants.TABLE_MIGRATED_DATA}{table} \
                                         (field_id, record_id, value, state)\
                                          VALUES (%s, %s, %s, %s)"
         id = list(id.keys())[0]
