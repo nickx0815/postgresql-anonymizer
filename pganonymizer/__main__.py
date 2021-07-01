@@ -36,7 +36,7 @@ def main():
     [testargs.update({x : config.get("Required",x)}) for x in constants.testarg]
     [testargs.update({x : config.get("Optional",x)})for x in constants.testarg_optional if x in config['Optional']]
     args = Args(testargs)
-    type = args.get('type')
+    type = args.type
     try:
         if type == 'anon':
             AnonymizationMain(args).startprocessing()
