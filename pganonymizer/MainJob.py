@@ -26,6 +26,7 @@ class BaseMain():
         self.args = args
         self.logger.setLogLevel(args)
         self.pg_args = get_pg_args(args)
+        self.get_schema()
     
 #     def set_migration(self, args):
 #         migration = args.get('migration')
@@ -51,7 +52,6 @@ class BaseMain():
     def startprocessing(self):
         """Main method"""
         args = self.args
-        self.get_schema()
         self.update_queue()
         self.test_connection()
         create_basic_tables(get_connection(self.pg_args))
