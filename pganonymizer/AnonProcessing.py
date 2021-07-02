@@ -97,7 +97,7 @@ class AnonProcessing(MainProcessing):
                                 #the case for already anonymized (migration) records
                                 continue
                             original_data[key] = {row.get('id'): row[key]}
-                            if all(x1 in value for x1 in [table,key]):
+                            if self.main_job.migration == 'True':
                                 self.create_anon(connection, table, original_data)
                             self.import_data(connection, key, table, row.get('id'), primary_key, value)
                             self.updatesuccessfullfields()

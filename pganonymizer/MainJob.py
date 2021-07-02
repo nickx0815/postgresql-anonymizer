@@ -26,10 +26,6 @@ class BaseMain():
         self.args = args
         self.logger.setLogLevel(args)
         self.pg_args = get_pg_args(args)
-        self.test_connection()
-        create_basic_tables(get_connection(self.pg_args))
-        self.get_schema(args)
-        self.update_queue()
     
     def set_migration(self, args):
         migration = args.get('migration')
@@ -54,14 +50,17 @@ class BaseMain():
         
     def startprocessing(self):
         """Main method"""
-
-        self.start(self.args)
-        dump_path = self.args.dump_file
-        if dump_path:
+        args = self.args
+        self.get_schema(args)
+        self.update_queue()
+        self.test_connection()
+        create_basic_tables(get_connection(self.pg_args))
+        self.start(args)
+        if args.dump_file:
             create_database_dump(self.pg_args)
     
     def start(self, args):
-        if args.threading == 'False':
+        if args.threading in ['False','false']:
             self.start_thread(self.jobs)  
         else:
             number_threads = self.get_thread_number()
