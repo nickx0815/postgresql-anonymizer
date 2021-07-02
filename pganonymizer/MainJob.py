@@ -99,10 +99,13 @@ class BaseMain():
     @logger.THREAD_STARTED
     def _runSpecificTask(self, job):
         job.start()
+        
+    def _get_qsize(self):
+        return self.jobs.qsize()
     
     @logger.NUMBER_THREAD
     def get_thread_number(self):
-        queue_size = self.jobs.qsize()
+        queue_size = self._get_qsize()
         thread = getattr(constants, self.THREAD)
         force_thread_number = self.args.force_thread_number
         if force_thread_number:
