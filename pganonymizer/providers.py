@@ -55,7 +55,7 @@ class Provider(object):
     def matches(cls, name):
         return cls.id.lower() == name.lower()
 
-    def alter_value(self, value, row):
+    def alter_value(self, value):
         raise NotImplementedError
 
 
@@ -73,7 +73,7 @@ class ClearProvider(with_metaclass(ProviderMeta, Provider)):
 
     id = 'clear'
 
-    def alter_value(self, value, row):
+    def alter_value(self, value):
         return None
 
 class MigrationProvider(with_metaclass(ProviderMeta, Provider)):
@@ -94,7 +94,7 @@ class FakeProvider(with_metaclass(ProviderMeta, Provider)):
     def matches(cls, name):
         return cls.id.lower() == name.split('.')[0].lower()
 
-    def alter_value(self, value, row):
+    def alter_value(self, value):
         func_name = self.kwargs['name'].split('.')[1]
         try:
             func = getattr(fake_data, func_name)
@@ -109,7 +109,7 @@ class MaskProvider(with_metaclass(ProviderMeta, Provider)):
     id = 'mask'
     default_sign = 'X'
 
-    def alter_value(self, value, row):
+    def alter_value(self, value):
         sign = self.kwargs.get('sign', self.default_sign) or self.default_sign
         return sign * len(value)
 
@@ -119,7 +119,7 @@ class MD5Provider(with_metaclass(ProviderMeta, Provider)):
 
     id = 'md5'
 
-    def alter_value(self, value, row):
+    def alter_value(self, value):
         return md5(value.encode('utf-8')).hexdigest()
 
 
@@ -128,5 +128,5 @@ class SetProvider(with_metaclass(ProviderMeta, Provider)):
 
     id = 'set'
 
-    def alter_value(self, value, row):
+    def alter_value(self, value):
         return self.kwargs.get('value')

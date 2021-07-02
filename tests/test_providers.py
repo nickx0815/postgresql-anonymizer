@@ -1,35 +1,39 @@
 import unittest
-from pganonymizer.providers import ChoiceProvider
+from pganonymizer import providers
 
 
 class TestChoiceProvider(unittest.TestCase):
     
     def test_alter_value(self):
-        choiceProvider = ChoiceProvider()
+        choiceprovider = providers.ChoiceProvider()
         values = [1,2,3,4]
-        choosenvalue = choiceProvider.alter_value(**{'value':values})
+        choosenvalue = choiceprovider.alter_value(**{'value':values})
         self.assertIn(choosenvalue,values)
     
 class TestClearProvider(unittest.TestCase):
     def test_alter_value(self):
-        return
+        clearprovider = providers.ClearProvider()
+        values = "test"
+        choosenvalue = clearprovider.alter_value(**{'value':values})
+        self.assertEqual(choosenvalue,False)
     
 class TestMigrationProvider(unittest.TestCase):
     def test_alter_value(self):
-        return
-
-class TestFakeProvider(unittest.TestCase):
-    def test_alter_value(self):
-        return
+        migrationprovider = providers.MigrationProvider()
+        values = "test"
+        choosenvalue = migrationprovider.alter_value(**{'value':values, 'row':{'id':15, 'field':'name', 'table':'res_partner'}})
+        self.assertEqual(choosenvalue,"res_partner_name_15")
 
 class TestMaskProvider(unittest.TestCase):
     def test_alter_value(self):
-        return
-
-class TestMD5Provider(unittest.TestCase):
-    def test_alter_value(self):
-        return
+        MaskProvider = providers.MaskProvider()
+        values = "test"
+        choosenvalue = MaskProvider.alter_value(**{'value':values})
+        self.assertEqual(choosenvalue,"X")
 
 class TestSetProvider(unittest.TestCase):
     def test_alter_value(self):
-        return
+        clearprovider = providers.ClearProvider()
+        values = "test"
+        choosenvalue = clearprovider.alter_value(**{'value':values})
+        self.assertEqual(choosenvalue,"test")
