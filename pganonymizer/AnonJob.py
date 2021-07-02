@@ -51,7 +51,7 @@ class AnonymizationMain(BaseMain):
                     self.jobs.put(AnonProcessing(self, type_, 1, [table], table, pg_args,self.logger))
                 else:
                     for table_key, table_attributes in table.items():
-                        self.create_basic_tables(get_connection(self.pg_args), tables=[constants.TABLE_MIGRATED_DATA], suffix=table_key)
+                        self.create_basic_tables(self.get_connection(self.pg_args), tables=[constants.TABLE_MIGRATED_DATA], suffix=table_key)
                         test = self.update_anon_search(table_key, table_attributes)
                         cursor = self.build_sql_select(connection, table_key, test.get('search', False), select="id")
                         while True:
