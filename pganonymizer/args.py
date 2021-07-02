@@ -17,3 +17,4 @@ class Args():
         self.type = dic.get('type')
         self.force_thread_number = dic.get('force_thread_number')
         self.FORCE_ANON_NUMBER_FIELD_PER_THREAD = dic.get('FORCE_ANON_NUMBER_FIELD_PER_THREAD')
+        self.FORCE_ANON_FETCH_RECORDS = dic.get('FORCE_ANON_FETCH_RECORDS')
