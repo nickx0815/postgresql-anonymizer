@@ -27,9 +27,9 @@ class BaseMain():
         self.logger.setLogLevel(args)
         self.pg_args = get_pg_args(args)
     
-    def set_migration(self, args):
-        migration = args.get('migration')
-        self.migration = migration
+#     def set_migration(self, args):
+#         migration = args.get('migration')
+#         self.migration = migration
     
     def isStartingUpError(self, oe):
         if constants.STARTINGUPERROR in oe.args[0]:
@@ -51,15 +51,16 @@ class BaseMain():
     def startprocessing(self):
         """Main method"""
         args = self.args
-        self.get_schema(args)
+        self.get_schema()
         self.update_queue()
         self.test_connection()
         create_basic_tables(get_connection(self.pg_args))
-        self.start(args)
+        self.start()
         if args.dump_file:
             create_database_dump(self.pg_args)
     
-    def start(self, args):
+    def start(self):
+        args = self.args
         if args.threading in ['False','false']:
             self.start_thread(self.jobs)  
         else:
@@ -70,7 +71,8 @@ class BaseMain():
             self.jobs.join()
     
     @logger.GET_SCHEMA
-    def get_schema(self, args):
+    def get_schema(self):
+        args = self.args
         if args.force_path_schema:
             path=args.force_path_schema
         else:
