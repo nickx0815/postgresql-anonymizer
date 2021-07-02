@@ -64,7 +64,7 @@ class ChoiceProvider(with_metaclass(ProviderMeta, Provider)):
 
     id = 'choice'
 
-    def alter_value(self, value, row):
+    def alter_value(self, value):
         return random.choice(self.kwargs.get('values'))
 
 
