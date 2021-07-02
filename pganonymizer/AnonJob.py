@@ -33,11 +33,14 @@ class AnonymizationMain(BaseMain):
             sys.exit(0)
         BaseMain.__init__(self, args)
     
+    def get_connection(self, args):
+        return get_connection(args)
+    
     def update_queue(self):
         #todo konfigurierbar
         #search wird nicht übernommen
         pg_args = self.pg_args
-        connection = get_connection(pg_args)
+        connection = self.get_connection(pg_args)
         schema = self.schema
         for type_, type_attributes in schema.items():
             for table in type_attributes:
