@@ -16,7 +16,7 @@ from pganonymizer.logging import logger
 
 
 class BaseMain():
-    logger = logger
+    logger = logger()
     jobs = Queue()
     schema = False
     pg_args = False
