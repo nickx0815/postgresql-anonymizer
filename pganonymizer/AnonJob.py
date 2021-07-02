@@ -36,7 +36,7 @@ class AnonymizationMain(BaseMain):
     def get_connection(self, args):
         return get_connection(args)
     
-    def create_basic_tables(self, connection, tables=[constants.TABLE_MIGRATED_DATA], suffix=table_key):
+    def create_basic_tables(self, connection, tables=[constants.TABLE_MIGRATED_DATA], suffix=False):
         create_basic_tables(connection, tables=[constants.TABLE_MIGRATED_DATA], suffix=suffix)
     
     def update_queue(self):
