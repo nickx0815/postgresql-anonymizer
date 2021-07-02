@@ -105,8 +105,8 @@ class BaseMain():
         queue_size = self.jobs.qsize()
         thread = getattr(constants, self.THREAD)
         force_thread_number = int(self.args.force_thread_number)
-        if force_thread_number and force_thread_number > thread:
-            thread=force_thread_number
+        if force_thread_number:
+            return force_thread_number
         number_threads = queue_size if queue_size < thread else thread
         return number_threads
     
