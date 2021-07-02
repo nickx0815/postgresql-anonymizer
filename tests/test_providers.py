@@ -15,7 +15,7 @@ class TestClearProvider(unittest.TestCase):
         clearprovider = providers.ClearProvider()
         values = "test"
         choosenvalue = clearprovider.alter_value(**{'value':values})
-        self.assertEqual(choosenvalue,False)
+        self.assertEqual(choosenvalue,None)
     
 class TestMigrationProvider(unittest.TestCase):
     def test_alter_value(self):
@@ -33,7 +33,7 @@ class TestMaskProvider(unittest.TestCase):
 
 class TestSetProvider(unittest.TestCase):
     def test_alter_value(self):
-        clearprovider = providers.ClearProvider()
+        SetProvider = providers.SetProvider()
         values = "test"
-        choosenvalue = clearprovider.alter_value(**{'value':values})
+        choosenvalue = SetProvider.alter_value(**{'value':values})
         self.assertEqual(choosenvalue,"test")
