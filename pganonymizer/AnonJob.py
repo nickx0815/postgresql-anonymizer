@@ -28,6 +28,8 @@ class AnonymizationMain(BaseMain):
         return args
     
     def __init__(self, args):
+        self.ANON_FETCH_RECORDS = args.FORCE_ANON_FETCH_RECORDS if args.FORCE_ANON_FETCH_RECORDS else constants.ANON_FETCH_RECORDS
+        self.ANON_NUMBER_FIELD_PER_THREAD = args.FORCE_ANON_NUMBER_FIELD_PER_THREAD if args.FORCE_ANON_NUMBER_FIELD_PER_THREAD else constants.ANON_NUMBER_FIELD_PER_THREAD
         if args.list_providers:
             self.list_provider_classes()
             sys.exit(0)
@@ -56,7 +58,7 @@ class AnonymizationMain(BaseMain):
                         cursor = self.build_sql_select(connection, table_key, test.get('search', False), select="id")
                         while True:
                             list = []
-                            records = cursor.fetchmany(size=constants.ANON_NUMBER_FIELD_PER_THREAD)
+                            records = cursor.fetchmany(size=self.ANON_NUMBER_FIELD_PER_THREAD)
                             totalrecords = len(records)
                             if not records:
                                 break
