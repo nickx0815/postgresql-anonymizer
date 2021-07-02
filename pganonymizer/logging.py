@@ -37,10 +37,10 @@ class logger():
         return test_connection
     
     def GET_SCHEMA(self, function):
-        def get_schema(self, args):
+        def get_schema(self):
             if args.force_path_schema:
                 self.logger.logger_.debug(f"the default schema path was forced to {args.force_path_schema}")
-            result = function(self, args)
+            result = function(self)
             self.logger.logger_.debug(f'the schema was loaded successfully')
             self.logger.logger_.debug(f'schema data {self.schema}')
             return result
