@@ -23,7 +23,7 @@ from pganonymizer.utils import _get_ids_sql_format, _, get_table_count, build_sq
 from pganonymizer.logging import logger
 
 class MainProcessing():
-    logger = logger()
+    logger = logger
     endtime = False
     successfullrecords = 0
     successfullfields = 0
