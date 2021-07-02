@@ -65,7 +65,7 @@ class ChoiceProvider(with_metaclass(ProviderMeta, Provider)):
     id = 'choice'
 
     def alter_value(self, value):
-        return random.choice(values)
+        return random.choice(value)
 
 
 class ClearProvider(with_metaclass(ProviderMeta, Provider)):
