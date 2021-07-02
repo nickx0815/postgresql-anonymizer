@@ -36,6 +36,9 @@ class AnonymizationMain(BaseMain):
     def get_connection(self, args):
         return get_connection(args)
     
+    def create_basic_tables(self, connection, tables=[constants.TABLE_MIGRATED_DATA], suffix=table_key):
+        create_basic_tables(connection, tables=[constants.TABLE_MIGRATED_DATA], suffix=table_key)
+    
     def update_queue(self):
         #todo konfigurierbar
         #search wird nicht übernommen
@@ -48,9 +51,9 @@ class AnonymizationMain(BaseMain):
                     self.jobs.put(AnonProcessing(self, type_, 1, [table], table, pg_args,self.logger))
                 else:
                     for table_key, table_attributes in table.items():
-                        create_basic_tables(get_connection(self.pg_args), tables=[constants.TABLE_MIGRATED_DATA], suffix=table_key)
+                        self.create_basic_tables(get_connection(self.pg_args), tables=[constants.TABLE_MIGRATED_DATA], suffix=table_key)
                         test = self.update_anon_search(table_key, table_attributes)
-                        cursor = build_sql_select(connection, table_key, test.get('search', False), select="id")
+                        cursor = self.build_sql_select(connection, table_key, test.get('search', False), select="id")
                         while True:
                             list = []
                             records = cursor.fetchmany(size=constants.ANON_NUMBER_FIELD_PER_THREAD)
@@ -62,6 +65,9 @@ class AnonymizationMain(BaseMain):
                             table_attributes_job = self.addJobRecordIds(table_attributes, list)
                             self.jobs.put(AnonProcessing(self, type_, totalrecords, table_attributes_job, table_key, pg_args, self.logger))
         connection.close()
+    
+    def build_sql_select(self, connection, table_key, search, select="id"):
+        build_sql_select(connection, table_key, search, select=select)
     
     def addJobRecordIds(self, table_attributes, ids):
         cur = copy.deepcopy(table_attributes)    
