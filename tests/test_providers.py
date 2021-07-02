@@ -29,7 +29,7 @@ class TestMaskProvider(unittest.TestCase):
         MaskProvider = providers.MaskProvider()
         values = "test"
         choosenvalue = MaskProvider.alter_value(**{'value':values})
-        self.assertEqual(choosenvalue,"X")
+        self.assertEqual(choosenvalue,"XXXX")
 
 class TestSetProvider(unittest.TestCase):
     def test_alter_value(self):

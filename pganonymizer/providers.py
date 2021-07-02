@@ -109,7 +109,7 @@ class MaskProvider(with_metaclass(ProviderMeta, Provider)):
     id = 'mask'
     default_sign = 'X'
 
-    def alter_value(self, value):
+    def alter_value(self, value, sign):
         sign = self.kwargs.get('sign', self.default_sign) or self.default_sign
         return sign * len(value)
 
@@ -129,4 +129,4 @@ class SetProvider(with_metaclass(ProviderMeta, Provider)):
     id = 'set'
 
     def alter_value(self, value):
-        return self.kwargs.get('value')
+        return value
