@@ -38,6 +38,7 @@ class logger():
     
     def GET_SCHEMA(self, function):
         def get_schema(self):
+            args = self.args
             if args.force_path_schema:
                 self.logger.logger_.debug(f"the default schema path was forced to {args.force_path_schema}")
             result = function(self)
