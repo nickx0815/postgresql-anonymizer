@@ -104,9 +104,9 @@ class BaseMain():
     def get_thread_number(self):
         queue_size = self.jobs.qsize()
         thread = getattr(constants, self.THREAD)
-        force_thread_number = int(self.args.force_thread_number)
+        force_thread_number = self.args.force_thread_number
         if force_thread_number:
-            return force_thread_number
+            return int(force_thread_number)
         number_threads = queue_size if queue_size < thread else thread
         return number_threads
     
