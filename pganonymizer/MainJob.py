@@ -4,7 +4,6 @@ from __future__ import absolute_import, print_function
 
 import argparse
 import threading
-import logging
 from queue import Queue
 
 import yaml
@@ -12,11 +11,11 @@ import yaml
 from pganonymizer.constants import constants 
 from pganonymizer.providers import PROVIDERS
 from pganonymizer.utils import create_database_dump, get_connection, get_pg_args, create_basic_tables
-from pganonymizer.logging import logger
+from pganonymizer.logging import logging
 
-
+logging = logging()
 class BaseMain():
-    logger = logger()
+
     jobs = Queue()
     schema = False
     pg_args = False
@@ -24,7 +23,7 @@ class BaseMain():
     
     def __init__(self, args):
         self.args = args
-        self.logger.setLogLevel(args)
+        self.logging.setLogLevel(args)
         self.pg_args = get_pg_args(args)
         self.get_schema()
     
@@ -37,7 +36,7 @@ class BaseMain():
             return True
         return False
     
-    @logger.TEST_CONNECTION
+    @logging.TEST_CONNECTION
     def test_connection(self):
         args = self.pg_args
         while True:
@@ -70,7 +69,7 @@ class BaseMain():
                 worker.start()
             self.jobs.join()
     
-    @logger.GET_SCHEMA
+    @logging.GET_SCHEMA
     def get_schema(self):
         args = self.args
         if args.force_path_schema:
@@ -87,7 +86,7 @@ class BaseMain():
         """List all available provider classes."""
         #print('Available provider classes:\n')
         for provider_cls in PROVIDERS:
-            #todo use logger
+            #todo use logging
             print('{:<10} {}'.format(provider_cls.id, provider_cls.__doc__))
     
     def start_thread(self, q):
@@ -96,14 +95,14 @@ class BaseMain():
             self._runSpecificTask(data)
             q.task_done()
     
-    @logger.THREAD_STARTED
+    @logging.THREAD_STARTED
     def _runSpecificTask(self, job):
         job.start()
         
     def _get_qsize(self):
         return self.jobs.qsize()
     
-    @logger.NUMBER_THREAD
+    @logging.NUMBER_THREAD
     def get_thread_number(self):
         queue_size = self._get_qsize()
         thread = getattr(constants, self.THREAD)
