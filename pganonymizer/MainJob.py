@@ -13,7 +13,7 @@ from pganonymizer.providers import PROVIDERS
 from pganonymizer.utils import create_database_dump, get_connection, get_pg_args, create_basic_tables
 from pganonymizer.logging import logger
 
-logging = logging()
+logging = logger()
 class BaseMain():
 
     jobs = Queue()
