@@ -21,6 +21,7 @@ from pganonymizer.exceptions import BadDataFormat
 from pganonymizer.providers import get_provider
 from pganonymizer.utils import _get_ids_sql_format, _, get_table_count, build_sql_select, update_fields_history, get_connection
 from pganonymizer.logging import logger
+logging_ = logger()
 
 class MainProcessing():
     logger = logger()
@@ -39,6 +40,7 @@ class MainProcessing():
         self.successfullfields = self.successfullfields+1
     
     def __init__(self, totalrecords, schema, table, pg_args, logger, type):
+        self.logging_ = logging_
         self.type=type
         self.logger=logger
         self.starttime = time.time()
