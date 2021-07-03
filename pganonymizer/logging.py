@@ -40,7 +40,7 @@ class logger():
         def get_schema(self):
             args = self.args
             if args.force_path_schema:
-                logging_.logging_.debug(f"the default schema path was forced to {args.force_path_schema}")
+                self.logging_.logging_.debug(f"the default schema path was forced to {args.force_path_schema}")
             result = function(self)
             logging_.logging_.debug(f'the schema was loaded successfully')
             logging_.logging_.debug(f'schema data {self.schema}')
