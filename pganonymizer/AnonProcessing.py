@@ -154,8 +154,10 @@ class AnonProcessing(MainProcessing):
                 # Skip the current column if there is no value to be altered
                 continue
             provider = get_provider(provider_config)
-            value = provider.alter_value(**{'value':orig_value, 'table': row_info.get('table'), 
-                                            'field': column_name, 'id':row_info.get('id')})
+            values = {'value':orig_value, 'table': row_info.get('table'), 
+                                            'field': column_name, 'id':row_info.get('id')}
+            values.update(provider_config)
+            value = provider.alter_value(**values)
             append = column_definition.get('append')
             if append:
                 value = value + append
