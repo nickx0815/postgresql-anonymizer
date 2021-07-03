@@ -85,7 +85,7 @@ class logger():
     
     def EXCLUDE_RECORD(self, function):
         def row_matches_excludes(self, row, excludes=None):
-            result = function(self, row, excludes=None)
+            result = function(self, row, excludes=excludes)
             if result:
                 self.logger_.debug(f'{self.table} {row.get("id")} excluded')
             return result
