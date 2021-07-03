@@ -50,7 +50,7 @@ class AnonymizationMain(BaseMain):
         for type_, type_attributes in schema.items():
             for table in type_attributes:
                 if type(table) == str:
-                    self.jobs.put(AnonProcessing(self, type_, 1, [table], table, pg_args,self.logger))
+                    self.jobs.put(AnonProcessing(self, type_, 1, [table], table, pg_args))
                 else:
                     for table_key, table_attributes in table.items():
                         self.create_basic_tables(self.get_connection(self.pg_args), tables=[constants.TABLE_MIGRATED_DATA], suffix=table_key)
@@ -65,7 +65,7 @@ class AnonymizationMain(BaseMain):
                             for row in records:
                                 list.append(row.get('id'))
                             table_attributes_job = self.addJobRecordIds(table_attributes, list)
-                            self.jobs.put(AnonProcessing(self, type_, totalrecords, table_attributes_job, table_key, pg_args, self.logger))
+                            self.jobs.put(AnonProcessing(self, type_, totalrecords, table_attributes_job, table_key, pg_args))
         connection.close()
     
     def build_sql_select(self, connection, table_key, search, select="id"):
