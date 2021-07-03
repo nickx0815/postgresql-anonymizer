@@ -4,7 +4,6 @@ from __future__ import absolute_import
 
 import csv
 import json
-import logging
 import re
 import subprocess
 import time
@@ -176,7 +175,6 @@ class AnonProcessing(MainProcessing,logger):
             return
         cursor = connection.cursor()
         for table in tables:
-            logging.info('delete tables "%s"', table)
             cursor.execute(f'DELETE FROM {table};')
             self.totalrecords = self.totalrecords+1
         cursor.close()
