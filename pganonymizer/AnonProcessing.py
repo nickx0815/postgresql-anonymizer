@@ -28,6 +28,7 @@ class AnonProcessing(MainProcessing):
     
     def __init__(self, main_job, type, totalrecords, schema, table, pg_args, logger):
         super(AnonProcessing, self).__init__(totalrecords, schema, table, pg_args, logger, type)
+        self.logging = logging.setLogLevel(main_job.args)
         self.verbose=False
         self.main_job = main_job
         
