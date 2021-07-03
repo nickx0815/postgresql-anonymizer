@@ -30,7 +30,8 @@ class AnonProcessing(MainProcessing):
     
     def __init__(self, main_job, type, totalrecords, schema, table, pg_args):
         super(AnonProcessing, self).__init__(totalrecords, schema, table, pg_args, type)
-        self.logging_ = logging.setLogLevel(main_job.args)
+        logging_.setLogLevel(main_job.args)
+        self.logging_ = logging_
         self.verbose=False
         self.main_job = main_job
         
