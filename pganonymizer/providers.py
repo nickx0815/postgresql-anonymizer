@@ -64,8 +64,8 @@ class ChoiceProvider(with_metaclass(ProviderMeta, Provider)):
 
     id = 'choice'
 
-    def alter_value(self, value):
-        return random.choice(value)
+    def alter_value(self, **kwargs):
+        return random.choice(kwargs.get('value'))
 
 
 class ClearProvider(with_metaclass(ProviderMeta, Provider)):
@@ -73,7 +73,7 @@ class ClearProvider(with_metaclass(ProviderMeta, Provider)):
 
     id = 'clear'
 
-    def alter_value(self, value):
+    def alter_value(self):
         return None
 
 class MigrationProvider(with_metaclass(ProviderMeta, Provider)):
@@ -81,9 +81,11 @@ class MigrationProvider(with_metaclass(ProviderMeta, Provider)):
 
     id = 'migration'
 
-    def alter_value(self, value, row):
-        return row.get('table')+"_"+row.get('field')+"_"+str(row.get('id'))
-
+    def alter_value(self, **kwargs):
+        table = kwargs.get('table')
+        field = kwargs.get('field')
+        id = kwargs.get('id')
+        return f"{table}_{field}_{id}"
 
 class FakeProvider(with_metaclass(ProviderMeta, Provider)):
     """Provider to generate fake data."""
@@ -94,8 +96,8 @@ class FakeProvider(with_metaclass(ProviderMeta, Provider)):
     def matches(cls, name):
         return cls.id.lower() == name.split('.')[0].lower()
 
-    def alter_value(self, value):
-        func_name = self.kwargs['name'].split('.')[1]
+    def alter_value(self, **kwargs):
+        func_name = kwargs['name'].split('.')[1]
         try:
             func = getattr(fake_data, func_name)
         except AttributeError as exc:
@@ -109,9 +111,9 @@ class MaskProvider(with_metaclass(ProviderMeta, Provider)):
     id = 'mask'
     default_sign = 'X'
 
-    def alter_value(self, value):
-        sign = self.kwargs.get('sign', self.default_sign) or self.default_sign
-        return sign * len(value)
+    def alter_value(self, **kwargs):
+        sign = kwargs.get('sign', self.default_sign) or self.default_sign
+        return sign * len(kwargs.get('value'))
 
 
 class MD5Provider(with_metaclass(ProviderMeta, Provider)):
@@ -119,8 +121,8 @@ class MD5Provider(with_metaclass(ProviderMeta, Provider)):
 
     id = 'md5'
 
-    def alter_value(self, value):
-        return md5(value.encode('utf-8')).hexdigest()
+    def alter_value(self, **kwargs):
+        return md5(kwargs.get('value').encode('utf-8')).hexdigest()
 
 
 class SetProvider(with_metaclass(ProviderMeta, Provider)):
@@ -128,5 +130,5 @@ class SetProvider(with_metaclass(ProviderMeta, Provider)):
 
     id = 'set'
 
-    def alter_value(self, value):
-        return value
+    def alter_value(self, **kwargs):
+        return kwargs.get('value')
