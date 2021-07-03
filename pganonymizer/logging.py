@@ -22,17 +22,17 @@ class logger():
             pass
         logger = logging.getLogger(__name__)
         logger.setLevel(self.get_default_log_level())
-        self.logging = logger
+        self.logging_ = logger
         
     def setLogLevel(self, args):
         level = getattr(logging, args.logging)
-        self.logging.setLevel(level)
+        self.logging_.setLevel(level)
     
     def TEST_CONNECTION(self, function):
         def test_connection(self):
             result = function(self)
-            self.logging.debug(f'the connection was set up successfully')
-            self.logging.debug(f'connection data {self.pg_args}')
+            self.logging_.debug(f'the connection was set up successfully')
+            self.logging_.debug(f'connection data {self.pg_args}')
             return result
         return test_connection
     
@@ -40,10 +40,10 @@ class logger():
         def get_schema(self):
             args = self.args
             if args.force_path_schema:
-                logging.logging.debug(f"the default schema path was forced to {args.force_path_schema}")
+                logging_.logging_.debug(f"the default schema path was forced to {args.force_path_schema}")
             result = function(self)
-            logging.logging.debug(f'the schema was loaded successfully')
-            logging.logging.debug(f'schema data {self.schema}')
+            logging_.logging_.debug(f'the schema was loaded successfully')
+            logging_.logging_.debug(f'schema data {self.schema}')
             return result
         return get_schema
     
