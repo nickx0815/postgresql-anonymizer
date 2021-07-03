@@ -73,7 +73,7 @@ class ClearProvider(with_metaclass(ProviderMeta, Provider)):
 
     id = 'clear'
 
-    def alter_value(self):
+    def alter_value(self, **kwargs):
         return None
 
 class MigrationProvider(with_metaclass(ProviderMeta, Provider)):
