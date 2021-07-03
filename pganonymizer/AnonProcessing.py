@@ -23,8 +23,7 @@ from pganonymizer.utils import _get_ids_sql_format, _, get_table_count, build_sq
 from pganonymizer.MainProcessing import MainProcessing
 from pganonymizer.logging import logger
 
-class AnonProcessing(MainProcessing):
-    logger = logger()
+class AnonProcessing(MainProcessing,logger):
     #todo verschlüsselung einbauen
     
     def __init__(self, main_job, type, totalrecords, schema, table, pg_args, logger):

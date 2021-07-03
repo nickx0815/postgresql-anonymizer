@@ -22,11 +22,11 @@ class logger():
             pass
         logger = logging.getLogger(__name__)
         logger.setLevel(self.get_default_log_level())
-        self.logger_ = logger
+        self.logger = logger
         
     def setLogLevel(self, args):
         level = getattr(logging, args.logging)
-        self.logger_.setLevel(level)
+        self.logger.setLevel(level)
     
     def TEST_CONNECTION(self, function):
         def test_connection(self):
