@@ -11,9 +11,9 @@ import yaml
 from pganonymizer.constants import constants 
 from pganonymizer.providers import PROVIDERS
 from pganonymizer.utils import create_database_dump, get_connection, get_pg_args, create_basic_tables
-from pganonymizer.logging import logger
+from pganonymizer.logging_ import logger
 
-logging = logger()
+logging_ = logger()
 class BaseMain():
 
     jobs = Queue()
@@ -23,7 +23,7 @@ class BaseMain():
     
     def __init__(self, args):
         self.args = args
-        self.logging = logging.setLogLevel(args)
+        logging_ = logging_.setLogLevel(args)
         self.pg_args = get_pg_args(args)
         self.get_schema()
     
@@ -36,7 +36,7 @@ class BaseMain():
             return True
         return False
     
-    @logging.TEST_CONNECTION
+    @logging_.TEST_CONNECTION
     def test_connection(self):
         args = self.pg_args
         while True:
@@ -69,7 +69,7 @@ class BaseMain():
                 worker.start()
             self.jobs.join()
     
-    @logging.GET_SCHEMA
+    @logging_.GET_SCHEMA
     def get_schema(self):
         args = self.args
         if args.force_path_schema:
@@ -86,7 +86,7 @@ class BaseMain():
         """List all available provider classes."""
         #print('Available provider classes:\n')
         for provider_cls in PROVIDERS:
-            #todo use logging
+            #todo use logging_
             print('{:<10} {}'.format(provider_cls.id, provider_cls.__doc__))
     
     def start_thread(self, q):
@@ -95,14 +95,14 @@ class BaseMain():
             self._runSpecificTask(data)
             q.task_done()
     
-    @logging.THREAD_STARTED
+    @logging_.THREAD_STARTED
     def _runSpecificTask(self, job):
         job.start()
         
     def _get_qsize(self):
         return self.jobs.qsize()
     
-    @logging.NUMBER_THREAD
+    @logging_.NUMBER_THREAD
     def get_thread_number(self):
         queue_size = self._get_qsize()
         thread = getattr(constants, self.THREAD)
