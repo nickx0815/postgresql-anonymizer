@@ -12,8 +12,8 @@ from pganonymizer.constants import constants
 from pganonymizer.providers import PROVIDERS
 from pganonymizer.utils import create_database_dump, get_connection, get_pg_args, create_basic_tables
 from pganonymizer.logging import logger
-
 logging_ = logger()
+
 class BaseMain():
 
     jobs = Queue()
@@ -23,7 +23,7 @@ class BaseMain():
     
     def __init__(self, args):
         self.args = args
-        logging_ = logging_.setLogLevel(args)
+        logging_.setLogLevel(args)
         self.pg_args = get_pg_args(args)
         self.get_schema()
     
