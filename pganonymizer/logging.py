@@ -25,8 +25,9 @@ class logger():
         self.logging_ = logger
         
     def setLogLevel(self, args):
-        level = getattr(logging, args.logging)
-        self.logging_.setLevel(level)
+        if args:
+            level = getattr(logging, args.logging)
+            self.logging_.setLevel(level)
     
     def TEST_CONNECTION(self, function):
         def test_connection(self):

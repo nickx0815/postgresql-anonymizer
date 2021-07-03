@@ -21,14 +21,13 @@ from pganonymizer.providers import get_provider
 from pganonymizer.utils import _get_ids_sql_format, _, get_table_count, build_sql_select, update_fields_history, get_connection
 from pganonymizer.MainProcessing import MainProcessing
 from pganonymizer.logging import logger
-logging = logger()
+
 
 class AnonProcessing(MainProcessing):
     #todo verschlüsselung einbauen
     
-    def __init__(self, main_job, type, totalrecords, schema, table, pg_args, logger):
-        super(AnonProcessing, self).__init__(totalrecords, schema, table, pg_args, logger, type)
-        self.logging = logging.setLogLevel(main_job.args)
+    def __init__(self, main_job, type, totalrecords, schema, table, pg_args):
+        super(AnonProcessing, self).__init__(totalrecords, schema, table, pg_args, type)
         self.verbose=False
         self.main_job = main_job
         
