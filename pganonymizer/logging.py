@@ -38,14 +38,13 @@ class logger():
     
     def GET_SCHEMA(self, function):
         def get_schema(self):
-            if getattr(self, 'logging'):
-                args = self.args
-                if args.force_path_schema:
-                    self.logging.debug(f"the default schema path was forced to {args.force_path_schema}")
-                result = function(self)
-                self.logging.debug(f'the schema was loaded successfully')
-                self.logging.debug(f'schema data {self.schema}')
-                return result
+            args = self.args
+            if args.force_path_schema:
+                logging.logging.debug(f"the default schema path was forced to {args.force_path_schema}")
+            result = function(self)
+            logging.logging.logging.debug(f'the schema was loaded successfully')
+            logging.logging.logging.debug(f'schema data {self.schema}')
+            return result
         return get_schema
     
     def NUMBER_THREAD(self, function):
