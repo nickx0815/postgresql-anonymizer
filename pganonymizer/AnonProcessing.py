@@ -30,7 +30,7 @@ class AnonProcessing(MainProcessing):
     
     def __init__(self, main_job, type, totalrecords, schema, table, pg_args):
         super(AnonProcessing, self).__init__(totalrecords, schema, table, pg_args, type)
-        self.logging = logging.setLogLevel(main_job.args)
+        self.logging_ = logging.setLogLevel(main_job.args)
         self.verbose=False
         self.main_job = main_job
         
@@ -166,7 +166,7 @@ class AnonProcessing(MainProcessing):
             column_dict[column_name] = value
         return column_dict
     
-    @logging.TRUNCATE_TABLES
+    @logging_.TRUNCATE_TABLES
     def truncate_tables(self, connection):
         """
         Truncate a list of tables.
@@ -190,7 +190,7 @@ class AnonProcessing(MainProcessing):
                 dic[key] = value.get('provider').get('field_anon_id')
         return dic
     
-    @logging.ANONYMIZATION_RECORD
+    @logging_.ANONYMIZATION_RECORD
     def import_data(self, connection, field, source_table, row_id, primary_key, value):
         """
         Import the temporary and anonymized data to a temporary table and write the changes back.
@@ -209,7 +209,7 @@ class AnonProcessing(MainProcessing):
         cursor.execute(sql)
         cursor.close()
     
-    @logging.EXCLUDE_RECORD 
+    @logging_.EXCLUDE_RECORD 
     def row_matches_excludes(self, row, excludes=None):
         """
         Check whether a row matches a list of field exclusion patterns.
@@ -231,7 +231,7 @@ class AnonProcessing(MainProcessing):
                     return result
         return False
     
-    @logging.INSERT_MIGRATED_FIELD
+    @logging_.INSERT_MIGRATED_FIELD
     def insert_migrated_fields_rec(self, cr, field, table):
         sql_insert = f"INSERT INTO {constants.TABLE_MIGRATED_FIELDS} (model_id, field_id) VALUES ('{table}', '{field}');"
         sql_select = f"SELECT id  from {constants.TABLE_MIGRATED_FIELDS} \
@@ -252,7 +252,7 @@ class AnonProcessing(MainProcessing):
             if row[column] is not None and pattern.match(row[column]):
                 return True
     
-    @logging.INSERT_MIGRATED_DATA
+    @logging_.INSERT_MIGRATED_DATA
     def create_anon(self, con, table, data):
         cr = con.cursor()
         field = list(data.keys())[0]
