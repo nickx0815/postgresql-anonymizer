@@ -24,6 +24,7 @@ class BaseMain():
     def __init__(self, args):
         self.args = args
         logging_.setLogLevel(args)
+        self.logging_ = logging_
         self.pg_args = get_pg_args(args)
         self.get_schema()
     
