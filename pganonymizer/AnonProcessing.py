@@ -163,7 +163,7 @@ class AnonProcessing(MainProcessing,logger):
             column_dict[column_name] = value
         return column_dict
     
-    @logger.TRUNCATE_TABLES
+    @logging.TRUNCATE_TABLES
     def truncate_tables(self, connection):
         """
         Truncate a list of tables.
