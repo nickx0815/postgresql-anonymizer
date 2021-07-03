@@ -13,27 +13,31 @@ class TestChoiceProvider(unittest.TestCase):
 class TestClearProvider(unittest.TestCase):
     def test_alter_value(self):
         clearprovider = providers.ClearProvider()
-        values = "test"
-        choosenvalue = clearprovider.alter_value(**{'value':values})
+        choosenvalue = clearprovider.alter_value()
         self.assertEqual(choosenvalue,None)
     
 class TestMigrationProvider(unittest.TestCase):
     def test_alter_value(self):
         migrationprovider = providers.MigrationProvider()
-        values = "test"
-        choosenvalue = migrationprovider.alter_value(**{'value':values, 'row':{'id':15, 'field':'name', 'table':'res_partner'}})
+        choosenvalue = migrationprovider.alter_value(**{'id':15, 'field':'name', 'table':'res_partner'})
         self.assertEqual(choosenvalue,"res_partner_name_15")
 
 class TestMaskProvider(unittest.TestCase):
     def test_alter_value(self):
-        MaskProvider = providers.MaskProvider()
+        maskprovider = providers.MaskProvider()
         values = "test"
-        choosenvalue = MaskProvider.alter_value(**{'value':values})
+        choosenvalue = maskprovider.alter_value(**{'value':values})
         self.assertEqual(choosenvalue,"XXXX")
+    
+    def test_alter_value_correct_len(self):
+       maskprovider = providers.MaskProvider()
+       values = "thisisatestvalue"#len 17
+       choosenvalue = maskprovider.alter_value(**{'value':values})
+       self.assertEqual(len(choosenvalue),len(values))
 
 class TestSetProvider(unittest.TestCase):
     def test_alter_value(self):
-        SetProvider = providers.SetProvider()
+        setprovider = providers.SetProvider()
         values = "test"
-        choosenvalue = SetProvider.alter_value(**{'value':values})
+        choosenvalue = setprovider.alter_value(**{'value':values})
         self.assertEqual(choosenvalue,"test")

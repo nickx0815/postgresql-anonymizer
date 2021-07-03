@@ -8,7 +8,7 @@ from pganonymizer.args import Args
 
 
 class TestAnonJob(unittest.TestCase):
-    path = __file__.replace('test_anon_job.py', 'sample_schema.yml')
+    path = __file__.replace('test_anon_job.py', 'utils/sample_schema.yml')
 
     
     def test_update_queue(self):

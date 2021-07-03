@@ -1,5 +1,5 @@
 tables:
- - auth_user:
+ - table1:
     primary_key: id
     fields:
      - first_name:
@@ -16,6 +16,23 @@ tables:
     excludes:
       - email:
         - "\\S[^@]*@example\\.com"
+ - table2:
+    primary_key: id
+    fields:
+     - first_name:
+        provider:
+          name: fake.first_name
+     - last_name:
+        provider:
+          name: set
+          value: "Bar"
+     - email:
+        provider:
+          name: md5
+        append: "@localhost"
+    excludes:
+      - id:
+        - 10
 
 truncate:
   - django_session

@@ -10,7 +10,7 @@ from mock import patch
 
 
 class TestMainJob(unittest.TestCase):
-    path = __file__.replace('test_main_job.py', 'sample_schema.yml')
+    path = __file__.replace('test_main_job.py', 'utils/sample_schema.yml')
     
     def test_pg_args(self):
         pg_args = {'user': 'odoo', 'host': 'postgres', 'password':'odoo', 'port': 5432, 'dbname':'dbtest'}
