@@ -21,8 +21,9 @@ from pganonymizer.providers import get_provider
 from pganonymizer.utils import _get_ids_sql_format, _, get_table_count, build_sql_select, update_fields_history, get_connection
 from pganonymizer.MainProcessing import MainProcessing
 from pganonymizer.logging import logger
+logging = logger()
 
-class AnonProcessing(MainProcessing,logger):
+class AnonProcessing(MainProcessing):
     #todo verschlüsselung einbauen
     
     def __init__(self, main_job, type, totalrecords, schema, table, pg_args, logger):
@@ -186,7 +187,7 @@ class AnonProcessing(MainProcessing,logger):
                 dic[key] = value.get('provider').get('field_anon_id')
         return dic
     
-    @logger.ANONYMIZATION_RECORD
+    @logging.ANONYMIZATION_RECORD
     def import_data(self, connection, field, source_table, row_id, primary_key, value):
         """
         Import the temporary and anonymized data to a temporary table and write the changes back.
@@ -205,7 +206,7 @@ class AnonProcessing(MainProcessing,logger):
         cursor.execute(sql)
         cursor.close()
     
-    @logger.EXCLUDE_RECORD 
+    @logging.EXCLUDE_RECORD 
     def row_matches_excludes(self, row, excludes=None):
         """
         Check whether a row matches a list of field exclusion patterns.
@@ -227,7 +228,7 @@ class AnonProcessing(MainProcessing,logger):
                     return result
         return False
     
-    @logger.INSERT_MIGRATED_FIELD
+    @logging.INSERT_MIGRATED_FIELD
     def insert_migrated_fields_rec(self, cr, field, table):
         sql_insert = f"INSERT INTO {constants.TABLE_MIGRATED_FIELDS} (model_id, field_id) VALUES ('{table}', '{field}');"
         sql_select = f"SELECT id  from {constants.TABLE_MIGRATED_FIELDS} \
@@ -248,7 +249,7 @@ class AnonProcessing(MainProcessing,logger):
             if row[column] is not None and pattern.match(row[column]):
                 return True
     
-    @logger.INSERT_MIGRATED_DATA
+    @logging.INSERT_MIGRATED_DATA
     def create_anon(self, con, table, data):
         cr = con.cursor()
         field = list(data.keys())[0]
