@@ -74,7 +74,7 @@ class AnonJobClass(BaseJobClass):
         connection.close()
     
     def build_sql_select(self, connection, table_key, search, select="id"):
-        build_sql_select(connection, table_key, search, select=select)
+        return build_sql_select(connection, table_key, search, select=select)
     
     def add_job_records_ids(self, table_attributes, ids):
         cur = copy.deepcopy(table_attributes)    
