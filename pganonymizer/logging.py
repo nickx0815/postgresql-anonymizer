@@ -15,7 +15,7 @@ class logger():
                    'filemode':'w'}
         return args
     
-    def logging_(self, args):
+    def set_log_level(self, args):
         level = getattr(logging, args.logging)
         self.setLevel(level)
         return self
