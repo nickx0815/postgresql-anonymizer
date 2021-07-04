@@ -28,8 +28,9 @@ class MainProcessing():
     def updatesuccessfullfields(self):
         self.successfullfields = self.successfullfields+1
     
-    def __init__(self, totalrecords, schema, table, pg_args, type ,logger):
+    def __init__(self, main_job, totalrecords, schema, table, pg_args, type ,logger):
         self.logging_ = logger
+        self.main_job = main_job
         self.type=type
         self.starttime = time.time()
         self.totalrecords = totalrecords

@@ -28,10 +28,11 @@ logging_ = logger()
 class AnonProcessing(MainProcessing):
     #todo verschlüsselung einbauen
     
-    def __init__(self, main_job, type, totalrecords, schema, table, pg_args, logger):
-        super(AnonProcessing, self).__init__(totalrecords, schema, table, pg_args, type, logger)
+    def __init__(self, main_job, type, totalrecords, schema, table, pg_args):
+        logger = main_job.logging_
+        super(AnonProcessing, self).__init__(main_job, totalrecords, schema, table, pg_args, type, logger)
         self.verbose=False
-        self.main_job = main_job
+        
         
     def _get_rel_method(self):
         return constants.PROCESS_METHOD_MAPPING[self.type]

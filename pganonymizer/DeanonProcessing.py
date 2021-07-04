@@ -9,7 +9,8 @@ class DeanonProcessing(MainProcessing):
     
     type = "deanonymization"
     
-    def __init__(self, tmpconnection, totalrecords, schema, table, pg_args, logger, type):
+    def __init__(self, main_job, tmpconnection, totalrecords, schema, table, pg_args,type):
+        logger = main_job.logging_
         super(DeanonProcessing, self).__init__(totalrecords, schema, table, pg_args, type, logger)
         self.tmpcon = tmpconnection
         
