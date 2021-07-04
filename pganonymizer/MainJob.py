@@ -29,7 +29,6 @@ class BaseJobClass():
         self.pg_args = get_pg_args(args)
         self.args = args
         self.set_schema(args)
-        
     
     def get_logger(self, args):
         logging_.setLogLevel(args)
