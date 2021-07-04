@@ -61,7 +61,7 @@ class BaseJobClass():
     
     
     def set_logger(self):
-        self.logging_ = logger.set_log_level(self.args, logging_)
+        self.logging_ = logger.set_log_level(self.args)
     
     def is_starting_up_error(self, oe):
         if constants.STARTINGUPERROR in oe.args[0]:
