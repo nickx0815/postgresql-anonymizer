@@ -15,6 +15,11 @@ class logger():
                    'filemode':'w'}
         return args
     
+    def get_logger(self, args, logger):
+        level = getattr(logging, args.logging)
+        logger.setLevel(level)
+        return logger
+    
     def __init__(self):
         try:
             logging.basicConfig(**self.get_config_parameter())
@@ -23,11 +28,6 @@ class logger():
         logger = logging.getLogger(__name__)
         logger.setLevel(self.get_default_log_level())
         self.logging_ = logger
-        
-    def setLogLevel(self, args):
-        if args:
-            level = getattr(logging, args.logging)
-            self.logging_.setLevel(level)
     
     def TEST_CONNECTION(self, function):
         def test_connection(self):

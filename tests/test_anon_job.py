@@ -25,7 +25,7 @@ class TestAnonJob(unittest.TestCase):
         args = Args({'force_path_schema':self.path})
         testmain = AnonJobClass(args)
         tableattr = testmain.schema.get('tables')[0].get('auth_user')
-        tableattr = testmain.addJobRecordIds(tableattr, [1,2,3,4,5,6])
+        tableattr = testmain.add_job_records_ids(tableattr, [1,2,3,4,5,6])
         self.assertIn('id in (1, 2, 3, 4, 5, 6)', tableattr['search'])
     
     def test_update_anon_search(self):

@@ -9,7 +9,7 @@ import time
 
 from pganonymizer.constants import constants 
 from pganonymizer.AnonProcessing import AnonProcessing
-from pganonymizer.utils import get_connection, build_sql_select, _get_ids_sql_format, create_basic_tables
+from pganonymizer.utils import build_sql_select, _get_ids_sql_format, create_basic_tables
 from pganonymizer.MainJob import BaseJobClass
 from pganonymizer.AnonProcessing import AnonProcessing
 
@@ -18,17 +18,23 @@ class AnonJobClass(BaseJobClass):
     THREAD = "NUMBER_MAX_THREADS_ANON"
     
     def __init__(self, args):
-        self.ANON_FETCH_RECORDS = self.get_anon_fetch_records(args)
-        self.ANON_NUMBER_FIELD_PER_THREAD = self.get_anon_number_field_per_thread(args)
+        self.set_anon_fetch_records(args)
+        self.set_anon_number_field_per_thread(args)
         super(AnonJobClass, self).__init__(args)
         
-    def get_anon_fetch_records(self, args):
-        return args.FORCE_ANON_FETCH_RECORDS if args.FORCE_ANON_FETCH_RECORDS \
+    def set_anon_fetch_records(self, args):
+        self.ANON_FETCH_RECORDS = args.FORCE_ANON_FETCH_RECORDS if args.FORCE_ANON_FETCH_RECORDS \
             else constants.ANON_FETCH_RECORDS
     
-    def get_anon_number_field_per_thread(self, args):
-        return args.FORCE_ANON_NUMBER_FIELD_PER_THREAD if args.FORCE_ANON_NUMBER_FIELD_PER_THREAD \
+    def set_anon_number_field_per_thread(self, args):
+        self.ANON_NUMBER_FIELD_PER_THREAD=  args.FORCE_ANON_NUMBER_FIELD_PER_THREAD if args.FORCE_ANON_NUMBER_FIELD_PER_THREAD \
             else constants.ANON_NUMBER_FIELD_PER_THREAD
+            
+    def get_anon_fetch_records(self):
+        return self.ANON_FETCH_RECORDS
+    
+    def get_anon_number_field_per_thread(self):
+        return self.ANON_FETCH_RECORDS
     
     def get_args(self):
         parser =  BaseJobClass.get_args(self, parseArgs=False)
@@ -45,16 +51,14 @@ class AnonJobClass(BaseJobClass):
     def update_queue(self):
         #todo konfigurierbar
         #search wird nicht übernommen
-        pg_args = self.pg_args
-        connection = self.get_connection(pg_args)
-        schema = self.schema
-        for type_, type_attributes in schema.items():
+        connection = self.get_connection()
+        for type_, type_attributes in self.schema.items():
             for table in type_attributes:
                 if type(table) == str:
-                    self.jobs.put(AnonProcessing(self, type_, 1, [table], table, pg_args))
+                    self.jobs.put(AnonProcessing(self, type_, 1, [table], table, self.pg_args, self.logging_))
                 else:
                     for table_key, table_attributes in table.items():
-                        self.create_basic_tables(self.get_connection(self.pg_args), tables=[constants.TABLE_MIGRATED_DATA], suffix=table_key)
+                        self.create_basic_tables(self.get_connection(), tables=[constants.TABLE_MIGRATED_DATA], suffix=table_key)
                         test = self.update_anon_search(table_key, table_attributes)
                         cursor = self.build_sql_select(connection, table_key, test.get('search', False), select="id")
                         while True:
@@ -65,14 +69,14 @@ class AnonJobClass(BaseJobClass):
                                 break
                             for row in records:
                                 list.append(row.get('id'))
-                            table_attributes_job = self.addJobRecordIds(table_attributes, list)
-                            self.jobs.put(AnonProcessing(self, type_, totalrecords, table_attributes_job, table_key, pg_args))
+                            table_attributes_job = self.add_job_records_ids(table_attributes, list)
+                            self.jobs.put(AnonProcessing(self, type_, totalrecords, table_attributes_job, table_key, self.pg_args, self.logging_))
         connection.close()
     
     def build_sql_select(self, connection, table_key, search, select="id"):
         build_sql_select(connection, table_key, search, select=select)
     
-    def addJobRecordIds(self, table_attributes, ids):
+    def add_job_records_ids(self, table_attributes, ids):
         cur = copy.deepcopy(table_attributes)    
         search_list = cur.get('search', [])
         search_list.append("id in "+_get_ids_sql_format(ids))

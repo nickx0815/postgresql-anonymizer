@@ -28,10 +28,8 @@ logging_ = logger()
 class AnonProcessing(MainProcessing):
     #todo verschlüsselung einbauen
     
-    def __init__(self, main_job, type, totalrecords, schema, table, pg_args):
-        super(AnonProcessing, self).__init__(totalrecords, schema, table, pg_args, type)
-        logging_.setLogLevel(main_job.args)
-        self.logging_ = logging_
+    def __init__(self, main_job, type, totalrecords, schema, table, pg_args, logger):
+        super(AnonProcessing, self).__init__(totalrecords, schema, table, pg_args, type, logger)
         self.verbose=False
         self.main_job = main_job
         

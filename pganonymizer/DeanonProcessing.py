@@ -3,13 +3,14 @@ from pganonymizer.utils import update_fields_history, _get_mapped_data
 from pganonymizer.constants import constants
 from pganonymizer.logging import logger
 from pganonymizer.MainProcessing import MainProcessing
+logging_ = logger()
 
 class DeanonProcessing(MainProcessing):
-    logger = logger()
+    
     type = "deanonymization"
     
     def __init__(self, tmpconnection, totalrecords, schema, table, pg_args, logger, type):
-        super(DeanonProcessing, self).__init__(totalrecords, schema, table, pg_args, logger, type)
+        super(DeanonProcessing, self).__init__(totalrecords, schema, table, pg_args, type, logger)
         self.tmpcon = tmpconnection
         
     def _get_rel_method(self):
@@ -39,11 +40,11 @@ class DeanonProcessing(MainProcessing):
                 self.updatesuccessfullrecords()
         #print(str(number) + " records deanonymized!")
     
-    @logger.UPDATE_MIGRATED_DATA
+    @logging_.UPDATE_MIGRATED_DATA
     def update_migrated_data_history(self, cr, id, table):
         cr.execute(f"UPDATE {constants.TABLE_MIGRATED_DATA}_{table} SET STATE = 1 WHERE ID = {id}")
     
-    @logger.DEANONYMIZATION_RECORD
+    @logging_.DEANONYMIZATION_RECORD
     def revert_anonymization(self, connection, record, table, field, value):
         cr1 = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
         record_db_id = record[0]

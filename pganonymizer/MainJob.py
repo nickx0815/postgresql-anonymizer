@@ -17,22 +17,51 @@ logging_ = logger()
 
 class BaseJobClass():
     jobs = Queue()
-    schema = False
-    pg_args = False
-    migration = False
     
     def __init__(self, args):
-        self.logging_ = self.get_logger(args)
-        if args.list_providers:
-            self.list_provider_classes()
-            sys.exit(0)
-        self.pg_args = get_pg_args(args)
         self.args = args
-        self.set_schema(args)
+        self.set_logger()
+        self.set_pg_args()
+        self.set_schema()
+        
+    def get_pg_args(self):
+        return self.pg_args
     
-    def get_logger(self, args):
-        logging_.setLogLevel(args)
-        return logging_
+    def set_pg_args(self):
+        self.pg_args = get_pg_args(self.args)
+    
+    def set_args(self, args):
+        self.args = args
+        
+    def get_args(self):
+        return self.args
+    
+    def get_jobs(self):
+        return self.jobs
+    
+    def add_job(self, job):
+        self.jobs.put(job)
+    
+    def get_schema(self):
+        return self.schema
+    
+    @logging_.SET_SCHEMA
+    def set_schema(self):
+        forced_schema_path = self.args.force_path_schema
+        if forced_schema_path:
+            path = forced_schema_path
+        else:
+            path = f"{constants.PATH_SCHEMA_FILES}{self.args.schema}"
+        try:
+            schema = yaml.load(open(path), Loader=yaml.FullLoader)
+        except:
+            schema = yaml.load(open(path))
+        finally:
+            self.schema = schema
+    
+    
+    def set_logger(self):
+        self.logging_ = logger.get_logger(self.args, logging_)
     
     def is_starting_up_error(self, oe):
         if constants.STARTINGUPERROR in oe.args[0]:
@@ -41,10 +70,9 @@ class BaseJobClass():
     
     @logging_.TEST_CONNECTION
     def test_connection(self):
-        args = self.pg_args
         while True:
             try:
-                self.get_connection(args)
+                self.get_connection()
                 return True
             except Exception as exc:
                 if self.is_starting_up_error(exc):
@@ -53,20 +81,20 @@ class BaseJobClass():
         
     def start_processing(self):
         """Main method"""
-        args = self.args
         self.update_queue()
         self.test_connection()
-        create_basic_tables(self.get_connection(self.pg_args))
+        create_basic_tables(self.get_connection())
         self.start()
-        if args.dump_file:
+        if self.args.dump_file:
             create_database_dump(self.pg_args)
     
-    def get_connection(self, args):
-        return get_connection(args)
+    def get_connection(self, autocommit=False):
+        con = get_connection(self.pg_args)
+        con.autocommit = autocommit
+        return con
     
     def start(self):
-        args = self.args
-        if args.threading in ['False','false']:
+        if self.args.threading in ['False','false']:
             self.run_job(self.jobs)  
         else:
             number_threads = self.get_thread_number()
@@ -75,20 +103,6 @@ class BaseJobClass():
                 worker.start()
             self.jobs.join()
     
-    @logging_.SET_SCHEMA
-    def set_schema(self, args):
-        forced_schema_path = args.force_path_schema
-        if forced_schema_path:
-            path = forced_schema_path
-        else:
-            path = f"{constants.PATH_SCHEMA_FILES}{args.schema}"
-        try:
-            schema = yaml.load(open(path), Loader=yaml.FullLoader)
-        except:
-            schema = yaml.load(open(path))
-        finally:
-            self.schema = schema
-        
     def list_provider_classes(self):
         """List all available provider classes."""
         #print('Available provider classes:\n')
