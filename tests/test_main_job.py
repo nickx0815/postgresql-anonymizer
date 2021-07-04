@@ -22,7 +22,7 @@ class TestMainJob(unittest.TestCase):
     def test_get_schema(self):
         args = Args({'force_path_schema':self.path})
         testmain = AnonJobClass(args)
-        testmain.set_schema(args)
+        testmain.set_schema()
         self.assertEqual(testmain.schema['tables'], [{'auth_user': {'primary_key': 'id', 'fields': \
                                                                     [{'first_name': {'provider': {'name': 'fake.first_name'}}},\
                                                                      {'last_name': {'provider': {'name': 'set', 'value': 'Bar'}}},\
