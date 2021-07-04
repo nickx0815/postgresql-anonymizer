@@ -3,7 +3,6 @@
 from __future__ import absolute_import, print_function
 
 import logging
-import sys
 import copy
 import datetime
 import time
@@ -11,32 +10,34 @@ import time
 from pganonymizer.constants import constants 
 from pganonymizer.AnonProcessing import AnonProcessing
 from pganonymizer.utils import get_connection, build_sql_select, _get_ids_sql_format, create_basic_tables
-from pganonymizer.MainJob import BaseMain
+from pganonymizer.MainJob import BaseJobClass
 from pganonymizer.AnonProcessing import AnonProcessing
 
-class AnonymizationMain(BaseMain):
+class AnonJobClass(BaseJobClass):
     
     THREAD = "NUMBER_MAX_THREADS_ANON"
     
+    def __init__(self, args):
+        self.ANON_FETCH_RECORDS = self.get_anon_fetch_records(args)
+        self.ANON_NUMBER_FIELD_PER_THREAD = self.get_anon_number_field_per_thread(args)
+        super(BaseJobClass, self).__init__(args)
+        
+    def get_anon_fetch_records(self, args):
+        return args.FORCE_ANON_FETCH_RECORDS if args.FORCE_ANON_FETCH_RECORDS \
+            else constants.ANON_FETCH_RECORDS
+    
+    def get_anon_number_field_per_thread(self, args):
+        return args.FORCE_ANON_NUMBER_FIELD_PER_THREAD if args.FORCE_ANON_NUMBER_FIELD_PER_THREAD \
+            else constants.ANON_NUMBER_FIELD_PER_THREAD
+    
     def get_args(self):
-        parser =  BaseMain.get_args(self, parseArgs=False)
+        parser =  BaseJobClass.get_args(self, parseArgs=False)
         parser.add_argument('-v', '--verbose', action='count', help='Increase verbosity')
         parser.add_argument('-l', '--list-providers', action='store_true', help='Show a list of all available providers',
                             default=False)
         parser.add_argument('--dump-file', help='Create a database dump file with the given name')
         args = parser.parse_args()
         return args
-    
-    def __init__(self, args):
-        self.ANON_FETCH_RECORDS = args.FORCE_ANON_FETCH_RECORDS if args.FORCE_ANON_FETCH_RECORDS else constants.ANON_FETCH_RECORDS
-        self.ANON_NUMBER_FIELD_PER_THREAD = args.FORCE_ANON_NUMBER_FIELD_PER_THREAD if args.FORCE_ANON_NUMBER_FIELD_PER_THREAD else constants.ANON_NUMBER_FIELD_PER_THREAD
-        if args.list_providers:
-            self.list_provider_classes()
-            sys.exit(0)
-        BaseMain.__init__(self, args)
-    
-    def get_connection(self, args):
-        return get_connection(args)
     
     def create_basic_tables(self, connection, tables=[constants.TABLE_MIGRATED_DATA], suffix=False):
         create_basic_tables(connection, tables=[constants.TABLE_MIGRATED_DATA], suffix=suffix)

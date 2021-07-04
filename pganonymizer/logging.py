@@ -37,8 +37,8 @@ class logger():
             return result
         return test_connection
     
-    def GET_SCHEMA(self, function):
-        def get_schema(self):
+    def SET_SCHEMA(self, function):
+        def set_schema(self):
             args = self.args
             if args.force_path_schema:
                 self.logging_.logging_.debug(f"the default schema path was forced to {args.force_path_schema}")
@@ -46,7 +46,7 @@ class logger():
             self.logging_.logging_.debug(f'the schema was loaded successfully')
             self.logging_.logging_.debug(f'schema data {self.schema}')
             return result
-        return get_schema
+        return set_schema
     
     def NUMBER_THREAD(self, function):
         def get_thread_number(self):
@@ -56,13 +56,13 @@ class logger():
         return get_thread_number
     
     def THREAD_STARTED(self, function):
-        def start_thread(self, job):
+        def run_job(self, job):
             self.logging_.logging_.debug(f"Thread started")
             self.logging_.logging_.debug(f'job\'s data {job}')
             result = function(self, job)
             self.logging_.logging_.debug(f"Thread finished")
             return result
-        return start_thread
+        return run_job
     
     def RESULTS(self, function):
         def start(self):

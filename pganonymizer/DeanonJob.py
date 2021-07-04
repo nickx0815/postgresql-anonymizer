@@ -8,15 +8,14 @@ import time
 from pganonymizer.constants import constants 
 from pganonymizer.utils import  get_connection, build_sql_select, _get_mapped_data
 from pganonymizer.DeanonProcessing import DeanonProcessing
-from pganonymizer.MainJob import BaseMain
+from pganonymizer.MainJob import BaseJobClass
 
-class DeAnonymizationMain(BaseMain):
+class DeanonJobClass(BaseJobClass):
     THREAD = "NUMBER_MAX_THREADS_DEANON"
-    
     tables = []
     TMPconnection = {}
     
-    def createTmpTables(self):
+    def create_tmp_tables(self):
         pg_args = self.pg_args
         connection = get_connection(pg_args)
         schema = self.schema
@@ -42,7 +41,7 @@ class DeAnonymizationMain(BaseMain):
         self.TMPconnection = connection
     
     def update_queue(self):
-        self.createTmpTables()
+        self.create_tmp_tables()
         self.__update_queue()
     
     def __update_queue(self):
@@ -71,8 +70,8 @@ class DeAnonymizationMain(BaseMain):
                 crtest.close()
         connection.close()
         
-    def startprocessing(self):
-        BaseMain.startprocessing(self)
+    def start_processing(self):
+        super(BaseJobClass, self).start_processing()
         self.TMPconnection.close()
         
         

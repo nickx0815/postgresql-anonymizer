@@ -4,6 +4,7 @@ from __future__ import absolute_import, print_function
 
 import argparse
 import threading
+import sys
 from queue import Queue
 
 import yaml
@@ -14,25 +15,26 @@ from pganonymizer.utils import create_database_dump, get_connection, get_pg_args
 from pganonymizer.logging import logger
 logging_ = logger()
 
-class BaseMain():
-
+class BaseJobClass():
     jobs = Queue()
     schema = False
     pg_args = False
     migration = False
     
     def __init__(self, args):
-        self.args = args
-        logging_.setLogLevel(args)
-        self.logging_ = logging_
+        self.logging_ = self.get_logger(args)
+        if args.list_providers:
+            self.list_provider_classes()
+            sys.exit(0)
         self.pg_args = get_pg_args(args)
-        self.get_schema()
+        self.set_schema(args)
+        self.args = args
     
-#     def set_migration(self, args):
-#         migration = args.get('migration')
-#         self.migration = migration
+    def get_logger(self, args):
+        logging_.setLogLevel(args)
+        return logging_
     
-    def isStartingUpError(self, oe):
+    def is_starting_up_error(self, oe):
         if constants.STARTINGUPERROR in oe.args[0]:
             return True
         return False
@@ -42,46 +44,50 @@ class BaseMain():
         args = self.pg_args
         while True:
             try:
-                get_connection(args)
+                self.get_connection(args)
                 return True
             except Exception as exc:
-                if self.isStartingUpError(exc):
+                if self.is_starting_up_error(exc):
                     continue
                 raise exc
         
-    def startprocessing(self):
+    def start_processing(self):
         """Main method"""
         args = self.args
         self.update_queue()
         self.test_connection()
-        create_basic_tables(get_connection(self.pg_args))
+        create_basic_tables(self.get_connection(self.pg_args))
         self.start()
         if args.dump_file:
             create_database_dump(self.pg_args)
     
+    def get_connection(self, args):
+        return get_connection(args)
+    
     def start(self):
         args = self.args
         if args.threading in ['False','false']:
-            self.start_thread(self.jobs)  
+            self.run_job(self.jobs)  
         else:
             number_threads = self.get_thread_number()
             for i in range(number_threads):
-                worker = threading.Thread(target=self.start_thread, args=(self.jobs,))
+                worker = threading.Thread(target=self.run_job, args=(self.jobs,))
                 worker.start()
             self.jobs.join()
     
-    @logging_.GET_SCHEMA
-    def get_schema(self):
-        args = self.args
-        if args.force_path_schema:
-            path=args.force_path_schema
+    @logging_.SET_SCHEMA
+    def set_schema(self, args):
+        forced_schema_path = args.force_path_schema
+        if forced_schema_path:
+            path = forced_schema_path
         else:
             path = f"{constants.PATH_SCHEMA_FILES}{args.schema}"
         try:
             schema = yaml.load(open(path), Loader=yaml.FullLoader)
         except:
             schema = yaml.load(open(path))
-        self.schema = schema
+        finally:
+            self.schema = schema
         
     def list_provider_classes(self):
         """List all available provider classes."""
@@ -90,22 +96,18 @@ class BaseMain():
             #todo use logging_
             print('{:<10} {}'.format(provider_cls.id, provider_cls.__doc__))
     
-    def start_thread(self, q):
-        while not q.empty():
-            data = q.get()
-            self._runSpecificTask(data)
-            q.task_done()
-    
-    @logging_.THREAD_STARTED
-    def _runSpecificTask(self, job):
-        job.start()
+    def run_job(self, jobs):
+        while not jobs.empty():
+            current_job = jobs.get()
+            current_job.start()
+            jobs.task_done()
         
-    def _get_qsize(self):
+    def _get_queue_size(self):
         return self.jobs.qsize()
     
     @logging_.NUMBER_THREAD
     def get_thread_number(self):
-        queue_size = self._get_qsize()
+        queue_size = self._get_queue_size()
         thread = getattr(constants, self.THREAD)
         force_thread_number = self.args.force_thread_number
         if force_thread_number:

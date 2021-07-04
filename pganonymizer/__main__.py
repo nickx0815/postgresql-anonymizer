@@ -3,8 +3,8 @@ from __future__ import absolute_import
 
 from pganonymizer.constants import constants
 from configparser import ConfigParser
-from pganonymizer.AnonJob import AnonymizationMain
-from pganonymizer.DeanonJob import DeAnonymizationMain
+from pganonymizer.AnonJob import AnonJobClass
+from pganonymizer.DeanonJob import DeanonJobClass
 from pganonymizer.args import Args
 import time
 
@@ -22,9 +22,9 @@ def main():
     type = args.type
     try:
         if type == 'anon':
-            AnonymizationMain(args).startprocessing()
+            AnonJobClass(args).start_processing()
         elif type == 'deanon':
-            DeAnonymizationMain(args).startprocessing()
+            DeanonJobClass(args).start_processing()
         else:
             raise Exception("the type has to be anon or deanon")
         exit_status = 0

@@ -248,10 +248,12 @@ class AnonProcessing(MainProcessing):
         if column == "id":
             if row.get('id') == exclude:
                 return True
+            return False
         else:
             pattern = re.compile(exclude, re.IGNORECASE)
             if row[column] is not None and pattern.match(row[column]):
                 return True
+            return False
     
     @logging_.INSERT_MIGRATED_DATA
     def create_anon(self, con, table, data):
