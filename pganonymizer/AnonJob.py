@@ -20,7 +20,6 @@ class AnonJobClass(BaseJobClass):
     def __init__(self, args):
         self.ANON_FETCH_RECORDS = self.get_anon_fetch_records(args)
         self.ANON_NUMBER_FIELD_PER_THREAD = self.get_anon_number_field_per_thread(args)
-        super(BaseJobClass, self).__init__(args)
         
     def get_anon_fetch_records(self, args):
         return args.FORCE_ANON_FETCH_RECORDS if args.FORCE_ANON_FETCH_RECORDS \
