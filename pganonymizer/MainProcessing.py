@@ -50,7 +50,7 @@ class MainProcessing():
     
     @logging_.RESULTS
     def start(self):
-        connection = get_connection(autocommit = True)
+        connection = self.get_connection(autocommit = True)
         method = self._get_rel_method()
         try:
             getattr(self, method)(connection)
