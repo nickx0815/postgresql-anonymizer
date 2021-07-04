@@ -15,10 +15,10 @@ class logger():
                    'filemode':'w'}
         return args
     
-    def get_logger(self, args, logger):
+    def logging_(self, args):
         level = getattr(logging, args.logging)
-        logger.setLevel(level)
-        return logger
+        self.setLevel(level)
+        return self
     
     def __init__(self):
         try:
