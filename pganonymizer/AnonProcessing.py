@@ -230,8 +230,8 @@ class AnonProcessing(MainProcessing):
                     return result
         return False
     
-    @logging_.INSERT_MIGRATED_FIELD
-    def insert_migrated_fields_rec(self, cr, field, table):
+    @logging_.CHECK_MIGRATED_FIELD
+    def check_migrated_fields_rec(self, cr, field, table):
         sql_insert = f"INSERT INTO {constants.TABLE_MIGRATED_FIELDS} (model_id, field_id) VALUES ('{table}', '{field}');"
         sql_select = f"SELECT id  from {constants.TABLE_MIGRATED_FIELDS} \
                                 WHERE model_id = '{table}' \
@@ -240,7 +240,15 @@ class AnonProcessing(MainProcessing):
         cr.execute(sql_select)
         record = cr.fetchone()
         if not record:
-            cr.execute(sql_insert)
+            self.insert_migrated_fields_rec(sql_insert)
+    
+    @logging_.INSERT_MIGRATED_FIELD
+    def insert_migrated_fields_rec(self, cr, insert_sql):
+        try:
+            cr.execute(insert_sql)
+            return True
+        except Exception:
+            return False, Exception
     
     def exclude_eval(self, exclude, column, row):
         if column == "id":
@@ -257,7 +265,7 @@ class AnonProcessing(MainProcessing):
     def create_anon(self, con, table, data):
         cr = con.cursor()
         field = list(data.keys())[0]
-        self.insert_migrated_fields_rec(cr, field, table)
+        self.check_migrated_fields_rec(cr, field, table)
         id = data.get(field)
         sql_migrated_data_insert = f"Insert into {constants.TABLE_MIGRATED_DATA}{table} \
                                         (field_id, record_id, value, state)\

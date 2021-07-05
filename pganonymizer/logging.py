@@ -101,10 +101,18 @@ class logger():
             return result
         return truncate_tables
     
-    def INSERT_MIGRATED_FIELD(self, function):
-        def insert_migrated_fields_rec(self, cr, field, table):
+    def CHECK_MIGRATED_FIELD(self, function):
+        def check_migrated_fields_rec(self, cr, field, table):
             result = function(self, cr, field, table)
             self.logging_.logging_.debug(f'INSERT INTO {table} ({field})')
+            return result
+        return check_migrated_fields_rec
+    
+    def INSERT_MIGRATED_FIELD(self, function):
+        def insert_migrated_fields_rec(self, cr, sql):
+            result = function(self, cr, sql)
+            if not result[0]:
+                self.logging_.logging_.debug(f'{result[1]}')
             return result
         return insert_migrated_fields_rec
     
