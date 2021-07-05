@@ -1,4 +1,4 @@
-import logging, datetime
+import logging, datetime, time
 from pganonymizer.constants import constants
 
 
@@ -30,6 +30,16 @@ class logger():
         logger = logging.getLogger(__name__)
         logger.setLevel(self.get_default_log_level())
         self.logging_ = logger
+    
+    def PRINT_PROCESSING_TIME(self, function):
+        def start_processing(self):
+            starttime = time.time()
+            result = function(self)
+            endtime = time.time()
+            runtime = str(datetime.timedelta(seconds=endtime-starttime))
+            self.logging_.logging_.info(f'the processing took {runtime}')
+            return result
+        return start_processing
     
     def TEST_CONNECTION(self, function):
         def test_connection(self):

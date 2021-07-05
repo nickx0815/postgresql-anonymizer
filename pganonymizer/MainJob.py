@@ -78,7 +78,8 @@ class BaseJobClass():
                 if self.is_starting_up_error(exc):
                     continue
                 raise exc
-        
+    
+    @logging_.PRINT_PROCESSING_TIME    
     def start_processing(self):
         """Main method"""
         self.update_queue()
