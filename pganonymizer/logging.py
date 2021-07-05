@@ -115,7 +115,7 @@ class logger():
             field = list(data.keys())[0]
             id = list(data.get(field).keys())[0]
             value = data.get(field).get(id)
-            self.logging_.logging_.info(f'{migrated_table} new({field} {id} {value})')
+            self.logging_.logging_.debug(f'{migrated_table} new({field} {id} {value})')
             return result
         return create_anon
     
