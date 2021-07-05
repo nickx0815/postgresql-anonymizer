@@ -29,8 +29,7 @@ class AnonProcessing(MainProcessing):
     #todo verschlüsselung einbauen
     
     def __init__(self, main_job, type, totalrecords, schema, table, pg_args):
-        logger = main_job.logging_
-        super(AnonProcessing, self).__init__(main_job, totalrecords, schema, table, pg_args, type, logger)
+        super(AnonProcessing, self).__init__(main_job, totalrecords, schema, table, pg_args, type, main_job.logging_)
         self.verbose=False
         
         

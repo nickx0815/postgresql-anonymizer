@@ -16,8 +16,10 @@ class logger():
         return args
     
     def set_log_level(self, args):
-        level = getattr(logging, args.logging)
-        self.logging_.setLevel(level)
+        loglevel = args.logging
+        if loglevel:
+            level = getattr(logging, loglevel)
+            self.logging_.setLevel(level)
         return self
     
     def __init__(self):

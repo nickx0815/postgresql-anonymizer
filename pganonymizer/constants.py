@@ -45,8 +45,9 @@ class constants():
                                 }
     
     section = ['Required','Optional']
-    testarg = ['schema', 'dbname', 'user', 'password', 'host', 'port', 'type']
-    testarg_optional = ['dump', 'dry_run', 'l', 'v', 'schema', 'threading', 'force_path_schema', 'force_thread_number']
+    testarg = ['schema', 'dbname', 'user', 'password', 'host', 'port', 'type', 'migration']
+    testarg_optional = ['dump', 'dry_run', 'l', 'v', 'schema', 'threading', 'force_path_schema', 'force_thread_number',
+                        'logging', 'FORCE_ANON_NUMBER_FIELD_PER_THREAD', 'FORCE_ANON_FETCH_RECORDS']
     PROCESS_METHOD_MAPPING = {'tables': 'anonymize_tables',
                               'truncate':'truncate_tables'}
     

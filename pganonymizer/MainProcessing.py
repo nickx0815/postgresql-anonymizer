@@ -22,12 +22,6 @@ class MainProcessing():
                         'truncate': 'Deletion',
                         'deanon': 'Deanonymization'}
     
-    def updatesuccessfullrecords(self):
-        self.successfullrecords = self.successfullrecords+1
-        
-    def updatesuccessfullfields(self):
-        self.successfullfields = self.successfullfields+1
-    
     def __init__(self, main_job, totalrecords, schema, table, pg_args, type ,logger):
         self.logging_ = logger
         self.main_job = main_job
@@ -39,6 +33,12 @@ class MainProcessing():
         self.table=table
         self.totalrecords = totalrecords
         self.pg_args = pg_args
+    
+    def updatesuccessfullrecords(self):
+        self.successfullrecords = self.successfullrecords+1
+        
+    def updatesuccessfullfields(self):
+        self.successfullfields = self.successfullfields+1
     
     def get_connection(self, autocommit=False):
         con = get_connection(self.pg_args)

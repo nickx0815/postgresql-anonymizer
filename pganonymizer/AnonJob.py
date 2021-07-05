@@ -18,9 +18,9 @@ class AnonJobClass(BaseJobClass):
     THREAD = "NUMBER_MAX_THREADS_ANON"
     
     def __init__(self, args):
+        super(AnonJobClass, self).__init__(args)
         self.set_anon_fetch_records(args)
         self.set_anon_number_field_per_thread(args)
-        super(AnonJobClass, self).__init__(args)
         
     def set_anon_fetch_records(self, args):
         self.ANON_FETCH_RECORDS = args.FORCE_ANON_FETCH_RECORDS if args.FORCE_ANON_FETCH_RECORDS \
