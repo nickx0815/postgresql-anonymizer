@@ -98,6 +98,7 @@ def _get_mapped_data(con, table, fields):
             records = cr.fetchone()
             if not records:
                 list.append((table,table,field,field))
+                break
             for record in records:
                 list.append(record)
     return list
