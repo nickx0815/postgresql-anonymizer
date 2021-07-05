@@ -20,7 +20,7 @@ class DeanonProcessing(MainProcessing):
         data = self.schema
         table = self.table
         number = 0
-        mapped_field_data = _get_mapped_data(connection, table, field=data[0])
+        mapped_field_data = _get_mapped_data(connection, table, fields=[data[0]])
         original_table = mapped_field_data[0]
         migrated_table = mapped_field_data[1]
         original_field = mapped_field_data[2]
