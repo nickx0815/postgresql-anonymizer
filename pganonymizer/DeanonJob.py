@@ -39,7 +39,7 @@ class DeanonJobClass(BaseJobClass):
             migrated_table = mapped_field_data[1]
             temp_table = "tmp_"+migrated_table
             list_table.append(temp_table)
-            fields_string = ",".join(fields+['id'])
+            fields_string = ",".join(mapped_field_data[3]+['id'])
             crtest.execute(f'CREATE TEMPORARY TABLE {temp_table} AS SELECT {fields_string} FROM {migrated_table};' )
             crtest.execute(f"CREATE INDEX index_id ON {temp_table} (id);")
             for field in fields:
@@ -81,4 +81,4 @@ class DeanonJobClass(BaseJobClass):
         super(DeanonJobClass, self).start_processing()
         self.TMPconnection.close()
         
-        
+        #
