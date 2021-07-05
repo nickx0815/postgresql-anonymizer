@@ -38,7 +38,7 @@ class MainProcessing():
         self.starttime = time.time()
         self.table=table
         self.totalrecords = totalrecords
-        self.pgargs = pg_args
+        self.pg_args = pg_args
     
     def get_connection(self, autocommit=False):
         con = get_connection(self.pg_args)
