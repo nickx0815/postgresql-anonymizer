@@ -10,7 +10,7 @@ class DeanonProcessing(MainProcessing):
     type = "deanonymization"
     
     def __init__(self, main_job, tmpconnection, totalrecords, schema, table, pg_args, type):
-        super(DeanonProcessing, self).__init__(totalrecords, schema, table, pg_args, type, main_job.logging_)
+        super(DeanonProcessing, self).__init__(main_job, totalrecords, schema, table, pg_args, type, main_job.logging_)
         self.tmpcon = tmpconnection
         
     def _get_rel_method(self):
