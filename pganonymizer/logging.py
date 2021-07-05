@@ -72,7 +72,7 @@ class logger():
             additionalrecordsinfo = f"successfull processed {self.successfullrecords} (total records {self.totalrecords})\n"
             additionalfieldsinfo = f"successfull processed {self.successfullfields} fields\n"
             self.logging_.logging_.debug(main)
-            self.logging_.logging_.logging_ing.debug(additionalrecordsinfo)
+            self.logging_.logging_.debug(additionalrecordsinfo)
             self.logging_.logging_.debug(additionalfieldsinfo)
             return result
         return start
