@@ -9,7 +9,7 @@ class Args():
         self.host = dic.get("host", "postgres")
         self.port = dic.get("port", 5432)
         self.dry_run = dic.get("dry_run")
-        self.dump_file = dic.get("dump")
+        #self.dump_file = dic.get("dump")
         self.threading = dic.get('threading', True)
         self.force_path_schema = dic.get('force_path_schema')
         self.logging = dic.get('logging', 'INFO')

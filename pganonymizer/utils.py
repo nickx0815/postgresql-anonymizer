@@ -157,18 +157,18 @@ def data2csv(data):
         writer.writerow(row_data)
     buf.seek(0)
     return buf
-
-def create_database_dump(db_args):
-    """
-    Create a dump file from the current database.
-
-    :param str filename: Path to the dumpfile that should be created
-    :param dict db_args: A dictionary with database related information
-    """
-    cur_time = time.time()
-    dbname = db_args.get('dbname')
-    file = f"{constants.PATH_DUMP}{cur_time}_{dbname}"
-    args = '{dbname}'.format(**db_args)
-    cmd = f'docker exec -i migration_postgres_1 psql -U odoo {args} > {file}'
-    logging.info('Creating database dump file "%s"', file)
-    subprocess.run(cmd, shell=True)
+# 
+# def create_database_dump(db_args):
+#     """
+#     Create a dump file from the current database.
+# 
+#     :param str filename: Path to the dumpfile that should be created
+#     :param dict db_args: A dictionary with database related information
+#     """
+#     cur_time = time.time()
+#     dbname = db_args.get('dbname')
+#     file = f"{constants.PATH_DUMP}{cur_time}_{dbname}"
+#     args = '{dbname}'.format(**db_args)
+#     cmd = f'docker exec -i migration_postgres_1 psql -U odoo {args} > {file}'
+#     logging.info('Creating database dump file "%s"', file)
+#     subprocess.run(cmd, shell=True)

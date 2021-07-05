@@ -86,8 +86,8 @@ class BaseJobClass():
         self.test_connection()
         create_basic_tables(self.get_connection())
         self.start()
-        if self.args.dump_file:
-            create_database_dump(self.pg_args)
+        #if self.args.dump_file:
+        #    create_database_dump(self.pg_args)
     
     def get_connection(self, autocommit=False):
         con = get_connection(self.pg_args)
