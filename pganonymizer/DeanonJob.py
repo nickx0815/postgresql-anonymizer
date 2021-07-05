@@ -6,7 +6,7 @@ import time
 
 
 from pganonymizer.constants import constants 
-from pganonymizer.utils import build_sql_select, _get_mapped_data
+from pganonymizer.utils import build_sql_select, _get_mapped_data, get_distinct_from_tuple
 from pganonymizer.DeanonProcessing import DeanonProcessing
 from pganonymizer.MainJob import BaseJobClass
 
@@ -32,20 +32,26 @@ class DeanonJobClass(BaseJobClass):
         connection.autocommit = True
         #todo umbauen, dass ein job jeweils alle migrated_fields eines records beinhaltet. 
         #todo weitere deanon methoden umbaunen, sodass alle felder mit einem update deanonymsiert werden
+        
+        #todo temp tables müssen im crate auf den migriereten feldern baisieren, im momennt sind es noch
+        # die alten 
+        # und außerdem muss noch die möglichkeit eingebaut werden, dass auch durch die
+        # migration aufgesplittete tabellen hier und in run revert verarbeitet werden können
+        
         crtest = connection.cursor()
         list_table = []
         for table, fields in schema.items():
-            mapped_field_data = _get_mapped_data(connection, table)
-            migrated_table = mapped_field_data[1]
-            temp_table = "tmp_"+migrated_table
-            list_table.append(temp_table)
-            fields_string = ",".join(mapped_field_data[3]+['id'])
-            crtest.execute(f'CREATE TEMPORARY TABLE {temp_table} AS SELECT {fields_string} FROM {migrated_table};' )
-            crtest.execute(f"CREATE INDEX index_id ON {temp_table} (id);")
-            for field in fields:
-                mapped_field_data = _get_mapped_data(connection, table, field=field)
-                migrated_field = mapped_field_data[3]
-                crtest.execute(f"CREATE INDEX index_{migrated_field} ON {temp_table} ({field});")
+            mapped_field_data = _get_mapped_data(connection, table, fields=fields)
+            distinct_tables = get_distinct_from_tuple(mapped_field_data, 1)
+            for migrated_table, mapped_fields in distinct_tables.items():
+                temp_table = "tmp_"+migrated_table
+                fields_string = ",".join(mapped_fields+['id'])
+                crtest.execute(f'CREATE TEMPORARY TABLE {temp_table} AS SELECT {fields_string} FROM {migrated_table};' )
+            
+                crtest.execute(f"CREATE INDEX index_id ON {temp_table} (id);")
+                list_table.append(temp_table)
+                for field in mapped_fields:
+                    crtest.execute(f"CREATE INDEX index_{field} ON {temp_table} ({field});")
         self.set_tables(list_table)
         crtest.close()
         self.set_tmp_connection(connection)
@@ -81,4 +87,4 @@ class DeanonJobClass(BaseJobClass):
         super(DeanonJobClass, self).start_processing()
         self.TMPconnection.close()
         
-        #
+        

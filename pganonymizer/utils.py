@@ -22,20 +22,7 @@ from pganonymizer.providers import get_provider
 def _(t):
     return t.replace("_", ".")
 
-def _get_mapped_data(con, table, field=False):
-    # todo function to determine which mapping (10,11,12...)
-    cr = con.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    select_model_id_sql = f"SELECT new_model_name, new_field_name FROM {constants.TABLE_MIGRATED_DATA_MAPPING} where old_model_name = '{table}'"
-    if field:
-        select_model_id_sql+=f" and old_field_name = '{field}'"
-    select_model_id_sql+=";"
-    cr.execute(select_model_id_sql)
-    record = cr.fetchone()
-    if not record:
-        return (table, table, field, field)
-    if not field:
-        return (table, record.get('new_model_name'))
-    return (table, record.get('new_model_name'), field, record.get('new_field_name'))
+
 
 def get_pg_args(args):
         """
@@ -68,10 +55,22 @@ def build_sql_select(connection, table, search, select="*"):
     cursor.execute(sql)
     return cursor
 
-def _get_ids_sql_format(ids):
+def _get_ids_sql_format(ids, char=False):
     if ids:
-        return str(set([x for x in ids])).replace("{", "(").replace("}", ")").replace("'", "")
+        parsed =  str(set([x for x in ids])).replace("{", "(").replace("}", ")")
+        if not char:
+            parsed.replace("'", "")
+        return parsed
     return False
+
+def get_distinct_from_tuple(iterable, index):
+    distinct_table_dic = {}
+    for object in iterable:
+        current_object = object[index]
+        if current_object not in distinct_table_dic.keys():
+            distinct_table_dic[current_object] = []
+        distinct_table_dic[current_object].append(current_object[3])
+    return distinct_table_dic
 
 def create_basic_tables(con, tables=constants.BASIC_TABLES, suffix=""):
     cr = con.cursor()
@@ -86,6 +85,22 @@ def create_basic_tables(con, tables=constants.BASIC_TABLES, suffix=""):
     cr.execute('COMMIT;')
     cr.close()
     con.close()
+
+def _get_mapped_data(con, table, fields):
+    # todo function to determine which mapping (10,11,12...)
+    cr = con.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    list = []
+    if fields:
+        field_parsed = _get_ids_sql_format(fields, char=True)
+        select_model_id_sql = f"SELECT old_model_name, new_model_name, old_field_name, new_field_name FROM {constants.TABLE_MIGRATED_DATA_MAPPING} where old_model_name = '{table}' and old_field_name in {field_parsed}"
+        cr.execute(select_model_id_sql)
+        while True:
+            records = cr.fetchmany()
+            if not records:
+                break
+            for record in records:
+                list.append(record)
+    return list
      
 def copy_from(connection, data, table, columns):
     """
