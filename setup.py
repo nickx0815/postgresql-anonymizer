@@ -16,7 +16,7 @@ install_requires = [
     'six',
     'progress',
     'psycopg2',
-    #'pyyaml==5.4.1'
+    'pyyaml==5.2.0'
 ]
 
 tests_require = [
