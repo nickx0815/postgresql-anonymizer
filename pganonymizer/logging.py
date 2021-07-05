@@ -37,7 +37,7 @@ class logger():
             result = function(self)
             endtime = time.time()
             runtime = str(datetime.timedelta(seconds=endtime-starttime))
-            self.logging_.logging_.info(f'the processing took {runtime}')
+            self.logging_.logging_.info(f'the processing took {runtime[:-3]}')
             return result
         return start_processing
     
