@@ -78,7 +78,7 @@ class DeanonJobClass(BaseJobClass):
         connection.close()
         
     def start_processing(self):
-        super(BaseJobClass, self).start_processing()
+        super(DeanonJobClass, self).start_processing()
         self.TMPconnection.close()
         
         
