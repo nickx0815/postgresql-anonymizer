@@ -97,7 +97,7 @@ def _get_mapped_data(con, table, fields):
         while True:
             records = cr.fetchone()
             if not records:
-                list.append(table,table,field,field)
+                list.append((table,table,field,field))
             for record in records:
                 list.append(record)
     return list
