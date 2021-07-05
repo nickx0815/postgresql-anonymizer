@@ -88,7 +88,7 @@ def create_basic_tables(con, tables=constants.BASIC_TABLES, suffix=""):
 
 def _get_mapped_data(con, table, fields):
     # todo function to determine which mapping (10,11,12...)
-    cr = con.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cr = con.cursor()
     list = []
     for field in fields:
         #field_parsed = _get_ids_sql_format(fields, char=True)
