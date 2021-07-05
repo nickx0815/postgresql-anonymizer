@@ -42,7 +42,7 @@ class DeanonProcessing(MainProcessing):
     
     @logging_.UPDATE_MIGRATED_DATA
     def update_migrated_data_history(self, cr, id, table):
-        cr.execute(f"UPDATE {constants.TABLE_MIGRATED_DATA}_{table} SET STATE = 1 WHERE ID = {id}")
+        cr.execute(f"UPDATE {constants.TABLE_MIGRATED_DATA}{table} SET STATE = 1 WHERE ID = {id}")
     
     @logging_.DEANONYMIZATION_RECORD
     def revert_anonymization(self, connection, record, table, field, value):
