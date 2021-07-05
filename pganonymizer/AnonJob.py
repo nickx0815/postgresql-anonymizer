@@ -91,7 +91,7 @@ class AnonJobClass(BaseJobClass):
             searchlist = []
             fieldlist = [list(x.keys())[0] for x in fielddic]
             for field in fieldlist:
-                searchlist.append(f"{field} not like '{table}_{field}_%' AND {field} IS NOT NULL ")
+                searchlist.append(f"{field} not like '{table}_{field}_%' AND {field} IS NOT NULL AND {field} <> ''")
             search.append("("+" OR ".join(searchlist)+")")
         table_attributes['search'] = search
         return table_attributes
