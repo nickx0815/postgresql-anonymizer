@@ -240,7 +240,7 @@ class AnonProcessing(MainProcessing):
         cr.execute(sql_select)
         record = cr.fetchone()
         if not record:
-            self.insert_migrated_fields_rec(sql_insert)
+            self.insert_migrated_fields_rec(cr, sql_insert)
     
     @logging_.INSERT_MIGRATED_FIELD
     def insert_migrated_fields_rec(self, cr, insert_sql):
