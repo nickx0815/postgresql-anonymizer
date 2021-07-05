@@ -123,7 +123,7 @@ class BaseJobClass():
     @logging_.NUMBER_THREAD
     def get_thread_number(self):
         queue_size = self._get_queue_size()
-        thread = getattr(constants, self.THREAD)
+        thread = constants.DEFAULT_NUMBER_THREADS
         force_thread_number = self.args.force_thread_number
         if force_thread_number:
             return int(force_thread_number)

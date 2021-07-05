@@ -15,8 +15,6 @@ from pganonymizer.AnonProcessing import AnonProcessing
 
 class AnonJobClass(BaseJobClass):
     
-    THREAD = "NUMBER_MAX_THREADS_ANON"
-    
     def __init__(self, args):
         super(AnonJobClass, self).__init__(args)
         self.set_anon_fetch_records(args)

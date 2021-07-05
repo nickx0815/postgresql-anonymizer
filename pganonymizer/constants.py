@@ -53,8 +53,7 @@ class constants():
     
     
     
-    NUMBER_MAX_THREADS_ANON = 8
-    NUMBER_MAX_THREADS_DEANON = 8
+    DEFAULT_NUMBER_THREADS = 8
     
     
     DEANON_NUMBER_FIELD_PER_THREAD = 1000

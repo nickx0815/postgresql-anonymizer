@@ -11,7 +11,6 @@ from pganonymizer.DeanonProcessing import DeanonProcessing
 from pganonymizer.MainJob import BaseJobClass
 
 class DeanonJobClass(BaseJobClass):
-    THREAD = "NUMBER_MAX_THREADS_DEANON"
     tables = []
     TMPconnection = {}
     
