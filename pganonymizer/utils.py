@@ -59,7 +59,7 @@ def _get_ids_sql_format(ids, char=False):
     if ids:
         parsed =  str(set([x for x in ids])).replace("{", "(").replace("}", ")")
         if not char:
-            parsed.replace("'", "")
+            parsed.replace("'","")
         return parsed
     return False
 
