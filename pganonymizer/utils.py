@@ -69,7 +69,7 @@ def get_distinct_from_tuple(iterable, index):
         current_object = object[index]
         if current_object not in distinct_table_dic.keys():
             distinct_table_dic[current_object] = []
-        distinct_table_dic[current_object].append(current_object[3])
+        distinct_table_dic[current_object].append(object[3])
     return distinct_table_dic
 
 def create_basic_tables(con, tables=constants.BASIC_TABLES, suffix=""):
