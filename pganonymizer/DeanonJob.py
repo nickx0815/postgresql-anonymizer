@@ -30,14 +30,6 @@ class DeanonJobClass(BaseJobClass):
         schema = self.get_schema()
         connection = self.get_connection()
         connection.autocommit = True
-        #todo umbauen, dass ein job jeweils alle migrated_fields eines records beinhaltet. 
-        #todo weitere deanon methoden umbaunen, sodass alle felder mit einem update deanonymsiert werden
-        
-        #todo temp tables müssen im crate auf den migriereten feldern baisieren, im momennt sind es noch
-        # die alten 
-        # und außerdem muss noch die möglichkeit eingebaut werden, dass auch durch die
-        # migration aufgesplittete tabellen hier und in run revert verarbeitet werden können
-        
         crtest = connection.cursor()
         list_table = []
         for table, fields in schema.items():
@@ -46,9 +38,12 @@ class DeanonJobClass(BaseJobClass):
             for migrated_table, mapped_fields in distinct_tables.items():
                 temp_table = "tmp_"+migrated_table
                 fields_string = ",".join(mapped_fields+['id'])
-                crtest.execute(f'CREATE TEMPORARY TABLE {temp_table} AS SELECT {fields_string} FROM {migrated_table};' )
-            
-                crtest.execute(f"CREATE INDEX index_id ON {temp_table} (id);")
+                try:
+                    crtest.execute(f'CREATE TEMPORARY TABLE {temp_table} AS SELECT {fields_string} FROM {migrated_table};' )
+                    crtest.execute(f"CREATE INDEX index_id ON {temp_table} (id);")
+                except:
+                    #for the case that 2 table in schema are refering to one table in the migrated db. So the tmp table is already existing
+                    pass
                 list_table.append(temp_table)
                 for field in mapped_fields:
                     crtest.execute(f"CREATE INDEX index_{field} ON {temp_table} ({field});")

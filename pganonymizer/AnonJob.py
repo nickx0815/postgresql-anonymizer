@@ -49,8 +49,6 @@ class AnonJobClass(BaseJobClass):
         create_basic_tables(connection, tables=[constants.TABLE_MIGRATED_DATA], suffix=suffix)
     
     def update_queue(self):
-        #todo konfigurierbar
-        #search wird nicht übernommen
         connection = self.get_connection()
         for type_, type_attributes in self.schema.items():
             for table in type_attributes:

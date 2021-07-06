@@ -13,6 +13,7 @@ from pganonymizer.constants import constants
 from pganonymizer.providers import PROVIDERS
 from pganonymizer.utils import get_connection, get_pg_args, create_basic_tables
 from pganonymizer.logging import logger
+from pganonymizer.analyse import run_analyse
 logging_ = logger()
 
 class BaseJobClass():
@@ -86,8 +87,7 @@ class BaseJobClass():
         self.test_connection()
         create_basic_tables(self.get_connection())
         self.start()
-        #if self.args.dump_file:
-        #    create_database_dump(self.pg_args)
+        run_analyse(self.get_connection())
     
     def get_connection(self, autocommit=False):
         con = get_connection(self.pg_args)

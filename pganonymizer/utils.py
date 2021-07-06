@@ -42,13 +42,13 @@ def update_fields_history(cr, model_id, record, state, field_id):
             ) values ( \
                 {state}, '{model_id}','{field_id}', '{str(now)}', '{str(now)}', {1}, {record});")
 
-def build_sql_select(connection, table, search, select="*"):
+def build_sql_select(connection, table, search, select="*", operator="AND"):
     cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
     
     sql_select = "SELECT {select} FROM {table}".format(select=select,
                                                        table=table)
     if search:
-        sql_statement = " AND ".join(search)
+        sql_statement = f" {operator} ".join(search)
         sql = "{select} WHERE {search_condition};".format(select=sql_select, search_condition=sql_statement)
     else:
         sql = "{select};".format(select=sql_select)
