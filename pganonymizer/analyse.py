@@ -6,22 +6,31 @@ try:
 except:
     no_pretty_table = True
 
-def run_analyse(con):
+def _get_ids_sql_format(ids, char=False):
+    if ids:
+        parsed =  str(set([x for x in ids])).replace("{", "(").replace("}", ")")
+        if not char:
+            return parsed.replace("'","")
+        return parsed
+    return False
+
+def run_analyse(con, tables=False):
     cursor = con.cursor()
     cursor2 = con.cursor()
-    orig_tables = ["%"]
+    if not tables:
+        orig_tables = "like '%'"
+    else:
+        orig_tables = f"in {_get_ids_sql_format(tables, char=True)}"
+    cursor.execute(f"select table_name from information_schema.tables where table_name {orig_tables} and table_type = 'BASE TABLE';")
+    orig_tables = cursor.fetchall()
     for table in orig_tables:
         anonymizable_fields = []
         anonymized_fields = []
         non_anonymized_fields = []
         info_table = table[0]
-        if table == '%':
-            string = f"table_name like '{table}'"
-        else:
-            string = f"table_name = '{table}'"
         #TODO suche muss angepasst werden, es werden felder gefunden welche bei der suche auf der tabelle dann nicht exisiieren
         # muss schauen wie ich die where clause anpassen muss
-        cursor.execute(f" SELECT column_name FROM information_schema.columns WHERE data_type in ('text', 'character varying') and {string};")
+        cursor.execute(f" SELECT column_name FROM information_schema.columns WHERE data_type in ('text', 'character varying') and table_name = '{info_table}';")
         while True:
             field_name = cursor.fetchall()
             if not field_name:
@@ -37,8 +46,6 @@ def run_analyse(con):
                 try:
                     cursor2.execute(f"select exists (select * from {info_table} where {field} like '{info_table}_{field}%');")
                 except:
-                    cursor2.execute(f"select exists (select * from {info_table} where {field.upper()} like '{info_table}_{field}%');")
-                finally:
                     non_anonymized_fields.append(field)
                     continue
                 result = cursor2.fetchone()
