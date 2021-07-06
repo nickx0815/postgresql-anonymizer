@@ -99,8 +99,7 @@ def _get_mapped_data(con, table, fields):
             if not records:
                 list.append((table,table,field,field))
                 break
-            for record in records:
-                list.append(record)
+            list.append(record)
     return list
      
 def copy_from(connection, data, table, columns):
