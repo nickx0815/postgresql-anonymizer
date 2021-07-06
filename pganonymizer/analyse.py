@@ -43,7 +43,7 @@ def run_analyse(con, db, tables=False):
             for field in field_name:
                 anonymizable_fields.append(field)
                 field = field[0]
-                cursor2.execute(f"select exists (select * from {info_table} where {field} like '{info_table}_{field}%');")
+                cursor2.execute(f"select exists (select * from {info_table} where \"{field}\" like '{info_table}_{field}%');")
                 result = cursor2.fetchone()
                 if not result[0]:
                     non_anonymized_fields.append(field)
