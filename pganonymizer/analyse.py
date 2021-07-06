@@ -14,7 +14,7 @@ def run_analyse(con):
         anonymizable_fields = []
         anonymized_fields = []
         non_anonymized_fields = []
-        info_table = info_table[0]
+        info_table = table[0]
         #TODO suche muss angepasst werden, es werden felder gefunden welche bei der suche auf der tabelle dann nicht exisiieren
         # muss schauen wie ich die where clause anpassen muss
         cursor.execute(f" SELECT column_name FROM information_schema.columns WHERE data_type in ('text', 'character varying') and table_name = {table}';")
