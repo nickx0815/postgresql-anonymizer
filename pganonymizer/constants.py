@@ -32,7 +32,7 @@ class constants():
     TABLE_MIGRATED_DEFINITON = {TABLE_MIGRATED_DATA: ["id  SERIAL NOT NULL primary key",
                                                       "field_id CHAR(50)",
                                                       "record_id INTEGER",
-                                                      "value CHAR(200)",
+                                                      "value VARCHAR",
                                                       "state INTEGER"],
                                 TABLE_MIGRATED_FIELDS: ["id  SERIAL NOT NULL primary key",
                                                       "model_id CHAR(50)",
