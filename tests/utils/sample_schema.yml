@@ -1,4 +1,4 @@
-tables:
+anonymization:
  - auth_user:
     primary_key: id
     fields:

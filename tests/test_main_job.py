@@ -23,7 +23,7 @@ class TestMainJob(unittest.TestCase):
         args = Args({'force_path_schema':self.path})
         testmain = AnonJobClass(args)
         testmain.set_schema()
-        self.assertEqual(testmain.schema['tables'], [{'auth_user': {'primary_key': 'id', 'fields': \
+        self.assertEqual(testmain.schema['anonymization'], [{'auth_user': {'primary_key': 'id', 'fields': \
                                                                     [{'first_name': {'provider': {'name': 'fake.first_name'}}},\
                                                                      {'last_name': {'provider': {'name': 'set', 'value': 'Bar'}}},\
                                                                      {'email': {'provider': {'name': 'md5'}, 'append': '@localhost'}}], \

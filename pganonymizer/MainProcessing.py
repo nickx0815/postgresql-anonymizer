@@ -11,9 +11,9 @@ class MainProcessing():
     successfullrecords = 0
     successfullfields = 0
 
-    type_print = {'tables': 'Anonymization',
+    type_print = {'anonymization': 'Anonymization',
                   'truncate': 'Deletion',
-                  'deanon': 'Deanonymization'}
+                  'deanonymization': 'Deanonymization'}
 
     def __init__(self, main_job, totalrecords, data, table, type):
         self.main_job = main_job

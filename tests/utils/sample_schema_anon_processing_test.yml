@@ -1,4 +1,4 @@
-tables:
+anonymization:
  - table1:
     primary_key: id
     fields:

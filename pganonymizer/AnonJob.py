@@ -1,7 +1,6 @@
 """Commandline implementation"""
 
 import copy
-
 from pganonymizer.constants import constants 
 from pganonymizer.AnonProcessing import AnonProcessing
 from pganonymizer.utils import build_sql_select, convert_list_to_sql, create_basic_table
@@ -45,11 +44,11 @@ class AnonJobClass(BaseJobClass):
     
     def update_queue(self):
         connection = self.get_connection()
-        for type_, type_attributes in self.schema.items():
+        for process_type, type_attributes in self.schema.items():
             for table in type_attributes:
-                if type(table) == str:
-                    self.jobs.put(AnonProcessing(self, type_, 1, [table], table))
-                else:
+                if process_type == 'truncate':
+                    self.jobs.put(AnonProcessing(self, process_type, 1, [table], table))
+                elif process_type == 'anonymization':
                     for table_key, table_attributes in table.items():
                         self.create_basic_table(self.get_connection(), tables=[constants.TABLE_MIGRATED_DATA], suffix=table_key)
                         test = self.update_anon_search(table_key, table_attributes)
@@ -63,7 +62,7 @@ class AnonJobClass(BaseJobClass):
                             for row in records:
                                 list.append(row.get('id'))
                             table_attributes_job = self.add_job_records_ids(table_attributes, list)
-                            self.jobs.put(AnonProcessing(self, type_, totalrecords, table_attributes_job, table_key))
+                            self.jobs.put(AnonProcessing(self, process_type, totalrecords, table_attributes_job, table_key))
         connection.close()
     
     def build_sql_select(self, connection, table_key, search, select="id"):

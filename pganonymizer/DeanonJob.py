@@ -56,7 +56,8 @@ class DeanonJobClass(BaseJobClass):
         #todo umbauen, dass ein job jeweils alle migrated_fields eines records beinhaltet. 
         #todo weitere deanon methoden umbaunen, sodass alle felder mit einem update deanonymsiert werden
         crtest = connection.cursor()
-        for table, fields in self.schema.items():
+        type = "deanonymization"
+        for table, fields in self.schema[type].items():
             for field in fields:
                 cursor = build_sql_select(connection, f"{constants.TABLE_MIGRATED_DATA}{table}", 
                                                                     ["field_id = '{field_id}'".format(field_id=field),
@@ -70,7 +71,7 @@ class DeanonJobClass(BaseJobClass):
                         break
                     for rec in records:
                         list.append((rec.get('record_id'), rec.get('value'), rec.get('id')))
-                    self.jobs.put(DeanonProcessing(self, self.TMPconnection, totalrecords, (field, list), table, 'deanon'))
+                    self.jobs.put(DeanonProcessing(self, self.TMPconnection, totalrecords, (field, list), table, type))
                 crtest.close()
         connection.close()
         

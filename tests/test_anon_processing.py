@@ -10,7 +10,7 @@ class TestAnonProcessing(unittest.TestCase):
         args = Args({'force_path_schema':self.path,
                      'FORCE_ANON_NUMBER_FIELD_PER_THREAD': 10})
         testmain = BaseJobClass(args)
-        testprocess = AnonProcessing(testmain, "tables", 0, False, False, testmain.logging_)
+        testprocess = AnonProcessing(testmain, "anonymization", 0, False, False, testmain.logging_)
         self.assertEqual(testprocess._get_run_method(), "anonymize_tables")
     
     def test_get_run_method_truncate(self):
@@ -24,8 +24,8 @@ class TestAnonProcessing(unittest.TestCase):
         args = Args({'force_path_schema':self.path,
                      'FORCE_ANON_NUMBER_FIELD_PER_THREAD': 10})
         testmain = BaseJobClass(args)
-        testprocess = AnonProcessing(testmain, "tables", 0, False, False, testmain.logging_)
-        column_dict = testprocess.get_column_dict(testmain.schema['tables'][0]['table1']['fields'])
+        testprocess = AnonProcessing(testmain, "anonymization", 0, False, False, testmain.logging_)
+        column_dict = testprocess.get_column_dict(testmain.schema['anonymization'][0]['table1']['fields'])
         for field in ['first_name', 'last_name', 'email']:
             self.assertTrue(column_dict[field]==None)
     
@@ -35,9 +35,9 @@ class TestAnonProcessing(unittest.TestCase):
         testrow = {'first_name':'Testname','last_name':'Testnachname','email':'test@test.de'}
         row_info = {'table':'table1','id':1}
         testmain = BaseJobClass(args)
-        testprocess = AnonProcessing(testmain, "tables", 0, False, False, testmain.logging_)
+        testprocess = AnonProcessing(testmain, "anonymization", 0, False, False, testmain.logging_)
         column_dict = testprocess.get_column_values(testrow,
-                                                    testmain.schema['tables'][0]['table1']['fields'],
+                                                    testmain.schema['anonymization'][0]['table1']['fields'],
                                                     row_info)
         self.assertTrue(testrow['first_name'] != column_dict['first_name'])
         self.assertTrue(testrow['last_name'] != column_dict['last_name'])
@@ -48,8 +48,8 @@ class TestAnonProcessing(unittest.TestCase):
                      'FORCE_ANON_NUMBER_FIELD_PER_THREAD': 10})
         testrow = {'first_name':'Testname','last_name':'Testnachname','email':'test@example.com'}
         testmain = BaseJobClass(args)
-        testprocess = AnonProcessing(testmain, "tables", 0, False, False, testmain.logging_)
-        result = testprocess.row_matches_excludes(testrow, excludes=testmain.schema['tables'][0]['table1']['excludes'])
+        testprocess = AnonProcessing(testmain, "anonymization", 0, False, False, testmain.logging_)
+        result = testprocess.row_matches_excludes(testrow, excludes=testmain.schema['anonymization'][0]['table1']['excludes'])
         self.assertTrue(result)
     
     def test_row_matches_excludes_false(self):
@@ -58,7 +58,7 @@ class TestAnonProcessing(unittest.TestCase):
         testrow = {'first_name':'Testname','last_name':'Testnachname','email':'test@test.com'}
         testmain = BaseJobClass(args)
         testprocess = AnonProcessing(testmain, "tables", 0, False, False, testmain.logging_)
-        result = testprocess.row_matches_excludes(testrow, excludes=testmain.schema['tables'][0]['table1']['excludes'])
+        result = testprocess.row_matches_excludes(testrow, excludes=testmain.schema['anonymization'][0]['table1']['excludes'])
         self.assertFalse(result)
     
     def test_row_matches_excludes_id_true(self):
@@ -66,8 +66,8 @@ class TestAnonProcessing(unittest.TestCase):
                      'FORCE_ANON_NUMBER_FIELD_PER_THREAD': 10})
         testrow = {'id':10, 'first_name':'Testname','last_name':'Testnachname','email':'test@example.com'}
         testmain = BaseJobClass(args)
-        testprocess = AnonProcessing(testmain, "tables", 0, False, False, testmain.logging_)
-        result = testprocess.row_matches_excludes(testrow, excludes=testmain.schema['tables'][1]['table2']['excludes'])
+        testprocess = AnonProcessing(testmain, "anonymization", 0, False, False, testmain.logging_)
+        result = testprocess.row_matches_excludes(testrow, excludes=testmain.schema['anonymization'][1]['table2']['excludes'])
         self.assertTrue(result)
     
     def test_row_matches_excludes__id_false(self):
@@ -75,8 +75,8 @@ class TestAnonProcessing(unittest.TestCase):
                      'FORCE_ANON_NUMBER_FIELD_PER_THREAD': 10})
         testrow = {'id':2, 'first_name':'Testname','last_name':'Testnachname','email':'test@test.com'}
         testmain = BaseJobClass(args)
-        testprocess = AnonProcessing(testmain, "tables", 0, False, False, testmain.logging_)
-        result = testprocess.row_matches_excludes(testrow, excludes=testmain.schema['tables'][1]['table2']['excludes'])
+        testprocess = AnonProcessing(testmain, "anonymization", 0, False, False, testmain.logging_)
+        result = testprocess.row_matches_excludes(testrow, excludes=testmain.schema['anonymization'][1]['table2']['excludes'])
         self.assertFalse(result)
     
     

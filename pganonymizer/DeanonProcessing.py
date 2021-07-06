@@ -8,7 +8,6 @@ logging_ = logger()
 class DeanonProcessing(MainProcessing):
     
     _autocommit = False
-    type = "deanonymization"
     
     def __init__(self, main_job, tmpconnection, totalrecords, data, table, type):
         super(DeanonProcessing, self).__init__(main_job, totalrecords, data, table, type)
