@@ -14,14 +14,14 @@ def _get_ids_sql_format(ids, char=False):
         return parsed
     return False
 
-def run_analyse(con, tables=False):
+def run_analyse(con, db, tables=False):
     cursor = con.cursor()
     cursor2 = con.cursor()
     if not tables:
         orig_tables = "like '%'"
     else:
         orig_tables = f"in {_get_ids_sql_format(tables, char=True)}"
-    cursor.execute(f"select table_name from information_schema.tables where table_name {orig_tables} and table_type = 'BASE TABLE';")
+    cursor.execute(f"select table_name from information_schema.tables where table_name {orig_tables} and table_type = 'BASE TABLE' and table_schema = 'public' and table_catalog = '{db}';")
     orig_tables = cursor.fetchall()
     for table in orig_tables:
         anonymizable_fields = []
