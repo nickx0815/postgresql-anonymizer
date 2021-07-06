@@ -21,10 +21,7 @@ def run_analyse(con):
             anonymized_fields = []
             non_anonymized_fields = []
             info_table = info_table[0]
-            cursor.execute(f"select name from ir_model_fields where model = '{info_table.replace('_','.')}' and store = true and ttype in ('char', \
-                                     'text', \
-                                     'html',\
-                                     'selection');")
+            cursor.execute(f"select name from ir_model_fields where model = '{info_table.replace('_','.')}' and store = true and ttype in ('char', 'text', 'html','selection');")
             while True:
                 field_name = cursor.fetchall()
                 if not field_name:
