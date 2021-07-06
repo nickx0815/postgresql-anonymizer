@@ -15,9 +15,13 @@ def run_analyse(con):
         anonymized_fields = []
         non_anonymized_fields = []
         info_table = table[0]
+        if table == '%':
+            string = f"table_name like '{table}'"
+        else:
+            string = f"table_name = '{table}'"
         #TODO suche muss angepasst werden, es werden felder gefunden welche bei der suche auf der tabelle dann nicht exisiieren
         # muss schauen wie ich die where clause anpassen muss
-        cursor.execute(f" SELECT column_name FROM information_schema.columns WHERE data_type in ('text', 'character varying') and table_name = {table}';")
+        cursor.execute(f" SELECT column_name FROM information_schema.columns WHERE data_type in ('text', 'character varying') and {string}';")
         while True:
             field_name = cursor.fetchall()
             if not field_name:
