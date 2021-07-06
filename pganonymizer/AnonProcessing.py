@@ -1,13 +1,7 @@
 """Helper methods"""
 
-from __future__ import absolute_import
 
-import csv
-import json
 import re
-import subprocess
-import time
-import datetime
 
 import psycopg2
 import psycopg2.extras
@@ -16,9 +10,8 @@ from psycopg2.errors import BadCopyFileFormat, InvalidTextRepresentation
 from six import StringIO
 
 from pganonymizer.constants import constants
-from pganonymizer.exceptions import BadDataFormat
 from pganonymizer.providers import get_provider
-from pganonymizer.utils import _get_ids_sql_format, _, get_table_count, build_sql_select, update_fields_history, get_connection
+from pganonymizer.utils import get_table_count, build_sql_select
 from pganonymizer.MainProcessing import MainProcessing
 from pganonymizer.logging import logger
 logging_ = logger()
@@ -28,12 +21,13 @@ logging_ = logger()
 class AnonProcessing(MainProcessing):
     #todo verschlüsselung einbauen
     
+    _autocommit = False
+    
     def __init__(self, main_job, type, totalrecords, schema, table, pg_args):
         super(AnonProcessing, self).__init__(main_job, totalrecords, schema, table, pg_args, type, main_job.logging_)
         self.verbose=False
         
-        
-    def _get_rel_method(self):
+    def _get_run_method(self):
         return constants.PROCESS_METHOD_MAPPING[self.type]
     
     def anonymize_tables(self, connection):
@@ -45,16 +39,14 @@ class AnonProcessing(MainProcessing):
         :param bool verbose: Display logging information and a progress bar.
         """
         definition = self.schema
-        verbose = self.verbose
         table_name = self.table
         columns = definition.get('fields', [])
         excludes = definition.get('excludes', [])
         search = definition.get('search')
         primary_key = definition.get('primary_key', constants.DEFAULT_PRIMARY_KEY)
-        total_count = get_table_count(connection, table_name)
-        self.build_data(connection, table_name, columns, excludes, total_count,search, primary_key, verbose)
+        self.__process(connection, table_name, columns, excludes,search, primary_key)
     
-    def build_data(self, connection, table, columns, excludes, total_count, search,primary_key, verbose=False):
+    def __process(self, connection, table, columns, excludes, search, primary_key):
         """
         Select all data from a table and return it together with a list of table columns.
     
@@ -69,18 +61,7 @@ class AnonProcessing(MainProcessing):
         :return: A tuple containing the data list and a complete list of all table columns.
         :rtype: (list, list)
         """
-        #todo update und history (migrated_data) in einer transaktion, wegen möglich eines abbruches
-        
-        #todo 
-        # umbauen der funktion
-        # ausgangslage: bisher werden alle daten einer tabelle ermittelt, dann jeden record durchgegangen und alle anon felder
-        # behandelt. Nachdem die komplette tabelle bearbeitet wurde, werden die history objekte angelegt. 
-        # Anforderung: Alle Columns werden für die tabelle ermittelt und dann durchgegangen. Pro column werden 
-        # dann die daten ermittelt. Nach bearbeitung eines records wird dann eine history angelegt. 
-        if verbose:
-            progress_bar = IncrementalBar('Anonymizing', max=total_count)
         cursor = build_sql_select(connection, table, search)
-        number=0
         while True:
             rows = cursor.fetchmany(size=constants.ANON_FETCH_RECORDS)
             if not rows:
@@ -88,7 +69,6 @@ class AnonProcessing(MainProcessing):
                 break
             for row in rows:
                 try:
-                    number=number+1
                     row_column_dict = {}
                     if not self.row_matches_excludes(row, excludes):
                         row_column_dict = self.get_column_values(row, columns, {'id':row.get('id'), 'table':table})
@@ -99,18 +79,15 @@ class AnonProcessing(MainProcessing):
                                 continue
                             original_data[key] = {row.get('id'): row[key]}
                             if self.main_job.args.migration == 'True':
-                                self.create_anon(connection, table, original_data)
-                            self.import_data(connection, key, table, row.get('id'), primary_key, value)
+                                self.save_original_data(connection, table, original_data)
+                            self.migrate_field(connection, key, table, row.get('id'), primary_key, value)
                             self.updatesuccessfullfields()
+                            connection.commit()
                         #todo nur updaten wenn auhc irgendein feld bearbeitet wurde
                         self.updatesuccessfullrecords()
                 except Exception as ex:
                     #todo use logger
                     print(ex)
-            if verbose:
-                progress_bar.next()
-        if verbose:
-            progress_bar.finish()
         cursor.close()
     
     def get_column_dict(self, columns):
@@ -182,15 +159,8 @@ class AnonProcessing(MainProcessing):
             self.totalrecords = self.totalrecords+1
         cursor.close()
     
-    def _get_anon_field_id(self, columns):
-        dic = {}
-        for column in columns:
-            for key, value in column.items():
-                dic[key] = value.get('provider').get('field_anon_id')
-        return dic
-    
     @logging_.ANONYMIZATION_RECORD
-    def import_data(self, connection, field, source_table, row_id, primary_key, value):
+    def migrate_field(self, connection, field, source_table, row_id, primary_key, value):
         """
         Import the temporary and anonymized data to a temporary table and write the changes back.
     
@@ -231,7 +201,7 @@ class AnonProcessing(MainProcessing):
         return False
     
     @logging_.CHECK_MIGRATED_FIELD
-    def check_migrated_fields_rec(self, cr, field, table):
+    def save_migrated_field(self, cr, field, table):
         sql_insert = f"INSERT INTO {constants.TABLE_MIGRATED_FIELDS} (model_id, field_id) VALUES ('{table}', '{field}');"
         sql_select = f"SELECT id  from {constants.TABLE_MIGRATED_FIELDS} \
                                 WHERE model_id = '{table}' \
@@ -262,10 +232,10 @@ class AnonProcessing(MainProcessing):
             return False
     
     @logging_.INSERT_MIGRATED_DATA
-    def create_anon(self, con, table, data):
+    def save_original_data(self, con, table, data):
         cr = con.cursor()
         field = list(data.keys())[0]
-        self.check_migrated_fields_rec(cr, field, table)
+        self.save_migrated_field(cr, field, table)
         id = data.get(field)
         sql_migrated_data_insert = f"Insert into {constants.TABLE_MIGRATED_DATA}{table} \
                                         (field_id, record_id, value, state)\

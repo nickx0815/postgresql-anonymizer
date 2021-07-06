@@ -1,19 +1,14 @@
 """Commandline implementation"""
 
-from __future__ import absolute_import, print_function
-
-import argparse
 import threading
-import sys
 from queue import Queue
 
 import yaml
 
 from pganonymizer.constants import constants 
 from pganonymizer.providers import PROVIDERS
-from pganonymizer.utils import get_connection, get_pg_args, create_basic_tables
+from pganonymizer.utils import get_connection, get_pg_args, create_basic_table, run_analysis
 from pganonymizer.logging import logger
-from pganonymizer.analyse import run_analyse
 logging_ = logger()
 
 class BaseJobClass():
@@ -58,9 +53,10 @@ class BaseJobClass():
         except:
             schema = yaml.load(open(path))
         finally:
+            if not schema:
+                raise Exception("no schema set")
             self.schema = schema
-    
-    
+            
     def set_logger(self):
         self.logging_ = logging_.set_log_level(self.args)
     
@@ -85,9 +81,9 @@ class BaseJobClass():
         """Main method"""
         self.update_queue()
         self.test_connection()
-        create_basic_tables(self.get_connection())
+        create_basic_table(self.get_connection())
         self.start()
-        run_analyse(self.get_connection(autocommit=True), self.args.dbname)
+        run_analysis(self.get_connection(autocommit=True), self.args.dbname)
     
     def get_connection(self, autocommit=False):
         con = get_connection(self.pg_args)

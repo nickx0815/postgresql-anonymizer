@@ -1,14 +1,7 @@
 """Helper methods"""
 
-from __future__ import absolute_import
 
-import csv
-import json
-import logging
-import re
-import subprocess
 import time
-import datetime
 from pganonymizer.utils import get_connection
 from pganonymizer.logging import logger
 logging_ = logger()
@@ -18,9 +11,9 @@ class MainProcessing():
     successfullrecords = 0
     successfullfields = 0
 
-    typemethodmapper = {'tables': 'Anonymization',
-                        'truncate': 'Deletion',
-                        'deanon': 'Deanonymization'}
+    type_print = {'tables': 'Anonymization',
+                  'truncate': 'Deletion',
+                  'deanon': 'Deanonymization'}
 
     def __init__(self, main_job, totalrecords, schema, table, pg_args, type ,logger):
         self.logging_ = logger
@@ -50,8 +43,8 @@ class MainProcessing():
 
     @logging_.RESULTS
     def start(self):
-        connection = self.get_connection(autocommit = True)
-        method = self._get_rel_method()
+        connection = self.get_connection(autocommit = self._autocommit)
+        method = self._get_run_method()
         try:
             getattr(self, method)(connection)
         except Exception as exp:
@@ -61,9 +54,9 @@ class MainProcessing():
             connection.close()
             self.endtime = time.time()
 
-    def _get_rel_method(self):
+    def _get_run_method(self):
         raise Exception("needs to be implemented!")
 
     def type_to_method_mapper(self, type):
-        return self.typemethodmapper.get(type, 'Deanonymization')
+        return self.type_print.get(type, 'Deanonymization')
     

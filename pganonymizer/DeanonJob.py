@@ -1,12 +1,8 @@
 """Commandline implementation"""
 
-from __future__ import absolute_import, print_function
-
-import time
-
 
 from pganonymizer.constants import constants 
-from pganonymizer.utils import build_sql_select, _get_mapped_data, get_distinct_from_tuple
+from pganonymizer.utils import build_sql_select, get_migration_mapping, get_distinct_from_tuple
 from pganonymizer.DeanonProcessing import DeanonProcessing
 from pganonymizer.MainJob import BaseJobClass
 
@@ -33,7 +29,7 @@ class DeanonJobClass(BaseJobClass):
         crtest = connection.cursor()
         list_table = []
         for table, fields in schema.items():
-            mapped_field_data = _get_mapped_data(connection, table, fields=fields)
+            mapped_field_data = get_migration_mapping(connection, table, fields=fields)
             distinct_tables = get_distinct_from_tuple(mapped_field_data, 1)
             for migrated_table, mapped_fields in distinct_tables.items():
                 temp_table = "tmp_"+migrated_table

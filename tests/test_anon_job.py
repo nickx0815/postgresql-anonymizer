@@ -4,7 +4,7 @@ from pganonymizer.utils import get_connection
 from pganonymizer.AnonJob import AnonJobClass
 from utils.ConnectionMock import ConnectionMock
 from utils.CursorMock import CursorMock
-from pganonymizer.args import Args
+from pganonymizer.Args import Args
 
 
 class TestAnonJob(unittest.TestCase):
@@ -16,7 +16,7 @@ class TestAnonJob(unittest.TestCase):
                      'FORCE_ANON_NUMBER_FIELD_PER_THREAD': 10})
         testmain = AnonJobClass(args)
         testmain.get_connection = MagicMock(return_value=ConnectionMock())
-        testmain.create_basic_tables = MagicMock(return_value=True)
+        testmain.create_basic_table = MagicMock(return_value=True)
         testmain.build_sql_select = MagicMock(return_value=CursorMock())
         testmain.update_queue()
         #todo assert

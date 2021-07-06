@@ -5,7 +5,7 @@ from pganonymizer.constants import constants
 from configparser import ConfigParser
 from pganonymizer.AnonJob import AnonJobClass
 from pganonymizer.DeanonJob import DeanonJobClass
-from pganonymizer.args import Args
+from pganonymizer.Args import Args
 import time
 
 import sys

@@ -1,28 +1,25 @@
 """Helper methods"""
 
-from __future__ import absolute_import
 
 import csv
 import json
-import logging
-import subprocess
-import time
 
-import psycopg2, datetime
+import psycopg2
 import psycopg2.extras
-from progress.bar import IncrementalBar
 from psycopg2.errors import BadCopyFileFormat, InvalidTextRepresentation
 from six import StringIO
 
 from pganonymizer.constants import constants
 from pganonymizer.exceptions import BadDataFormat
-from pganonymizer.providers import get_provider
+no_pretty_table = False
+try:
+    from prettytable import PrettyTable
+except:
+    no_pretty_table = True
 
 
 def _(t):
     return t.replace("_", ".")
-
-
 
 def get_pg_args(args):
         """
@@ -34,13 +31,6 @@ def get_pg_args(args):
         """
         return ({name: value for name, value in
                  zip(constants.DATABASE_ARGS, (args.dbname, args.user, args.password, args.host, args.port))})
-
-def update_fields_history(cr, model_id, record, state, field_id):
-    now = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
-    cr.execute(f"Insert into ir_model_fields_anonymization_history ( \
-                state, model_id, field_to_group,create_date, write_date, create_uid, record_id \
-            ) values ( \
-                {state}, '{model_id}','{field_id}', '{str(now)}', '{str(now)}', {1}, {record});")
 
 def build_sql_select(connection, table, search, select="*", operator="AND"):
     cursor = connection.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -55,7 +45,7 @@ def build_sql_select(connection, table, search, select="*", operator="AND"):
     cursor.execute(sql)
     return cursor
 
-def _get_ids_sql_format(ids, char=False):
+def convert_list_to_sql(ids, char=False):
     if ids:
         parsed =  str(set([x for x in ids])).replace("{", "(").replace("}", ")")
         if not char:
@@ -72,7 +62,7 @@ def get_distinct_from_tuple(iterable, index):
         distinct_table_dic[current_object].append(object[3])
     return distinct_table_dic
 
-def create_basic_tables(con, tables=constants.BASIC_TABLES, suffix=""):
+def create_basic_table(con, tables=constants.BASIC_TABLES, suffix=""):
     cr = con.cursor()
     for basic_table in tables:
         basic_table_with_suffix = f'{basic_table}{suffix}'
@@ -81,17 +71,17 @@ def create_basic_tables(con, tables=constants.BASIC_TABLES, suffix=""):
         if not table[0]:
             fields = constants.TABLE_MIGRATED_DEFINITON.get(basic_table)
             if fields:
-                cr.execute(f'CREATE TABLE {basic_table_with_suffix} {_get_ids_sql_format(fields)};')
+                cr.execute(f'CREATE TABLE {basic_table_with_suffix} {convert_list_to_sql(fields)};')
     cr.execute('COMMIT;')
     cr.close()
     con.close()
 
-def _get_mapped_data(con, table, fields):
+def get_migration_mapping(con, table, fields):
     # todo function to determine which mapping (10,11,12...)
     cr = con.cursor()
     list = []
     for field in fields:
-        #field_parsed = _get_ids_sql_format(fields, char=True)
+        #field_parsed = convert_list_to_sql(fields, char=True)
         select_model_id_sql = f"SELECT old_model_name, new_model_name, old_field_name, new_field_name FROM {constants.TABLE_MIGRATED_DATA_MAPPING} where old_model_name = '{table}' and old_field_name = '{field}'"
         cr.execute(select_model_id_sql)
         while True:
@@ -173,18 +163,56 @@ def data2csv(data):
         writer.writerow(row_data)
     buf.seek(0)
     return buf
-# 
-# def create_database_dump(db_args):
-#     """
-#     Create a dump file from the current database.
-# 
-#     :param str filename: Path to the dumpfile that should be created
-#     :param dict db_args: A dictionary with database related information
-#     """
-#     cur_time = time.time()
-#     dbname = db_args.get('dbname')
-#     file = f"{constants.PATH_DUMP}{cur_time}_{dbname}"
-#     args = '{dbname}'.format(**db_args)
-#     cmd = f'docker exec -i migration_postgres_1 psql -U odoo {args} > {file}'
-#     logging.info('Creating database dump file "%s"', file)
-#     subprocess.run(cmd, shell=True)
+
+def run_analysis(con, db, tables=False):
+    cursor = con.cursor()
+    cursor2 = con.cursor()
+    if not tables:
+        orig_tables = "like '%'"
+    else:
+        orig_tables = f"in {convert_list_to_sql(tables, char=True)}"
+    cursor.execute(f"select table_name from information_schema.tables where table_name {orig_tables} and table_type = 'BASE TABLE' and table_schema = 'public' and table_catalog = '{db}';")
+    orig_tables = cursor.fetchall()
+    for table in orig_tables:
+        anonymizable_fields = []
+        anonymized_fields = []
+        non_anonymized_fields = []
+        info_table = table[0]
+        #TODO suche muss angepasst werden, es werden felder gefunden welche bei der suche auf der tabelle dann nicht exisiieren
+        # muss schauen wie ich die where clause anpassen muss
+        cursor.execute(f" SELECT column_name FROM information_schema.columns WHERE data_type in ('text', 'character varying') and table_name = '{info_table}';")
+        while True:
+            field_name = cursor.fetchall()
+            if not field_name:
+                break
+            if not no_pretty_table:
+                x = PrettyTable()
+                x.field_names = ["Fieldname", "Percent Anonymized", "Total Records", "Total Anonymized Records"]
+            else:
+                x = "Fieldname    Percent Anonymized    Total Records    Total Anonymized Records\n"
+            for field in field_name:
+                anonymizable_fields.append(field)
+                field = field[0]
+                cursor2.execute(f"select exists (select * from {info_table} where \"{field}\" like '{info_table}_{field}%');")
+                result = cursor2.fetchone()
+                if not result[0]:
+                    non_anonymized_fields.append(field)
+                    continue
+                if result[0]:
+                    anonymized_fields.append(field)
+                    cursor.execute(f"select count(*) from {info_table} where {field} is not NULL and {field} <> '';")
+                    total_number = cursor.fetchone()[0]
+                    cursor.execute(f"select count(*) from {info_table} where {field} like '{info_table}_{field}%' \
+                        and {field} is not NULL and {field} <> '';")
+                    anonymized_number = cursor.fetchone()[0]
+                    percent = round(anonymized_number/total_number*100,2) if total_number != 0 else 0.0
+                    if not no_pretty_table:
+                        x.add_row([field, percent, total_number, anonymized_number])
+                    else:
+                        x = x + f"{field}, {percent} %, {total_number}, {anonymized_number}\n"
+            if len(anonymized_fields) != 0:
+                print(f"{info_table}")
+                print(x)
+                print(f"number fields {len(anonymized_fields)}")
+                print("")
+    print("finished")

@@ -2,7 +2,7 @@ from unittest.mock import MagicMock
 import unittest
 from pganonymizer.utils import get_connection
 from pganonymizer.AnonJob import AnonJobClass
-from pganonymizer.args import Args
+from pganonymizer.Args import Args
 from pganonymizer.constants import constants
 from pganonymizer.logging import logger
 from mock import patch

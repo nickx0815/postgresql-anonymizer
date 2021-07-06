@@ -97,11 +97,11 @@ class logger():
         return start
     
     def ANONYMIZATION_RECORD(self, function):
-        def import_data(self, connection, field, source_table, row_id, primary_key, value):
+        def migrate_field(self, connection, field, source_table, row_id, primary_key, value):
             result = function(self, connection, field, source_table, row_id, primary_key, value)
             self.logging_.logging_.info(f'{source_table} {row_id} {field} anonymized -> {value}')
             return result
-        return import_data
+        return migrate_field
     
     def EXCLUDE_RECORD(self, function):
         def row_matches_excludes(self, row, excludes=None):
@@ -119,11 +119,11 @@ class logger():
         return truncate_tables
     
     def CHECK_MIGRATED_FIELD(self, function):
-        def check_migrated_fields_rec(self, cr, field, table):
+        def save_migrated_field(self, cr, field, table):
             result = function(self, cr, field, table)
             self.logging_.logging_.debug(f'INSERT INTO {table} ({field})')
             return result
-        return check_migrated_fields_rec
+        return save_migrated_field
     
     def INSERT_MIGRATED_FIELD(self, function):
         def insert_migrated_fields_rec(self, cr, sql):
@@ -134,7 +134,7 @@ class logger():
         return insert_migrated_fields_rec
     
     def INSERT_MIGRATED_DATA(self, function):
-        def create_anon(self, con, table, data):
+        def save_original_data(self, con, table, data):
             result = function(self, con, table, data)
             migrated_table = constants.TABLE_MIGRATED_DATA+"_"+table
             field = list(data.keys())[0]
@@ -142,7 +142,7 @@ class logger():
             value = data.get(field).get(id)
             self.logging_.logging_.debug(f'{migrated_table} new({field} {id} {value})')
             return result
-        return create_anon
+        return save_original_data
     
     def UPDATE_MIGRATED_DATA(self, function):
         def update_migrated_data_history(self, cr, id, table):

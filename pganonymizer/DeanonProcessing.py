@@ -1,5 +1,5 @@
 import psycopg2
-from pganonymizer.utils import update_fields_history, _get_mapped_data
+from pganonymizer.utils import get_migration_mapping
 from pganonymizer.constants import constants
 from pganonymizer.logging import logger
 from pganonymizer.MainProcessing import MainProcessing
@@ -7,20 +7,21 @@ logging_ = logger()
 
 class DeanonProcessing(MainProcessing):
     
+    _autocommit = True
     type = "deanonymization"
     
     def __init__(self, main_job, tmpconnection, totalrecords, schema, table, pg_args, type):
         super(DeanonProcessing, self).__init__(main_job, totalrecords, schema, table, pg_args, type, main_job.logging_)
         self.tmpcon = tmpconnection
         
-    def _get_rel_method(self):
+    def _get_run_method(self):
         return "run_revert"
 
     def run_revert(self, connection):
         data = self.schema
         table = self.table
         number = 0
-        mapped_field_data = _get_mapped_data(connection, table, fields=[data[0]])[0]
+        mapped_field_data = get_migration_mapping(connection, table, fields=[data[0]])[0]
         original_table = mapped_field_data[0]
         migrated_table = mapped_field_data[1]
         original_field = mapped_field_data[2]

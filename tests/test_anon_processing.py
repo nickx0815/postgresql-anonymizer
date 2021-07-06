@@ -1,24 +1,24 @@
 import unittest
-from pganonymizer.args import Args
+from pganonymizer.Args import Args
 from pganonymizer.MainJob import BaseJobClass
 from pganonymizer.AnonProcessing import AnonProcessing
 
 class TestAnonProcessing(unittest.TestCase):
     path = __file__.replace('test_anon_processing.py', 'utils/sample_schema_anon_processing_test.yml')
     
-    def test_get_rel_method_tables(self):
+    def test_get_run_method_tables(self):
         args = Args({'force_path_schema':self.path,
                      'FORCE_ANON_NUMBER_FIELD_PER_THREAD': 10})
         testmain = BaseJobClass(args)
         testprocess = AnonProcessing(testmain, "tables", 0, False, False, testmain.logging_)
-        self.assertEqual(testprocess._get_rel_method(), "anonymize_tables")
+        self.assertEqual(testprocess._get_run_method(), "anonymize_tables")
     
-    def test_get_rel_method_truncate(self):
+    def test_get_run_method_truncate(self):
         args = Args({'force_path_schema':self.path,
                      'FORCE_ANON_NUMBER_FIELD_PER_THREAD': 10})
         testmain = BaseJobClass(args)
         testprocess = AnonProcessing(testmain, "truncate", 0, False, False, testmain.logging_)
-        self.assertEqual(testprocess._get_rel_method(), "truncate_tables")
+        self.assertEqual(testprocess._get_run_method(), "truncate_tables")
     
     def test_get_column_dict(self):
         args = Args({'force_path_schema':self.path,
