@@ -41,6 +41,13 @@ class logger():
             return result
         return start_processing
     
+    def MAPPED_FIELD_NOT_FOUND(self, function):
+        def _field_not_found(self, record):
+            result = function(self, record)
+            self.logging_.logging_.debug(f"the record {record} is skipped, value not found for migrated field")
+            return result
+        return _field_not_found
+    
     def TEST_CONNECTION(self, function):
         def test_connection(self):
             result = function(self)

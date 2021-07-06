@@ -87,7 +87,7 @@ class BaseJobClass():
         self.test_connection()
         create_basic_tables(self.get_connection())
         self.start()
-        run_analyse(self.get_connection())
+        run_analyse(self.get_connection(autocommit=True))
     
     def get_connection(self, autocommit=False):
         con = get_connection(self.pg_args)
