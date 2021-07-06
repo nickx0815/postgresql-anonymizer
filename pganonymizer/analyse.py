@@ -54,7 +54,7 @@ def run_analyse(con):
                         if not no_pretty_table:
                             x.add_row([field, percent, total_number, anonymized_number])
                         else:
-                            x.append(f"{field}, {percent} %, {total_number}, {anonymized_number}\n")
+                            x = x + f"{field}, {percent} %, {total_number}, {anonymized_number}\n"
                 if len(anonymized_fields) != 0:
                     print(f"{info_table}")
                     print(x)
