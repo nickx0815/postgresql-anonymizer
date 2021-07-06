@@ -21,6 +21,8 @@ def run_analyse(con):
             anonymized_fields = []
             non_anonymized_fields = []
             info_table = info_table[0]
+            #TODO suche muss angepasst werden, es werden felder gefunden welche bei der suche auf der tabelle dann nicht exisiieren
+            # muss schauen wie ich die where clause anpassen muss
             cursor.execute(f"select name from ir_model_fields where model = '{info_table.replace('_','.')}' and store = true and ttype in ('char', 'text', 'html','selection');")
             while True:
                 field_name = cursor.fetchall()
@@ -37,6 +39,8 @@ def run_analyse(con):
                     try:
                         cursor2.execute(f"select exists (select * from {info_table} where {field} like '{info_table}_{field}%');")
                     except:
+                        cursor2.execute(f"select exists (select * from {info_table} where {field.upper()} like '{info_table}_{field}%');")
+                    finally:
                         non_anonymized_fields.append(field)
                         continue
                     result = cursor2.fetchone()
