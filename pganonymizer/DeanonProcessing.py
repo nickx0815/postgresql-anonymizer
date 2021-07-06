@@ -7,11 +7,11 @@ logging_ = logger()
 
 class DeanonProcessing(MainProcessing):
     
-    _autocommit = True
+    _autocommit = False
     type = "deanonymization"
     
-    def __init__(self, main_job, tmpconnection, totalrecords, schema, table, pg_args, type):
-        super(DeanonProcessing, self).__init__(main_job, totalrecords, schema, table, pg_args, type, main_job.logging_)
+    def __init__(self, main_job, tmpconnection, totalrecords, data, table, type):
+        super(DeanonProcessing, self).__init__(main_job, totalrecords, data, table, type)
         self.tmpcon = tmpconnection
         
     def _get_run_method(self):
@@ -35,11 +35,15 @@ class DeanonProcessing(MainProcessing):
             record_db = cr3.fetchone()
             cr3.close()
             if record_db:
-                self.revert_anonymization(connection, record_db, migrated_table, migrated_field, value)
-                self.update_migrated_data_history(connection.cursor(), record_id, table)
-                self.updatesuccessfullfields()
-                self.updatesuccessfullrecords()
-        #print(str(number) + " records deanonymized!")
+                try:
+                    self.revert_anonymization(connection, record_db, migrated_table, migrated_field, value)
+                    self.update_migrated_data_history(connection.cursor(), record_id, table)
+                    self.updatesuccessfullfields()
+                    self.updatesuccessfullrecords()
+                except:
+                    connection.rollback()
+                finally:
+                    connection.commit()
     
     @logging_.UPDATE_MIGRATED_DATA
     def update_migrated_data_history(self, cr, id, table):

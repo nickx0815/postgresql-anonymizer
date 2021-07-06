@@ -48,7 +48,7 @@ class AnonJobClass(BaseJobClass):
         for type_, type_attributes in self.schema.items():
             for table in type_attributes:
                 if type(table) == str:
-                    self.jobs.put(AnonProcessing(self, type_, 1, [table], table, self.pg_args))
+                    self.jobs.put(AnonProcessing(self, type_, 1, [table], table))
                 else:
                     for table_key, table_attributes in table.items():
                         self.create_basic_table(self.get_connection(), tables=[constants.TABLE_MIGRATED_DATA], suffix=table_key)
@@ -63,7 +63,7 @@ class AnonJobClass(BaseJobClass):
                             for row in records:
                                 list.append(row.get('id'))
                             table_attributes_job = self.add_job_records_ids(table_attributes, list)
-                            self.jobs.put(AnonProcessing(self, type_, totalrecords, table_attributes_job, table_key, self.pg_args))
+                            self.jobs.put(AnonProcessing(self, type_, totalrecords, table_attributes_job, table_key))
         connection.close()
     
     def build_sql_select(self, connection, table_key, search, select="id"):

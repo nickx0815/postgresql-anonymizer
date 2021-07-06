@@ -23,9 +23,8 @@ class AnonProcessing(MainProcessing):
     
     _autocommit = False
     
-    def __init__(self, main_job, type, totalrecords, schema, table, pg_args):
-        super(AnonProcessing, self).__init__(main_job, totalrecords, schema, table, pg_args, type, main_job.logging_)
-        self.verbose=False
+    def __init__(self, main_job, type, totalrecords, data, table):
+        super(AnonProcessing, self).__init__(main_job, totalrecords, data, table, type)
         
     def _get_run_method(self):
         return constants.PROCESS_METHOD_MAPPING[self.type]
@@ -78,11 +77,15 @@ class AnonProcessing(MainProcessing):
                                 #the case for already anonymized (migration) records
                                 continue
                             original_data[key] = {row.get('id'): row[key]}
-                            if self.main_job.args.migration == 'True':
-                                self.save_original_data(connection, table, original_data)
-                            self.migrate_field(connection, key, table, row.get('id'), primary_key, value)
-                            self.updatesuccessfullfields()
-                            connection.commit()
+                            try:
+                                if self.main_job.args.migration == 'True':
+                                    self.save_original_data(connection, table, original_data)
+                                self.migrate_field(connection, key, table, row.get('id'), primary_key, value)
+                                self.updatesuccessfullfields()
+                            except:
+                                connection.rollback()
+                            finally:
+                                connection.commit()
                         #todo nur updaten wenn auhc irgendein feld bearbeitet wurde
                         self.updatesuccessfullrecords()
                 except Exception as ex:

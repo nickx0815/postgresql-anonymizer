@@ -70,7 +70,7 @@ class DeanonJobClass(BaseJobClass):
                         break
                     for rec in records:
                         list.append((rec.get('record_id'), rec.get('value'), rec.get('id')))
-                    self.jobs.put(DeanonProcessing(self, self.TMPconnection, totalrecords, (field, list), table, self.pg_args,'deanon'))
+                    self.jobs.put(DeanonProcessing(self, self.TMPconnection, totalrecords, (field, list), table, 'deanon'))
                 crtest.close()
         connection.close()
         

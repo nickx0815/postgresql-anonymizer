@@ -15,17 +15,17 @@ class MainProcessing():
                   'truncate': 'Deletion',
                   'deanon': 'Deanonymization'}
 
-    def __init__(self, main_job, totalrecords, schema, table, pg_args, type ,logger):
-        self.logging_ = logger
+    def __init__(self, main_job, totalrecords, data, table, type):
         self.main_job = main_job
+        self.logging_ = main_job.logging_
         self.type=type
         self.starttime = time.time()
         self.totalrecords = totalrecords
-        self.schema=schema
+        self.schema=data
         self.starttime = time.time()
         self.table=table
         self.totalrecords = totalrecords
-        self.pg_args = pg_args
+        self.pg_args = main_job.pg_args
 
     def updatesuccessfullrecords(self):
         self.successfullrecords = self.successfullrecords+1
@@ -58,5 +58,5 @@ class MainProcessing():
         raise Exception("needs to be implemented!")
 
     def type_to_method_mapper(self, type):
-        return self.type_print.get(type, 'Deanonymization')
+        return self.type_print[self.type]
     
