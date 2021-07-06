@@ -95,8 +95,8 @@ def _get_mapped_data(con, table, fields):
         select_model_id_sql = f"SELECT old_model_name, new_model_name, old_field_name, new_field_name FROM {constants.TABLE_MIGRATED_DATA_MAPPING} where old_model_name = '{table}' and old_field_name = '{field}'"
         cr.execute(select_model_id_sql)
         while True:
-            records = cr.fetchone()
-            if not records:
+            record = cr.fetchone()
+            if not record:
                 list.append((table,table,field,field))
                 break
             list.append(record)
