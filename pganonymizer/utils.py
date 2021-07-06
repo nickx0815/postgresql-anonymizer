@@ -100,6 +100,7 @@ def _get_mapped_data(con, table, fields):
                 list.append((table,table,field,field))
                 break
             list.append(record)
+            break
     return list
      
 def copy_from(connection, data, table, columns):
