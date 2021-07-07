@@ -1,5 +1,5 @@
 
 import unittest
-class TestDeanonJob(unittest.TestCase):
+class TestDeAnonJobClass(unittest.TestCase):
     pass
     

@@ -11,7 +11,7 @@ from pganonymizer.utils import get_connection, get_pg_args, create_basic_table, 
 from pganonymizer.logging import logger
 logging_ = logger()
 
-class BaseJobClass():
+class Main():
     jobs = Queue()
     
     def __init__(self, args):

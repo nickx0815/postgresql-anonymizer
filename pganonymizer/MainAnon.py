@@ -2,17 +2,16 @@
 
 import copy
 from pganonymizer.constants import constants 
-from pganonymizer.AnonProcessing import AnonProcessing
+from pganonymizer.JobAnon import JobAnon
 from pganonymizer.utils import build_sql_select, convert_list_to_sql, create_basic_table
-from pganonymizer.MainJob import BaseJobClass
-from pganonymizer.AnonProcessing import AnonProcessing
+from pganonymizer.Main import Main
 
-class AnonJobClass(BaseJobClass):
+class MainAnon(Main):
     
     THREAD = "NUMBER_MAX_THREADS_ANON"
     
     def __init__(self, args):
-        super(AnonJobClass, self).__init__(args)
+        super(MainAnon, self).__init__(args)
         self.set_anon_fetch_records(args)
         self.set_anon_number_field_per_thread(args)
         
@@ -31,7 +30,8 @@ class AnonJobClass(BaseJobClass):
         return self.ANON_FETCH_RECORDS
     
     def get_args(self):
-        parser =  BaseJobClass.get_args(self, parseArgs=False)
+        #todo use super call
+        parser =  Main.get_args(self, parseArgs=False)
         parser.add_argument('-v', '--verbose', action='count', help='Increase verbosity')
         parser.add_argument('-l', '--list-providers', action='store_true', help='Show a list of all available providers',
                             default=False)
@@ -47,7 +47,7 @@ class AnonJobClass(BaseJobClass):
         for process_type, type_attributes in self.schema.items():
             for table in type_attributes:
                 if process_type == 'truncate':
-                    self.jobs.put(AnonProcessing(self, process_type, 1, [table], table))
+                    self.jobs.put(JobAnon(self, process_type, 1, [table], table))
                 elif process_type == 'anonymization':
                     for table_key, table_attributes in table.items():
                         self.create_basic_table(self.get_connection(), tables=[constants.TABLE_MIGRATED_DATA], suffix=table_key)
@@ -62,7 +62,7 @@ class AnonJobClass(BaseJobClass):
                             for row in records:
                                 list.append(row.get('id'))
                             table_attributes_job = self.add_job_records_ids(table_attributes, list)
-                            self.jobs.put(AnonProcessing(self, process_type, totalrecords, table_attributes_job, table_key))
+                            self.jobs.put(JobAnon(self, process_type, totalrecords, table_attributes_job, table_key))
         connection.close()
     
     def build_sql_select(self, connection, table_key, search, select="id"):

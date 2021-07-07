@@ -2,15 +2,15 @@ import psycopg2
 from pganonymizer.utils import get_migration_mapping
 from pganonymizer.constants import constants
 from pganonymizer.logging import logger
-from pganonymizer.MainProcessing import MainProcessing
+from pganonymizer.Job import Job
 logging_ = logger()
 
-class DeanonProcessing(MainProcessing):
+class JobDeanon(Job):
     
     _autocommit = False
     
     def __init__(self, main_job, tmpconnection, totalrecords, data, table, type):
-        super(DeanonProcessing, self).__init__(main_job, totalrecords, data, table, type)
+        super(JobDeanon, self).__init__(main_job, totalrecords, data, table, type)
         self.tmpcon = tmpconnection
         
     def _get_run_method(self):

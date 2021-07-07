@@ -6,7 +6,7 @@ from pganonymizer.utils import get_connection
 from pganonymizer.logging import logger
 logging_ = logger()
 
-class MainProcessing():
+class Job():
     endtime = False
     successfullrecords = 0
     successfullfields = 0

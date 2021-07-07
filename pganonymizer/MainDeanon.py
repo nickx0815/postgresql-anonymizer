@@ -3,10 +3,10 @@
 
 from pganonymizer.constants import constants 
 from pganonymizer.utils import build_sql_select, get_migration_mapping, get_distinct_from_tuple
-from pganonymizer.DeanonProcessing import DeanonProcessing
-from pganonymizer.MainJob import BaseJobClass
+from pganonymizer.JobDeanon import JobDeanon
+from pganonymizer.Main import Main
 
-class DeanonJobClass(BaseJobClass):
+class MainDeanon(Main):
     tables = []
     TMPconnection = {}
     
@@ -71,12 +71,12 @@ class DeanonJobClass(BaseJobClass):
                         break
                     for rec in records:
                         list.append((rec.get('record_id'), rec.get('value'), rec.get('id')))
-                    self.jobs.put(DeanonProcessing(self, self.TMPconnection, totalrecords, (field, list), table, type))
+                    self.jobs.put(JobDeanon(self, self.TMPconnection, totalrecords, (field, list), table, type))
                 crtest.close()
         connection.close()
         
     def start_processing(self):
-        super(DeanonJobClass, self).start_processing()
+        super(MainDeanon, self).start_processing()
         self.TMPconnection.close()
         
         

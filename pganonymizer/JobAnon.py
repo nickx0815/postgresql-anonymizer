@@ -12,19 +12,19 @@ from six import StringIO
 from pganonymizer.constants import constants
 from pganonymizer.providers import get_provider
 from pganonymizer.utils import get_table_count, build_sql_select
-from pganonymizer.MainProcessing import MainProcessing
+from pganonymizer.Job import Job
 from pganonymizer.logging import logger
 logging_ = logger()
 
 
 
-class AnonProcessing(MainProcessing):
+class JobAnon(Job):
     #todo verschlüsselung einbauen
     
     _autocommit = False
     
     def __init__(self, main_job, type, totalrecords, data, table):
-        super(AnonProcessing, self).__init__(main_job, totalrecords, data, table, type)
+        super(JobAnon, self).__init__(main_job, totalrecords, data, table, type)
         
     def _get_run_method(self):
         return constants.PROCESS_METHOD_MAPPING[self.type]
