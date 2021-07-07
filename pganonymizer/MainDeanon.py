@@ -43,7 +43,7 @@ class MainDeanon(Main):
                 fields_string = ",".join(mapped_fields+['id'])
                 try:
                     crtest.execute(f'CREATE TEMPORARY TABLE {temp_table} AS SELECT {fields_string} FROM {migrated_table};' )
-                    crtest.execute(f"CREATE INDEX index_id ON {temp_table} (id);")
+                    crtest.execute(f"CREATE INDEX index_{temp_table}_id ON {temp_table} (id);")
                 except:
                     #for the case that 2 table in schema are refering to one table in the migrated db. So the tmp table is already existing
                     pass
