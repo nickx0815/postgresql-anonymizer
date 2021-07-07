@@ -85,15 +85,11 @@ def get_migration_mapping(con, table, fields):
     cr = con.cursor()
     list = []
         #field_parsed = convert_list_to_sql(fields, char=True)
-    select_model_id_sql = f"SELECT old_model_name, new_model_name, old_field_name, new_field_name FROM {constants.TABLE_MIGRATED_DATA_MAPPING} where old_model_name = '{table}' and old_field_name in {convert_list_to_sql(fields, char=True)}"
-    cr.execute(select_model_id_sql)
-    while True:
+    for field in fields:
+        select_model_id_sql = f"SELECT old_model_name, new_model_name, old_field_name, new_field_name FROM {constants.TABLE_MIGRATED_DATA_MAPPING} where old_model_name = '{table}' and old_field_name '{field}';"
+        cr.execute(select_model_id_sql)
         record = cr.fetchone()
-        if not record:
-            list.append((table,table,field,field))
-            break
         list.append(record)
-        break
     return list
      
 def copy_from(connection, data, table, columns):
