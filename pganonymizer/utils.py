@@ -53,13 +53,17 @@ def convert_list_to_sql(ids, char=False):
         return parsed
     return False
 
-def get_distinct_from_tuple(iterable, index):
+def get_distinct_from_tuple(iterable, index, add_index=False):
     distinct_table_dic = {}
     for object in iterable:
         current_object = object[index]
         if current_object not in distinct_table_dic.keys():
             distinct_table_dic[current_object] = []
-        distinct_table_dic[current_object].append(object[3])
+        if add_index:
+            add_object = object[add_index]
+        else:
+            add_object = object
+        distinct_table_dic[current_object].append(add_object)
     return distinct_table_dic
 
 def create_basic_table(con, tables=constants.BASIC_TABLES, suffix=""):
@@ -80,17 +84,16 @@ def get_migration_mapping(con, table, fields):
     # todo function to determine which mapping (10,11,12...)
     cr = con.cursor()
     list = []
-    for field in fields:
         #field_parsed = convert_list_to_sql(fields, char=True)
-        select_model_id_sql = f"SELECT old_model_name, new_model_name, old_field_name, new_field_name FROM {constants.TABLE_MIGRATED_DATA_MAPPING} where old_model_name = '{table}' and old_field_name = '{field}'"
-        cr.execute(select_model_id_sql)
-        while True:
-            record = cr.fetchone()
-            if not record:
-                list.append((table,table,field,field))
-                break
-            list.append(record)
+    select_model_id_sql = f"SELECT old_model_name, new_model_name, old_field_name, new_field_name FROM {constants.TABLE_MIGRATED_DATA_MAPPING} where old_model_name = '{table}' and old_field_name in {convert_list_to_sql(fields, char=True)}"
+    cr.execute(select_model_id_sql)
+    while True:
+        record = cr.fetchone()
+        if not record:
+            list.append((table,table,field,field))
             break
+        list.append(record)
+        break
     return list
      
 def copy_from(connection, data, table, columns):
