@@ -80,9 +80,10 @@ class Main():
     def start_processing(self):
         """Main method"""
         self.update_queue()
-        self.test_connection()
-        create_basic_table(self.get_connection())
-        self.start()
+        if self._get_queue_size():
+            self.test_connection()
+            create_basic_table(self.get_connection())
+            self.start()
         run_analysis(self.get_connection(autocommit=True), self.args.dbname)
     
     def get_connection(self, autocommit=False):

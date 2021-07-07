@@ -22,6 +22,11 @@ class MainDeanon(Main):
     def get_tmp_connection(self):
         return self.TMPconnection
     
+    def eval_schema(self, schema):
+        if schema.get('deanonymization'):
+            return True
+        raise Exception("main level of schema not found")
+    
     def create_tmp_tables(self):
         schema = self.get_schema()
         connection = self.get_connection()

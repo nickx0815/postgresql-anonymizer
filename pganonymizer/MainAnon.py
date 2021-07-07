@@ -29,6 +29,11 @@ class MainAnon(Main):
     def get_anon_number_field_per_thread(self):
         return self.ANON_FETCH_RECORDS
     
+    def eval_schema(self, schema):
+        if schema.get('truncate') or schema.get('anonymization'):
+            return True
+        raise Exception("main level of schema not found")
+    
     def get_args(self):
         #todo use super call
         parser =  Main.get_args(self, parseArgs=False)
