@@ -28,12 +28,13 @@ class MainDeanon(Main):
         raise Exception("main level of schema not found")
     
     def create_tmp_tables(self):
-        schema = self.get_schema()
+        schema = self.get_schema()['deanonymization']
         connection = self.get_connection()
         connection.autocommit = True
         crtest = connection.cursor()
         list_table = []
-        for table, fields in schema['deanonymization'].items():
+        for data in schema:
+            table, fields = data.items()
             mapped_field_data = get_migration_mapping(connection, table, fields=fields)
             distinct_tables = get_distinct_from_tuple(mapped_field_data, 1)
             for migrated_table, mapped_fields in distinct_tables.items():
