@@ -60,7 +60,8 @@ class MainDeanon(Main):
     
     def __update_queue(self):
         connection = self.get_connection(autocommit=True)
-        schema = self.get_schema()['deanonymization']
+        type = "deanonymization"
+        schema = self.get_schema()[type]
         #todo umbauen, dass ein job jeweils alle migrated_fields eines records beinhaltet. 
         #todo weitere deanon methoden umbaunen, sodass alle felder mit einem update deanonymsiert werden
         crtest = connection.cursor()

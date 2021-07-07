@@ -57,6 +57,6 @@ class Job():
     def _get_run_method(self):
         raise Exception("needs to be implemented!")
 
-    def type_to_method_mapper(self, type):
+    def type_to_method_mapper(self):
         return self.type_print[self.type]
     

@@ -87,7 +87,7 @@ class logger():
         def start(self):
             result = function(self)
             runtime = str(datetime.timedelta(seconds=self.endtime-self.starttime))
-            main = f"the {self.type_to_method_mapper(self.type)} of {self.table} took {runtime}\n"
+            main = f"the {self.type_to_method_mapper()} of {self.table} took {runtime}\n"
             additionalrecordsinfo = f"successfull processed {self.successfullrecords} (total records {self.totalrecords})\n"
             additionalfieldsinfo = f"successfull processed {self.successfullfields} fields\n"
             self.logging_.logging_.debug(main)
