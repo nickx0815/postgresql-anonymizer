@@ -34,7 +34,8 @@ class MainDeanon(Main):
         crtest = connection.cursor()
         list_table = []
         for data in schema:
-            table, fields = data.items()
+            table = list(data.keys())[0]
+            fields = data[table]
             mapped_field_data = get_migration_mapping(connection, table, fields=fields)
             distinct_tables = get_distinct_from_tuple(mapped_field_data, 1)
             for migrated_table, mapped_fields in distinct_tables.items():
