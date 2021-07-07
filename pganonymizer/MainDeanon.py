@@ -49,7 +49,7 @@ class MainDeanon(Main):
                     pass
                 list_table.append(temp_table)
                 for field in mapped_fields:
-                    crtest.execute(f"CREATE INDEX index_{field} ON {temp_table} ({field});")
+                    crtest.execute(f"CREATE INDEX index_{temp_table}_{field} ON {temp_table} ({field});")
         self.set_tables(list_table)
         crtest.close()
         self.set_tmp_connection(connection)
