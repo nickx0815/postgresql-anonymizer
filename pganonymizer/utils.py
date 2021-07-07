@@ -90,6 +90,8 @@ def get_migration_mapping(con, table, fields):
         cr.execute(select_model_id_sql)
         record = cr.fetchone()
         list.append(record)
+    if not list:
+        return False
     return list
      
 def copy_from(connection, data, table, columns):
