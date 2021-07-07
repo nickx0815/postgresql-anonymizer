@@ -73,14 +73,14 @@ class MainDeanon(Main):
                                                                     "state = 0"],
                                                                     select="id, record_id, value")
                 while True:
-                    list = []
+                    list_ = []
                     records = cursor.fetchmany(size=constants.DEANON_NUMBER_FIELD_PER_THREAD)
                     totalrecords = len(records)
                     if not records:
                         break
                     for rec in records:
-                        list.append((rec.get('record_id'), rec.get('value'), rec.get('id')))
-                    self.jobs.put(JobDeanon(self, self.TMPconnection, totalrecords, (field, list), table, type))
+                        list_.append((rec.get('record_id'), rec.get('value'), rec.get('id')))
+                    self.jobs.put(JobDeanon(self, self.TMPconnection, totalrecords, (field, list_), table, type))
                 crtest.close()
         connection.close()
         
