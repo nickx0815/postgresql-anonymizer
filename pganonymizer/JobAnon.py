@@ -219,7 +219,7 @@ class JobAnon(Job):
     def insert_migrated_fields_rec(self, cr, insert_sql):
         try:
             cr.execute(insert_sql)
-            return True
+            return True, False
         except Exception:
             return False, Exception
     
