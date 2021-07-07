@@ -37,6 +37,8 @@ class MainDeanon(Main):
             table = list(data.keys())[0]
             fields = data[table]
             mapped_field_data = get_migration_mapping(connection, table, fields=fields)
+            if not mapped_field_data:
+                continue
             distinct_tables = get_distinct_from_tuple(mapped_field_data, 1)
             for migrated_table, mapped_fields in distinct_tables.items():
                 temp_table = "tmp_"+migrated_table
