@@ -33,7 +33,7 @@ class MainDeanon(Main):
         connection.autocommit = True
         crtest = connection.cursor()
         list_table = []
-        for table, fields in schema.items():
+        for table, fields in schema['deanonymization'].items():
             mapped_field_data = get_migration_mapping(connection, table, fields=fields)
             distinct_tables = get_distinct_from_tuple(mapped_field_data, 1)
             for migrated_table, mapped_fields in distinct_tables.items():
