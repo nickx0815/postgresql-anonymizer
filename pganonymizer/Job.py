@@ -3,6 +3,7 @@
 
 import time
 from pganonymizer.utils import get_connection
+from pganonymizer.constants import constants
 from pganonymizer.logging import logger
 logging_ = logger()
 
@@ -11,9 +12,9 @@ class Job():
     successfullrecords = 0
     successfullfields = 0
 
-    type_print = {'anonymization': 'Anonymization',
-                  'truncate': 'Deletion',
-                  'deanonymization': 'Deanonymization'}
+    type_print = {constants.KEY_ANONYMIZATION: 'Anonymization',
+                  constants.KEY_DELETE: 'Deletion',
+                  constants.KEY_DEANONYMIZATION: 'Deanonymization'}
 
     def __init__(self, main_job, totalrecords, data, table, type):
         self.main_job = main_job

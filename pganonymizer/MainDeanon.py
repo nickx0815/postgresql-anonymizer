@@ -2,13 +2,23 @@
 
 
 from pganonymizer.constants import constants 
-from pganonymizer.utils import build_sql_select, get_migration_mapping, get_distinct_from_tuple
+from pganonymizer.utils import build_sql_select, get_migration_mapping, get_distinct_from_tuple, get_connection
+from pganonymizer.BruteForceMapping import bruteForceMapping
 from pganonymizer.JobDeanon import JobDeanon
 from pganonymizer.Main import Main
 
 class MainDeanon(Main):
     tables = []
     TMPconnection = {}
+    
+    type = constants.KEY_DEANONYMIZATION
+    
+    def __init__(self, args):
+        super(MainDeanon, self).__init__(args)
+        self.create_mapping()
+    
+    def create_mapping(self):
+        bruteForceMapping(get_connection(self.pg_args), self.args.dbname)
     
     def set_tables(self, table):
         self.tables = table
@@ -23,12 +33,12 @@ class MainDeanon(Main):
         return self.TMPconnection
     
     def eval_schema(self, schema):
-        if schema.get('deanonymization'):
+        if schema.get(constants.KEY_DEANONYMIZATION):
             return True
         raise Exception("main level of schema not found")
     
     def create_tmp_tables(self):
-        schema = self.get_schema()['deanonymization']
+        schema = self.get_schema()[self.type]
         connection = self.get_connection()
         connection.autocommit = True
         crtest = connection.cursor()
@@ -62,8 +72,7 @@ class MainDeanon(Main):
     
     def __update_queue(self):
         connection = self.get_connection(autocommit=True)
-        type = "deanonymization"
-        schema = self.get_schema()[type]
+        schema = self.get_schema()[self.type]
         #todo umbauen, dass ein job jeweils alle migrated_fields eines records beinhaltet. 
         #todo weitere deanon methoden umbaunen, sodass alle felder mit einem update deanonymsiert werden
         crtest = connection.cursor()
@@ -83,7 +92,7 @@ class MainDeanon(Main):
                         break
                     for rec in records:
                         list_.append((rec.get('record_id'), rec.get('value'), rec.get('id')))
-                    self.jobs.put(JobDeanon(self, self.TMPconnection, totalrecords, (field, list_), table, type))
+                    self.jobs.put(JobDeanon(self, self.TMPconnection, totalrecords, (field, list_), table, self.type))
                 crtest.close()
         connection.close()
         

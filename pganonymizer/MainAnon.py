@@ -30,7 +30,7 @@ class MainAnon(Main):
         return self.ANON_FETCH_RECORDS
     
     def eval_schema(self, schema):
-        if schema.get('truncate') or schema.get('anonymization'):
+        if schema.get(constants.KEY_DELETE) or schema.get(constants.KEY_ANONYMIZATION):
             return True
         raise Exception("main level of schema not found")
     
@@ -49,25 +49,25 @@ class MainAnon(Main):
     
     def update_queue(self):
         connection = self.get_connection()
-        for process_type, type_attributes in self.schema.items():
-            for table in type_attributes:
-                if process_type == 'truncate':
-                    self.jobs.put(JobAnon(self, process_type, 1, [table], table))
-                elif process_type == 'anonymization':
-                    for table_key, table_attributes in table.items():
-                        self.create_basic_table(self.get_connection(), tables=[constants.TABLE_MIGRATED_DATA], suffix=table_key)
-                        test = self.update_anon_search(table_key, table_attributes)
-                        cursor = self.build_sql_select(connection, table_key, test.get('search', False), select="id")
-                        while True:
-                            list = []
-                            records = cursor.fetchmany(size=self.ANON_NUMBER_FIELD_PER_THREAD)
-                            totalrecords = len(records)
-                            if not records:
-                                break
-                            for row in records:
-                                list.append(row.get('id'))
-                            table_attributes_job = self.add_job_records_ids(table_attributes, list)
-                            self.jobs.put(JobAnon(self, process_type, totalrecords, table_attributes_job, table_key))
+        DELETE_SCHEMA = self.get_schema().get(constants.KEY_DELETE, [])
+        ANON_SCHEMA = self.get_schema().get(constants.ANON_SCHEMA, [])
+        for table in DELETE_SCHEMA:
+            self.jobs.put(JobAnon(self, constants.KEY_DELETE, 1, [table], table))
+        for table in ANON_SCHEMA:
+            for table_key, table_attributes in table.items():
+                self.create_basic_table(self.get_connection(), tables=[constants.TABLE_MIGRATED_DATA], suffix=table_key)
+                test = self.update_anon_search(table_key, table_attributes)
+                cursor = self.build_sql_select(connection, table_key, test.get('search', False), select="id")
+                while True:
+                    list = []
+                    records = cursor.fetchmany(size=self.ANON_NUMBER_FIELD_PER_THREAD)
+                    totalrecords = len(records)
+                    if not records:
+                        break
+                    for row in records:
+                        list.append(row.get('id'))
+                    table_attributes_job = self.add_job_records_ids(table_attributes, list)
+                    self.jobs.put(JobAnon(self, constants.ANON_SCHEMA, totalrecords, table_attributes_job, table_key))
         connection.close()
     
     def build_sql_select(self, connection, table_key, search, select="id"):
