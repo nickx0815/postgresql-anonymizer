@@ -5,7 +5,7 @@ from pganonymizer.MainAnon import MainAnon
 from pganonymizer.tests.utils.ConnectionMock import ConnectionMock
 from pganonymizer.tests.utils.CursorMock import CursorMock
 from pganonymizer.Args import Args
-
+from queue import Queue
 
 class TestCompleteProcess(unittest.TestCase):
     path = __file__.replace('integrationtest_anonymization.py', 'utils/integrationtest.yml')
@@ -22,10 +22,12 @@ class TestCompleteProcess(unittest.TestCase):
     
     def test_anonymization(self):
         args = Args({'force_path_schema':self.path,
+                     'threading':False,
                      'analysis': False,
                      'type': 'anon',
                      'dbname': 'testdb'})
         anon = MainAnon(args)
+        anon.jobs = Queue()
         partner, company = self.get_current_data(anon)
         anon.start_processing()
         partner_processed, company_processed = self.get_current_data(anon)
