@@ -15,4 +15,4 @@ from . import test_main_processing
 from . import test_providers
 from . import test_utils
 
-from . import integrationstest_anonymization
+from . import integrationtest_anonymization
