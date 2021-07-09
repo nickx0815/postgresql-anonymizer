@@ -37,12 +37,12 @@ def main():
     sys.exit(exit_status)
 
 if __name__ == '__main__':
-    if '--unitest' in sys.argv:
+    if '--unittest' in sys.argv:
         subprocess.call([sys.executable,  "-m", "unittest", "discover", path, "-p", "test_*.py"])
     if '--integrationtest' in sys.argv:
         path = os.path.abspath(os.path.join(os.path.dirname(__file__)).replace("pganonymizer", "tests/"))
         TestLoader_ = TestLoader()
         test_classes = TestLoader_.discover(path, pattern="integrationtest_*.py")
         unittest.TextTestRunner(verbosity=10).run(test_classes)
-    else:
+    if '--unittest' in sys.argv and '--integrationtest' in sys.argv:
         main()
