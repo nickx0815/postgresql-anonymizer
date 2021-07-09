@@ -1,0 +1,18 @@
+anonymization:
+- res_partner:
+    primary_key: id
+    fields:
+     - name:
+        provider:
+          name: migration
+     - display_name:
+        provider:
+          name: migration
+     - street:
+        provider:
+          name: migration
+- res_company:
+    fields:
+	 - name:
+		provider:
+			name: migration

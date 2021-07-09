@@ -14,6 +14,7 @@ class Args():
         self.logging = dic.get('logging', 'INFO')
         self.migration = dic.get('migration')
         self.type = dic.get('type')
+        self.analysis = dic.get('analysis', True)
         self.force_thread_number = dic.get('force_thread_number')
         self.FORCE_ANON_NUMBER_FIELD_PER_THREAD = dic.get('FORCE_ANON_NUMBER_FIELD_PER_THREAD')
         self.FORCE_ANON_FETCH_RECORDS = dic.get('FORCE_ANON_FETCH_RECORDS')

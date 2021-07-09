@@ -84,7 +84,8 @@ class Main():
             self.test_connection()
             create_basic_table(self.get_connection())
             self.start()
-        run_analysis(self.get_connection(autocommit=True), self.args.dbname)
+        if self.args.analysis:
+            run_analysis(self.get_connection(autocommit=True), self.args.dbname)
     
     def get_connection(self, autocommit=False):
         con = get_connection(self.pg_args)
