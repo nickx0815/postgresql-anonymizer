@@ -50,7 +50,7 @@ class MainAnon(Main):
     def update_queue(self):
         connection = self.get_connection()
         DELETE_SCHEMA = self.get_schema().get(constants.KEY_DELETE, [])
-        ANON_SCHEMA = self.get_schema().get(constants.ANON_SCHEMA, [])
+        ANON_SCHEMA = self.get_schema().get(constants.KEY_ANONYMIZATION, [])
         for table in DELETE_SCHEMA:
             self.jobs.put(JobAnon(self, constants.KEY_DELETE, 1, [table], table))
         for table in ANON_SCHEMA:
