@@ -40,6 +40,8 @@ def __main():
 
 def run_test(p):
     path = os.path.abspath(os.path.join(os.path.dirname(__file__)).replace("pganonymizer", "tests/"))
+    print(path)
+    return
     testloader_ = TestLoader()
     test_classes = testloader_.discover(path, pattern=p)
     unittest.TextTestRunner(verbosity=10).run(test_classes)
