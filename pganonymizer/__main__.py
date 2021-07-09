@@ -45,7 +45,7 @@ def run_test(p):
     unittest.TextTestRunner(verbosity=10).run(test_classes)
 
 def main():
-    print(sys.arg)
+    print(sys.argv)
     if '--unittest' in sys.argv:
         pattern =  "test_*.py"
         run_test(pattern)
