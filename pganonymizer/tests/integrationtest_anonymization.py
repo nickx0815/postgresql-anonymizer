@@ -32,9 +32,9 @@ class TestCompleteProcess(unittest.TestCase):
         anon.start_processing()
         partner_processed, company_processed = self.get_current_data(anon)
         for partner in partner_processed:
-            self.assertTrue(f"res_partner_name" in partner[0] or partner[0] == None, "partner not anonymized correctly")
-            self.assertTrue(f"res_partner_display_name" in partner[1] or partner[1] == None, "partner not anonymized correctly")
-            self.assertTrue(f"res_partner_street" in partner[2] or partner[2] == None, "partner not anonymized correctly")
+            self.assertTrue("res_partner_name_" in partner[0] if partner[0] != None else True, "partner not anonymized correctly")
+            self.assertTrue("res_partner_display_name_" in partner[1] if partner[1] != None else True, "partner not anonymized correctly")
+            self.assertTrue("res_partner_street_" in partner[2] if partner[2] != None else True, "partner not anonymized correctly")
         for company in company_processed:
-            self.assertTrue(f"res_company_name" in company[0] or company[0] == None, "company not anonymized correctly")
+            self.assertTrue("res_company_name_" in company[0] or company[0] == None, "company not anonymized correctly")
         
