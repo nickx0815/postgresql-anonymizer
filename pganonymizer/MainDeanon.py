@@ -3,7 +3,7 @@
 
 from pganonymizer.constants import constants 
 from pganonymizer.utils import build_sql_select, get_migration_mapping, get_distinct_from_tuple, get_connection
-from pganonymizer.BruteForceMapping import bruteForceMapping
+from pganonymizer.BruteForceMapping import brute_force_mapping
 from pganonymizer.JobDeanon import JobDeanon
 from pganonymizer.Main import Main
 
