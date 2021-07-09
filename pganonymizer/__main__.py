@@ -43,7 +43,6 @@ def run_test(p):
     unittest.TextTestRunner(verbosity=10).run(test_classes)
 
 if __name__ == '__main__':
-    print(sys.argv)
     if '--unittest' in sys.argv:
         pattern =  "test_*.py"
         run_test(pattern)
