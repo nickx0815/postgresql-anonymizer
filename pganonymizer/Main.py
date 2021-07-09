@@ -93,7 +93,7 @@ class Main():
         return con
     
     def start(self):
-        if self.args.threading in ['False','false']:
+        if self.args.threading in ['False','false'] or not self.args.threading:
             self.run_job(self.jobs)  
         else:
             number_threads = self.get_thread_number()
