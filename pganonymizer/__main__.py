@@ -36,13 +36,18 @@ def main():
         exit_status = 1
     sys.exit(exit_status)
 
+def run_test(p):
+    path = os.path.abspath(os.path.join(os.path.dirname(__file__)).replace("pganonymizer", "tests/"))
+    testloader_ = TestLoader()
+    test_classes = testloader_.discover(path, pattern=p)
+    unittest.TextTestRunner(verbosity=10).run(test_classes)
+
 if __name__ == '__main__':
     if '--unittest' in sys.argv:
-        subprocess.call([sys.executable,  "-m", "unittest", "discover", path, "-p", "test_*.py"])
+        pattern =  "test_*.py"
+        run_test(pattern)
     if '--integrationtest' in sys.argv:
-        path = os.path.abspath(os.path.join(os.path.dirname(__file__)).replace("pganonymizer", "tests/"))
-        TestLoader_ = TestLoader()
-        test_classes = TestLoader_.discover(path, pattern="integrationtest_*.py")
-        unittest.TextTestRunner(verbosity=10).run(test_classes)
-    if '--unittest' in sys.argv and '--integrationtest' in sys.argv:
+        pattern = "integrationtest_*.py"
+        run_test(pattern)
+    if not '--unittest' in sys.argv and not '--integrationtest' in sys.argv:
         main()
