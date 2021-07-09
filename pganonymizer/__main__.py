@@ -15,7 +15,9 @@ import time
 import sys, subprocess
 
 config = ConfigParser()
-def main():
+
+
+def __main():
     testargs = {}
     config.read(constants.PATH_CONFIG_FILE)
     if False in set([x in config.sections() for x in constants.section]):
@@ -42,7 +44,8 @@ def run_test(p):
     test_classes = testloader_.discover(path, pattern=p)
     unittest.TextTestRunner(verbosity=10).run(test_classes)
 
-if __name__ == '__main__':
+def main():
+    print(sys.arg)
     if '--unittest' in sys.argv:
         pattern =  "test_*.py"
         run_test(pattern)
@@ -50,4 +53,5 @@ if __name__ == '__main__':
         pattern = "integrationtest_*.py"
         run_test(pattern)
     if not '--unittest' in sys.argv and not '--integrationtest' in sys.argv:
-        main()
+        __main()
+
