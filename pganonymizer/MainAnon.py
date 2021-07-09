@@ -67,7 +67,7 @@ class MainAnon(Main):
                     for row in records:
                         list.append(row.get('id'))
                     table_attributes_job = self.add_job_records_ids(table_attributes, list)
-                    self.jobs.put(JobAnon(self, constants.ANON_SCHEMA, totalrecords, table_attributes_job, table_key))
+                    self.jobs.put(JobAnon(self, constants.KEY_ANONYMIZATION, totalrecords, table_attributes_job, table_key))
         connection.close()
     
     def build_sql_select(self, connection, table_key, search, select="id"):
