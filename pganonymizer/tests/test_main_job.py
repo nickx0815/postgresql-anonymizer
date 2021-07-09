@@ -1,11 +1,10 @@
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 import unittest
 from pganonymizer.utils import get_connection
 from pganonymizer.MainAnon import MainAnon
 from pganonymizer.Args import Args
 from pganonymizer.constants import constants
 from pganonymizer.logging import logger
-from mock import patch
 
 
 
