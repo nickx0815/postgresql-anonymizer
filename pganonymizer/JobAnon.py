@@ -62,33 +62,34 @@ class JobAnon(Job):
         :rtype: (list, list)
         """
         cursor = build_sql_select(connection, table, search)
-        rows = cursor.fetchall(back_as=[])
-        for row in rows:
-            #todo check if try can be removed
-            try:
-                row_column_dict = {}
-                if not self.row_matches_excludes(row, excludes):
-                    row_column_dict = self.get_column_values(row, columns, {'id':row.get('id'), 'table':table})
-                    for key, value in row_column_dict.items():
-                        original_data = {}
-                        if row[key] == value:
-                            #the case for already anonymized (migration) records
-                            continue
-                        original_data[key] = {row.get('id'): row[key]}
-                        try:
-                            if self.migration == 'True':
-                                self.save_original_data(connection, table, original_data)
-                            self.migrate_field(connection, key, table, row.get('id'), primary_key, value)
-                            self.updatesuccessfullfields()
-                        except:
-                            connection.rollback()
-                        finally:
-                            connection.commit()
-                    #todo nur updaten wenn auhc irgendein feld bearbeitet wurde
-                    self.updatesuccessfullrecords()
-            except Exception as ex:
-                #todo use logger
-                print(ex)
+        rows = cursor.fetchall()
+        if rows:
+            for row in rows:
+                #todo check if try can be removed
+                try:
+                    row_column_dict = {}
+                    if not self.row_matches_excludes(row, excludes):
+                        row_column_dict = self.get_column_values(row, columns, {'id':row.get('id'), 'table':table})
+                        for key, value in row_column_dict.items():
+                            original_data = {}
+                            if row[key] == value:
+                                #the case for already anonymized (migration) records
+                                continue
+                            original_data[key] = {row.get('id'): row[key]}
+                            try:
+                                if self.migration == 'True':
+                                    self.save_original_data(connection, table, original_data)
+                                self.migrate_field(connection, key, table, row.get('id'), primary_key, value)
+                                self.updatesuccessfullfields()
+                            except:
+                                connection.rollback()
+                            finally:
+                                connection.commit()
+                        #todo nur updaten wenn auhc irgendein feld bearbeitet wurde
+                        self.updatesuccessfullrecords()
+                except Exception as ex:
+                    #todo use logger
+                    print(ex)
         cursor.close()
     
     def get_column_dict(self, columns):
