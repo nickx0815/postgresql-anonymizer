@@ -62,7 +62,7 @@ class JobAnon(Job):
         :rtype: (list, list)
         """
         cursor = build_sql_select(connection, table, search)
-        rows = cursor.fetchall(size=constants.ANON_FETCH_RECORDS, back_as=[])
+        rows = cursor.fetchall(back_as=[])
         for row in rows:
             #todo check if try can be removed
             try:
