@@ -39,12 +39,12 @@ def __main():
     sys.exit(exit_status)
 
 def run_test(p):
-    path = os.path.abspath(os.path.join(os.path.dirname(__file__)).replace("pganonymizer", "tests/"))
-    print(path)
-    return
+    path =  os.path.abspath(os.path.join(os.path.dirname(__file__))).replace("__main__", "tests/")
     testloader_ = TestLoader()
     test_classes = testloader_.discover(path, pattern=p)
     unittest.TextTestRunner(verbosity=10).run(test_classes)
+
+run_test("rere")
 
 def main():
     print(sys.argv)
