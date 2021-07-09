@@ -18,7 +18,7 @@ class MainDeanon(Main):
         self.create_mapping()
     
     def create_mapping(self):
-        bruteForceMapping(get_connection(self.pg_args), self.args.dbname)
+        brute_force_mapping(get_connection(self.pg_args), self.args.dbname)
     
     def set_tables(self, table):
         self.tables = table
