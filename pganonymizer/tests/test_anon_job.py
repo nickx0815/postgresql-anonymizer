@@ -2,8 +2,8 @@ import unittest
 from unittest.mock import MagicMock
 from pganonymizer.utils import get_connection
 from pganonymizer.MainAnon import MainAnon
-from utils.ConnectionMock import ConnectionMock
-from utils.CursorMock import CursorMock
+from pganonymizer.tests.utils.ConnectionMock import ConnectionMock
+from pganonymizer.tests.utils.CursorMock import CursorMock
 from pganonymizer.Args import Args
 
 
