@@ -22,7 +22,6 @@ class TestCompleteProcess(unittest.TestCase):
     
     def test_anonymization(self):
         args = Args({'force_path_schema':self.path,
-                     'threading':False,
                      'analysis': False,
                      'type': 'anon',
                      'dbname': 'testdb'})
