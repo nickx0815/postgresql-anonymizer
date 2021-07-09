@@ -1,5 +1,5 @@
 anonymization:
-- res_partner:
+ - res_partner:
     primary_key: id
     fields:
      - name:
@@ -11,8 +11,10 @@ anonymization:
      - street:
         provider:
           name: migration
-- res_company:
+
+ - res_company:
+    primary_key: id
     fields:
-	 - name:
-		provider:
-			name: migration
+     - name:
+        provider:
+          name: migration
