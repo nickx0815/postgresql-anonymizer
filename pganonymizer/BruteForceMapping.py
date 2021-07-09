@@ -1,6 +1,8 @@
 import psycopg2, sys
 from pganonymizer.utils import convert_list_to_sql
 
+#todo in den ausblick schreiben, dass performanteres erstellen des mappings geplant ist
+
 
 def get_data(check, value):
     for c in check:
@@ -45,8 +47,6 @@ def brute_force_mapping(con, db):
         return created_data
     cursor.execute(f"select table_name from information_schema.tables where table_type = 'BASE TABLE' and table_schema = 'public' and table_catalog = '{db}';")
     tables = cursor.fetchall()
-            #TODO suche muss angepasst werden, es werden felder gefunden welche bei der suche auf der tabelle dann nicht exisiieren
-            # muss schauen wie ich die where clause anpassen muss
     cursor2.execute(f" SELECT table_name, column_name FROM information_schema.columns WHERE data_type in ('text', 'character varying') and table_name in {convert_list_to_sql([x[0] for x in tables], char=True)};")
     while True:
         fields = cursor2.fetchmany()

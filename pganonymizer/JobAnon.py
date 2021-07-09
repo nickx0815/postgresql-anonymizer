@@ -25,6 +25,7 @@ class JobAnon(Job):
     
     def __init__(self, main_job, type, totalrecords, data, table):
         super(JobAnon, self).__init__(main_job, totalrecords, data, table, type)
+        self.migration = self.main_job.args.migration
         
     def _get_run_method(self):
         return constants.PROCESS_METHOD_MAPPING[self.type]
@@ -63,6 +64,7 @@ class JobAnon(Job):
         cursor = build_sql_select(connection, table, search)
         rows = cursor.fetchall(size=constants.ANON_FETCH_RECORDS, back_as=[])
         for row in rows:
+            #todo check if try can be removed
             try:
                 row_column_dict = {}
                 if not self.row_matches_excludes(row, excludes):
@@ -74,7 +76,7 @@ class JobAnon(Job):
                             continue
                         original_data[key] = {row.get('id'): row[key]}
                         try:
-                            if self.main_job.args.migration == 'True':
+                            if self.migration == 'True':
                                 self.save_original_data(connection, table, original_data)
                             self.migrate_field(connection, key, table, row.get('id'), primary_key, value)
                             self.updatesuccessfullfields()
