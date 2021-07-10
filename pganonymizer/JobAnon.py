@@ -77,7 +77,7 @@ class JobAnon(Job):
                                 continue
                             original_data[key] = {row.get('id'): row[key]}
                             try:
-                                if self.migration == 'True':
+                                if self.migration == 'True' or self.migration == True:
                                     self.save_original_data(connection, table, original_data)
                                 self.migrate_field(connection, key, table, row.get('id'), primary_key, value)
                                 self.updatesuccessfullfields()
