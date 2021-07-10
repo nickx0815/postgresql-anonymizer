@@ -26,9 +26,9 @@ class TestCompleteProcess(unittest.TestCase):
     def get_current_original_data(self, args):
         con = get_connection(args)
         cursor = con.cursor()
-        cursor.execute("Select name, display_name, street from res_partner;")
+        cursor.execute("Select id, name, display_name, street from res_partner;")
         res_partner = cursor.fetchall()
-        cursor.execute("Select name from res_company;")
+        cursor.execute("Select id, name from res_company;")
         res_company = cursor.fetchall()
         return res_partner, res_company
     
@@ -54,7 +54,9 @@ class TestCompleteProcess(unittest.TestCase):
         anon = MainDeanon(args)
         anon.jobs = Queue()
         anon.start_processing()
-        deanonymized_original_data = self.get_current_original_data(anon.pg_args)
-        self.assertEqual(self.original_data, deanonymized_original_data, "the original_data was not deanonymized correctly")
+        deanonymized_data = self.get_current_original_data(anon.pg_args)[0]
+        original_data = self.original_data[0]
+        for record in original_data:
+            self.assertTrue(record in deanonymized_data)
         
         
