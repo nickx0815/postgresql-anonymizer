@@ -8,6 +8,7 @@ from pganonymizer.tests.utils.CursorMock import CursorMock
 from pganonymizer.Args import Args
 from queue import Queue
 
+
 class TestCompleteProcess(unittest.TestCase):
     path_schema_anon = __file__.replace('integrationtest_anonymization.py', 'utils/integrationtest_anon.yml')
     path_schema_deanon = __file__.replace('integrationtest_anonymization.py', 'utils/integrationtest_deanon.yml')
@@ -25,7 +26,8 @@ class TestCompleteProcess(unittest.TestCase):
         args = Args({'force_path_schema':self.path_schema_anon,
                      'analysis': False,
                      'type': 'anon',
-                     'dbname': 'testdb'})
+                     'dbname': 'testdb',
+                     'migration': True})
         anon = MainAnon(args)
         anon.jobs = Queue()
         partner, company = self.get_current_data(anon)
@@ -42,7 +44,8 @@ class TestCompleteProcess(unittest.TestCase):
         args = Args({'force_path_schema':self.path_schema_deanon,
              'analysis': False,
              'type': 'deanon',
-             'dbname': 'testdb'})
+             'dbname': 'testdb',
+             'migration': True})
         self.test_anonymization()
         anon = MainDeanon(args)
         anon.jobs = Queue()
