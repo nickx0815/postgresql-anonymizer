@@ -49,7 +49,7 @@ class TestCompleteProcess(unittest.TestCase):
             self.assertTrue(f"res_partner_street_{partner[0]}" == partner[3] if partner[3] != None else True, 
                             self.ERROR)
         for company in company_processed:
-            self.assertTrue(f"res_company_name_{partner[0]}" == company[1] or company[1] == None, 
+            self.assertTrue(f"res_company_name_{company[0]}" == company[1] or company[1] == None, 
                             self.ERROR)
         
     def test_deanonymization(self):
