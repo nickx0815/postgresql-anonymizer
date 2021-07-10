@@ -13,8 +13,18 @@ class TestCompleteProcess(unittest.TestCase):
     path_schema_anon = __file__.replace('integrationtest_anonymization.py', 'utils/integrationtest_anon.yml')
     path_schema_deanon = __file__.replace('integrationtest_anonymization.py', 'utils/integrationtest_deanon.yml')
     
-    def get_current_data(self, anon):
-        con = get_connection(anon.pg_args)
+    args = {'analysis': False,
+            'dbname': 'testdb',
+            'migration': True}
+    data = False
+    
+    @classmethod
+    def setUpClass(cls):
+        super(TestCompleteProcess, cls).setUpClass()
+        cls.data = cls.get_current_data(Args({'dbname':'testdb'}))
+    
+    def get_current_data(self, args):
+        con = get_connection(args)
         cursor = con.cursor()
         cursor.execute("Select name, display_name, street from res_partner;")
         res_partner = cursor.fetchall()
@@ -22,17 +32,14 @@ class TestCompleteProcess(unittest.TestCase):
         res_company = cursor.fetchall()
         return res_partner, res_company
     
-    def test_anonymization(self):
-        args = Args({'force_path_schema':self.path_schema_anon,
-                     'analysis': False,
-                     'type': 'anon',
-                     'dbname': 'testdb',
-                     'migration': True})
+    def anonymization(self):
+        self.args.update({'force_path_schema':self.path_schema_anon, 'type': 'anon'})
+        args = Args(self.args)
         anon = MainAnon(args)
         anon.jobs = Queue()
-        partner, company = self.get_current_data(anon)
+        partner, company = self.get_current_data(anon.pg_args)
         anon.start_processing()
-        partner_processed, company_processed = self.get_current_data(anon)
+        partner_processed, company_processed = self.get_current_data(anon.pg_args)
         for partner in partner_processed:
             self.assertTrue("res_partner_name_" in partner[0] if partner[0] != None else True, "partner not anonymized correctly")
             self.assertTrue("res_partner_display_name_" in partner[1] if partner[1] != None else True, "partner not anonymized correctly")
@@ -41,16 +48,14 @@ class TestCompleteProcess(unittest.TestCase):
             self.assertTrue("res_company_name_" in company[0] or company[0] == None, "company not anonymized correctly")
         
     def test_deanonymization(self):
-        args = Args({'force_path_schema':self.path_schema_deanon,
-             'analysis': False,
-             'type': 'deanon',
-             'dbname': 'testdb',
-             'migration': True})
-        self.test_anonymization()
+        self.args.update({'force_path_schema':self.path_schema_deanon, 'type': 'deanon'})
+        args = Args(self.args)
+        self.anonymization()
         anon = MainDeanon(args)
         anon.jobs = Queue()
         anon.start_processing()
-        partner_processed, company_processed = self.get_current_data(anon)
+        partner_processed, company_processed = self.get_current_data(anon.pg_args)
+        print(self.data)
         for partner in partner_processed:
             self.assertFalse("res_partner_name_" in partner[0] if partner[0] != None else False, "partner not anonymized correctly")
             self.assertFalse("res_partner_display_name_" in partner[1] if partner[1] != None else False, "partner not anonymized correctly")
