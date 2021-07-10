@@ -17,6 +17,7 @@ class TestCompleteProcess(unittest.TestCase):
             'dbname': 'testdb',
             'migration': True}
     original_data = False
+    ERROR = "record not anonymized correctly"
     
     @classmethod
     def setUpClass(cls):
@@ -33,21 +34,27 @@ class TestCompleteProcess(unittest.TestCase):
         return res_partner, res_company
     
     def anonymization(self):
-        self.args.update({'force_path_schema':self.path_schema_anon, 'type': 'anon'})
+        self.args.update({'force_path_schema':self.path_schema_anon, 
+                          'type': 'anon'})
         args = Args(self.args)
         anon = MainAnon(args)
         anon.jobs = Queue()
         anon.start_processing()
         partner_processed, company_processed = self.get_current_original_data(anon.pg_args)
         for partner in partner_processed:
-            self.assertTrue("res_partner_name_" in partner[1] if partner[1] != None else True, "partner not anonymized correctly")
-            self.assertTrue("res_partner_display_name_" in partner[2] if partner[2] != None else True, "partner not anonymized correctly")
-            self.assertTrue("res_partner_street_" in partner[3] if partner[3] != None else True, "partner not anonymized correctly")
+            self.assertTrue(f"res_partner_name_{partner[0]}" == partner[1] if partner[1] != None else True, 
+                            )
+            self.assertTrue(f"res_partner_display_name_{partner[0]}" == partner[2] if partner[2] != None else True, 
+                            self.ERROR)
+            self.assertTrue(f"res_partner_street_{partner[0]}" == partner[3] if partner[3] != None else True, 
+                            self.ERROR)
         for company in company_processed:
-            self.assertTrue("res_company_name_" in company[1] or company[1] == None, "company not anonymized correctly")
+            self.assertTrue(f"res_company_name_{partner[0]}" == company[1] or company[1] == None, 
+                            self.ERROR)
         
     def test_deanonymization(self):
-        self.args.update({'force_path_schema':self.path_schema_deanon, 'type': 'deanon'})
+        self.args.update({'force_path_schema':self.path_schema_deanon, 
+                          'type': 'deanon'})
         args = Args(self.args)
         self.anonymization()
         anon = MainDeanon(args)
