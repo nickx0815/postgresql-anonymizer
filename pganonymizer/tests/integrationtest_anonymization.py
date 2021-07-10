@@ -21,7 +21,7 @@ class TestCompleteProcess(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         super(TestCompleteProcess, cls).setUpClass()
-        cls.data = cls.get_current_data(Args({'dbname':'testdb'}))
+        cls.data = cls.get_current_data(cls, Args({'dbname':'testdb'}))
     
     def get_current_data(self, args):
         con = get_connection(args)
