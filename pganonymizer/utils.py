@@ -90,7 +90,7 @@ def get_migration_mapping(con, table, fields):
         cr.execute(select_model_id_sql)
         record = cr.fetchone()
         if record:
-            list.append([x.replace(" ", "") for x in record])
+            list.append(tuple(x.replace(" ", "") for x in record))
     if not list:
         return False
     return list
