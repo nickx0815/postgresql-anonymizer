@@ -41,11 +41,11 @@ class TestCompleteProcess(unittest.TestCase):
         anon.start_processing()
         partner_processed, company_processed = self.get_current_original_data(anon.pg_args)
         for partner in partner_processed:
-            self.assertTrue("res_partner_name_" in partner[0] if partner[0] != None else True, "partner not anonymized correctly")
-            self.assertTrue("res_partner_display_name_" in partner[1] if partner[1] != None else True, "partner not anonymized correctly")
-            self.assertTrue("res_partner_street_" in partner[2] if partner[2] != None else True, "partner not anonymized correctly")
+            self.assertTrue("res_partner_name_" in partner[1] if partner[1] != None else True, "partner not anonymized correctly")
+            self.assertTrue("res_partner_display_name_" in partner[2] if partner[2] != None else True, "partner not anonymized correctly")
+            self.assertTrue("res_partner_street_" in partner[3] if partner[3] != None else True, "partner not anonymized correctly")
         for company in company_processed:
-            self.assertTrue("res_company_name_" in company[0] or company[0] == None, "company not anonymized correctly")
+            self.assertTrue("res_company_name_" in company[1] or company[1] == None, "company not anonymized correctly")
         
     def test_deanonymization(self):
         self.args.update({'force_path_schema':self.path_schema_deanon, 'type': 'deanon'})
