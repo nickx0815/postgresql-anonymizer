@@ -26,7 +26,7 @@ def remove_not_migrated(fields, con):
             field_to_be_migrated.append((table, field))
             continue
         cursor.execute(f"select exists ( select from model_migration_mapping where old_model_name = '{table}' and old_field_name = '{field}');")
-        exist = cursor4.fetchone()
+        exist = cursor.fetchone()
         if not exist[0]:
             sql = f"Insert into model_migration_mapping \
                             (old_model_name, new_model_name, old_field_name, new_field_name)\
