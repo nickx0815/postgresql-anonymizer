@@ -37,7 +37,6 @@ class TestCompleteProcess(unittest.TestCase):
         args = Args(self.args)
         anon = MainAnon(args)
         anon.jobs = Queue()
-        partner, company = self.get_current_original_data(anon.pg_args)
         anon.start_processing()
         partner_processed, company_processed = self.get_current_original_data(anon.pg_args)
         for partner in partner_processed:
