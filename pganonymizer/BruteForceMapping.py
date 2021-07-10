@@ -12,7 +12,6 @@ def get_data(check, value):
 
 def remove_not_migrated(fields, con):
     cursor = con.cursor()
-    con.autocommit = True
     field_to_be_migrated = []
     for field in fields:
         table = field[0]
@@ -31,6 +30,7 @@ def remove_not_migrated(fields, con):
                          VALUES (%s, %s, %s, %s);"
         data = (table, table, field, field)
         cursor.execute(sql, data)
+        cursor.execute('COMMIT;')
     cursor.close()
     return field_to_be_migrated
         
@@ -73,6 +73,7 @@ def brute_force_mapping(con, db):
                                  VALUES (%s, %s, %s, %s);"
                 data = (old_table, table, old_field, field)
                 cursor4.execute(sql, data)
+                cursor.execute('COMMIT;')
                 created_data.append((table, field))
     return created_data
                         
