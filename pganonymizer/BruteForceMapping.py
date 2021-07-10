@@ -14,8 +14,8 @@ def remove_not_migrated(fields, con):
     cursor = con.cursor()
     field_to_be_migrated = []
     for field in fields:
-        table = field[0].replace(" ","")
-        field = field[1].replace(" ","")
+        table = field[0]
+        field = field[1]
         try:
             cursor.execute(f"select exists ( select from {table} where \"{field}\" LIKE '{table}_{field}_%');")
         except:

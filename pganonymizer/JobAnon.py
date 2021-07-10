@@ -205,10 +205,7 @@ class JobAnon(Job):
     @logging_.CHECK_MIGRATED_FIELD
     def save_migrated_field(self, cr, field, table):
         sql_insert = f"INSERT INTO {constants.TABLE_MIGRATED_FIELDS} (model_id, field_id) VALUES ('{table}', '{field}');"
-        sql_select = f"SELECT id  from {constants.TABLE_MIGRATED_FIELDS} \
-                                WHERE model_id = '{table}' \
-                                       AND field_id = '{field}' \
-                                LIMIT 1;"
+        sql_select = f"SELECT id  from {constants.TABLE_MIGRATED_FIELDS} WHERE model_id = '{table}' AND field_id = '{field}' LIMIT 1;"
         cr.execute(sql_select)
         record = cr.fetchone()
         if not record:
