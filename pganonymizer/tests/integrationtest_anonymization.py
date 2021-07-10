@@ -14,7 +14,6 @@ class TestCompleteProcess(unittest.TestCase):
     
     def get_current_data(self, anon):
         con = get_connection(anon.pg_args)
-        con.autocommit = True
         cursor = con.cursor()
         cursor.execute("Select name, display_name, street from res_partner;")
         res_partner = cursor.fetchall()
