@@ -1,6 +1,6 @@
 import unittest
 from unittest.mock import MagicMock
-from pganonymizer.utils import get_connection
+from pganonymizer.utils import get_connection, get_pg_args
 from pganonymizer.MainAnon import MainAnon
 from pganonymizer.MainDeanon import MainDeanon
 from pganonymizer.tests.utils.ConnectionMock import ConnectionMock
@@ -21,7 +21,7 @@ class TestCompleteProcess(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         super(TestCompleteProcess, cls).setUpClass()
-        cls.data = cls.get_current_data(cls, Args({'dbname':'testdb'}))
+        cls.data = cls.get_current_data(cls, get_pg_args(Args({'dbname':'testdb'})))
     
     def get_current_data(self, args):
         con = get_connection(args)
