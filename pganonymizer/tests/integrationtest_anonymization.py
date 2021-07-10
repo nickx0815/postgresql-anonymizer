@@ -16,14 +16,14 @@ class TestCompleteProcess(unittest.TestCase):
     args = {'analysis': False,
             'dbname': 'testdb',
             'migration': True}
-    data = False
+    original_data = False
     
     @classmethod
     def setUpClass(cls):
         super(TestCompleteProcess, cls).setUpClass()
-        cls.data = cls.get_current_data(cls, get_pg_args(Args({'dbname':'testdb'})))
+        cls.original_data = cls.get_current_original_data(cls, get_pg_args(Args({'dbname':'testdb'})))
     
-    def get_current_data(self, args):
+    def get_current_original_data(self, args):
         con = get_connection(args)
         cursor = con.cursor()
         cursor.execute("Select name, display_name, street from res_partner;")
@@ -37,9 +37,9 @@ class TestCompleteProcess(unittest.TestCase):
         args = Args(self.args)
         anon = MainAnon(args)
         anon.jobs = Queue()
-        partner, company = self.get_current_data(anon.pg_args)
+        partner, company = self.get_current_original_data(anon.pg_args)
         anon.start_processing()
-        partner_processed, company_processed = self.get_current_data(anon.pg_args)
+        partner_processed, company_processed = self.get_current_original_data(anon.pg_args)
         for partner in partner_processed:
             self.assertTrue("res_partner_name_" in partner[0] if partner[0] != None else True, "partner not anonymized correctly")
             self.assertTrue("res_partner_display_name_" in partner[1] if partner[1] != None else True, "partner not anonymized correctly")
@@ -54,7 +54,7 @@ class TestCompleteProcess(unittest.TestCase):
         anon = MainDeanon(args)
         anon.jobs = Queue()
         anon.start_processing()
-        deanonymized_data = self.get_current_data(anon.pg_args)
-        self.assertEqual(self.data, deanonymized_data, "the data was not deanonymized correctly")
+        deanonymized_original_data = self.get_current_original_data(anon.pg_args)
+        self.assertEqual(self.original_data, deanonymized_original_data, "the original_data was not deanonymized correctly")
         
         
