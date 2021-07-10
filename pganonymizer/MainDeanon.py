@@ -49,7 +49,7 @@ class MainDeanon(Main):
             mapped_field_data = get_migration_mapping(connection, table, fields=fields)
             if not mapped_field_data:
                 continue
-            distinct_tables = get_distinct_from_tuple(mapped_field_data, 1)
+            distinct_tables = get_distinct_from_tuple(mapped_field_data, 1, add_index=3)
             for migrated_table, mapped_fields in distinct_tables.items():
                 temp_table = "tmp_"+migrated_table
                 fields_string = ",".join(mapped_fields+['id'])
