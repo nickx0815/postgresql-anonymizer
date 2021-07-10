@@ -54,13 +54,7 @@ class TestCompleteProcess(unittest.TestCase):
         anon = MainDeanon(args)
         anon.jobs = Queue()
         anon.start_processing()
-        partner_processed, company_processed = self.get_current_data(anon.pg_args)
-        print(self.data)
-        for partner in partner_processed:
-            self.assertFalse("res_partner_name_" in partner[0] if partner[0] != None else False, "partner not anonymized correctly")
-            self.assertFalse("res_partner_display_name_" in partner[1] if partner[1] != None else False, "partner not anonymized correctly")
-            self.assertFalse("res_partner_street_" in partner[2] if partner[2] != None else False, "partner not anonymized correctly")
-        for company in company_processed:
-            self.assertFalse("res_company_name_" in company[0] if company[0] != None else False, "company not anonymized correctly")
+        deanonymized_data = self.get_current_data(anon.pg_args)
+        self.assertEqual(self.data, deanonymized_data, "the data was not deanonymized correctly")
         
         
