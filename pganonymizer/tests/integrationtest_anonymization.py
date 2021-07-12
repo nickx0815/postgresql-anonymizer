@@ -16,9 +16,7 @@ class TestCompleteProcess(unittest.TestCase):
     
     args = {'analysis': False,
             'dbname': 'testdb',
-            'migration': True,
-            'host': 'localhost',
-            'port':6543,
+            'migration': True
             }
     ERROR = "record not anonymized correctly"
     
@@ -99,8 +97,7 @@ class TestCompleteProcess(unittest.TestCase):
         self.logging()
 
     def get_log_data(self):
-        #base_path = constants.PATH_LOG_FILE_BASE
-        base_path = "/home/inter/workspaces/clp_deployment/migration/tests/log/"
+        base_path = constants.PATH_LOG_FILE_BASE
         files = os.listdir(base_path)
         d = [file.replace(".log","") for file in files if file.endswith(".log")]
         sorted(d, key=lambda x: datetime.datetime.strptime(x, date_pattern))
