@@ -69,7 +69,7 @@ class TestCompleteProcess(unittest.TestCase):
         self.assertTrue(len(partner_original_data) == len(deanonymized_data[0]))
         for record in company_original_data:
             self.assertTrue(record in deanonymized_data[1])
-        self.assertTrue(len(partner_original_data) == len(deanonymized_data[1]))
+        self.assertTrue(len(company_original_data) == len(deanonymized_data[1]))
     
     def logging(self):
         log_lines = self.get_log_data()
