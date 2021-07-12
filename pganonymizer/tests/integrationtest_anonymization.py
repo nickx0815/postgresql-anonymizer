@@ -92,7 +92,7 @@ class TestCompleteProcess(unittest.TestCase):
     def test_process(self):
         self.anonymization()
         self.deanonymization()
-        self.logging_anon()
+        self.logging()
 
     def get_log_data():
         base_path = constants.PATH_LOG_FILE_BASE
