@@ -16,7 +16,6 @@ class TestCompleteProcess(unittest.TestCase):
     args = {'analysis': False,
             'dbname': 'testdb',
             'migration': True}
-    original_data = False
     ERROR = "record not anonymized correctly"
     
     @classmethod
@@ -64,5 +63,6 @@ class TestCompleteProcess(unittest.TestCase):
         original_data = self.original_data[0]
         for record in original_data:
             self.assertTrue(record in deanonymized_data)
+        self.assertTrue(len(original_data) == len(deanonymized_data))
         
         

@@ -44,8 +44,6 @@ def run_test(p):
     test_classes = testloader_.discover(path, pattern=p)
     unittest.TextTestRunner(verbosity=10).run(test_classes)
 
-run_test("rere")
-
 def main():
     print(sys.argv)
     if '--unittest' in sys.argv:
