@@ -16,13 +16,17 @@ class TestCompleteProcess(unittest.TestCase):
     
     args = {'analysis': False,
             'dbname': 'testdb',
-            'migration': True}
+            'migration': True,
+            'host': 'localhost',
+            'port':6543,
+            }
     ERROR = "record not anonymized correctly"
     
     @classmethod
     def setUpClass(cls):
         super(TestCompleteProcess, cls).setUpClass()
-        pgargs = get_pg_args(Args({'dbname':'testdb'}))
+        cls.args.update({'dbname':'testdb'})
+        pgargs = get_pg_args(Args(cls.args))
         cls.original_data = cls.get_current_original_data(cls, pgargs)
     
     def get_current_original_data(self, args):
@@ -76,17 +80,17 @@ class TestCompleteProcess(unittest.TestCase):
         partner_original_data = self.original_data[0]
         company_original_data = self.original_data[1]
         for partner in partner_original_data:
-            self.assertTrue(f"res_partner {partner[0]} name anonymized -> res_partner_name_{partner[0]}" in log_lines)
-            self.assertTrue(f"res_partner {partner[0]} display_name anonymized -> res_partner_display_name_{partner[0]}" in log_lines)
-            self.assertTrue(f"res_partner {partner[0]} street anonymized -> res_partner_street_{partner[0]}" in log_lines)
+            self.assertTrue(f"res_partner {partner[0]} name anonymized -> res_partner_name_{partner[0]}" in log_lines if partner[1] != None else True)
+            self.assertTrue(f"res_partner {partner[0]} display_name anonymized -> res_partner_display_name_{partner[0]}" in log_lines if partner[2] != None else True)
+            self.assertTrue(f"res_partner {partner[0]} street anonymized -> res_partner_street_{partner[0]}" in log_lines if partner[3] != None else True)
         for company in company_original_data:
-            self.assertTrue(f"res_company {company[0]} name anonymized -> res_company_name_{company[0]}" in log_lines)  
+            self.assertTrue(f"res_company {company[0]} name anonymized -> res_company_name_{company[0]}" in log_lines if company[1] != None else True)  
         for partner in partner_original_data:
-            self.assertTrue(f"res_partner {partner[0]} name deanonymized -> {partner[1]}" in log_lines)
-            self.assertTrue(f"res_partner {partner[0]} display_name deanonymized -> {partner[2]}" in log_lines)
-            self.assertTrue(f"res_partner {partner[0]} street deanonymized -> {partner[3]}" in log_lines)
+            self.assertTrue(f"res_partner {partner[0]} name deanonymized -> {partner[1]}" in log_lines if partner[1] != None else True)
+            self.assertTrue(f"res_partner {partner[0]} display_name deanonymized -> {partner[2]}" in log_lines if partner[2] != None else True)
+            self.assertTrue(f"res_partner {partner[0]} street deanonymized -> {partner[3]}" in log_lines if partner[3] != None else True)
         for company in company_original_data:
-            self.assertTrue(f"res_company {company[0]} name deanonymized -> {company[1]}" in log_lines) 
+            self.assertTrue(f"res_company {company[0]} name deanonymized -> {company[1]}" in log_lines if company[1] != None else True) 
             
     
     def test_process(self):
@@ -95,7 +99,8 @@ class TestCompleteProcess(unittest.TestCase):
         self.logging()
 
     def get_log_data(self):
-        base_path = constants.PATH_LOG_FILE_BASE
+        #base_path = constants.PATH_LOG_FILE_BASE
+        base_path = "/home/inter/workspaces/clp_deployment/migration/tests/log/"
         files = os.listdir(base_path)
         d = [file.replace(".log","") for file in files if file.endswith(".log")]
         sorted(d, key=lambda x: datetime.datetime.strptime(x, date_pattern))
