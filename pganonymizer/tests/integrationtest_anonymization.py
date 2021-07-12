@@ -94,7 +94,7 @@ class TestCompleteProcess(unittest.TestCase):
         self.deanonymization()
         self.logging()
 
-    def get_log_data():
+    def get_log_data(self):
         base_path = constants.PATH_LOG_FILE_BASE
         files = os.listdir(base_path)
         d = [file.replace(".log","") for file in files if file.endswith(".log")]
