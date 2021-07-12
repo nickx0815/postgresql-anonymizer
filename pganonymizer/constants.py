@@ -1,9 +1,12 @@
 # Database arguments used for the CLI
 from datetime import datetime
 
-date = datetime.now().strftime("%d_%m_%Y %H:%M:%S")
+date_pattern = "%d_%m_%Y %H:%M:%S"
+date = datetime.now().strftime(date_pattern)
 
 class constants():
+    
+    
 
     DATABASE_ARGS = ('dbname', 'user', 'password', 'host', 'port')
     
@@ -19,7 +22,8 @@ class constants():
     STARTINGUPERROR = "the database system is starting up"
     
     PATH_SCHEMA_FILES =  "/home/migration/schema/"
-    PATH_LOG_FILES = f"/home/migration/log/{date}.log"
+    PATH_LOG_FILE_BASE = "/home/migration/log/"
+    PATH_LOG_FILES = f"{PATH_LOG_FILE_BASE}{date}.log"
     #PATH_LOG_FILES = f"/home/inter/Schreibtisch/{date}.log"
     PATH_CONFIG_FILE = '/home/migration/migrationConfig.conf'
     TABLE_MIGRATED_DATA = 'migrated_data_'

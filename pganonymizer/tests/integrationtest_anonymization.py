@@ -1,8 +1,9 @@
-import unittest
+import unittest, os, datetime
 from unittest.mock import MagicMock
 from pganonymizer.utils import get_connection, get_pg_args
 from pganonymizer.MainAnon import MainAnon
 from pganonymizer.MainDeanon import MainDeanon
+from pganonymizer.constants import constants, date_pattern
 from pganonymizer.tests.utils.ConnectionMock import ConnectionMock
 from pganonymizer.tests.utils.CursorMock import CursorMock
 from pganonymizer.Args import Args
@@ -21,7 +22,8 @@ class TestCompleteProcess(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         super(TestCompleteProcess, cls).setUpClass()
-        cls.original_data = cls.get_current_original_data(cls, get_pg_args(Args({'dbname':'testdb'})))
+        pgargs = get_pg_args(Args({'dbname':'testdb'}))
+        cls.original_data = cls.get_current_original_data(cls, pgargs)
     
     def get_current_original_data(self, args):
         con = get_connection(args)
@@ -51,7 +53,7 @@ class TestCompleteProcess(unittest.TestCase):
             self.assertTrue(f"res_company_name_{company[0]}" == company[1] or company[1] == None, 
                             self.ERROR)
         
-    def test_deanonymization(self):
+    def deanonymization(self):
         self.args.update({'force_path_schema':self.path_schema_deanon, 
                           'type': 'deanon'})
         args = Args(self.args)
@@ -59,10 +61,46 @@ class TestCompleteProcess(unittest.TestCase):
         anon = MainDeanon(args)
         anon.jobs = Queue()
         anon.start_processing()
-        deanonymized_data = self.get_current_original_data(anon.pg_args)[0]
-        original_data = self.original_data[0]
-        for record in original_data:
-            self.assertTrue(record in deanonymized_data)
-        self.assertTrue(len(original_data) == len(deanonymized_data))
-        
-        
+        deanonymized_data = self.get_current_original_data(anon.pg_args)
+        partner_original_data = self.original_data[0]
+        company_original_data = self.original_data[1]
+        for record in partner_original_data:
+            self.assertTrue(record in deanonymized_data[0])
+        self.assertTrue(len(partner_original_data) == len(deanonymized_data[0]))
+        for record in company_original_data:
+            self.assertTrue(record in deanonymized_data[1])
+        self.assertTrue(len(partner_original_data) == len(deanonymized_data[1]))
+    
+    def logging(self):
+        log_lines = self.get_log_data()
+        partner_original_data = self.original_data[0]
+        company_original_data = self.original_data[1]
+        for partner in partner_original_data:
+            self.assertTrue(f"res_partner {partner[0]} name anonymized -> res_partner_name_{partner[0]}" in log_lines)
+            self.assertTrue(f"res_partner {partner[0]} display_name anonymized -> res_partner_display_name_{partner[0]}" in log_lines)
+            self.assertTrue(f"res_partner {partner[0]} street anonymized -> res_partner_street_{partner[0]}" in log_lines)
+        for company in company_original_data:
+            self.assertTrue(f"res_company {company[0]} name anonymized -> res_company_name_{company[0]}" in log_lines)  
+        for partner in partner_original_data:
+            self.assertTrue(f"res_partner {partner[0]} name deanonymized -> {partner[1]}" in log_lines)
+            self.assertTrue(f"res_partner {partner[0]} display_name deanonymized -> {partner[2]}" in log_lines)
+            self.assertTrue(f"res_partner {partner[0]} street deanonymized -> {partner[3]}" in log_lines)
+        for company in company_original_data:
+            self.assertTrue(f"res_company {company[0]} name deanonymized -> {company[1]}" in log_lines) 
+            
+    
+    def test_process(self):
+        self.anonymization()
+        self.deanonymization()
+        self.logging_anon()
+
+    def get_log_data():
+        base_path = constants.PATH_LOG_FILE_BASE
+        files = os.listdir(base_path)
+        d = [file.replace(".log","") for file in files if file.endswith(".log")]
+        sorted(d, key=lambda x: datetime.datetime.strptime(x, date_pattern))
+        current_log = d[len(d)-1]
+        with open(f"{base_path}{current_log}.log", "r") as log:
+            log_lines = log.read()
+        return log_lines
+
